@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Pink Lighter</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <link rel="icon" href="favicon.ico">
+    
+    <script src="script/delaunator.js"></script>
+    <script src="script/gl-matrix.js"></script>
+    <script src="script/gl-util.js"></script>
+		<script src="script/jquery-3.4.1.js"></script>
+			
+  </head>
+
+  <body>
+    <div class="hider centerer">
+		  <img class="title flicker-in" src="img/title_shadowed.svg" />
+    </div>
+    
+    <div class="centerer" top=0 left=0>
+      <img class="title" z-index=9 src="img/title_shadowed.svg" />
+    </div>
+		
+    <div class="navigation">
+      <div class="nav-button"><a href="#lighter-mesh">
+        <img class="nav-element-image" src="img/about_button.svg" /></a></div>
+      <div class="nav-button"><a href="#home">
+        <img class="nav-element-image" src="img/nav_placeholder.svg" /></a></div>
+      <div class="nav-button"><a href="#contact">
+        <img class="nav-element-image" src="img/contact_button.svg" /></a></div>
+      <div id="arrow-up" class="nav-button"><a href="#purple-triangles">
+        <img class="nav-element-image" src="img/backup_button.svg" /></a></div>
+      <div class="nav-handle"><img class="nav-element-image" src="img/nav_handle.svg" /></div>
+      
+    </div>
+    
+    <canvas id="purple-triangles" class="gl-backdrop">
+    </canvas>
+		
+    <!-- Royalty Free Model by Matusa, off cgtrader.com : https://www.cgtrader.com/free-3d-models/various/various-models/bic-lighter-7c776fb1-6df5-4e9c-bd93-0709475aae31 -->
+    <canvas id="lighter-mesh" class="gl-backdrop">
+    </canvas>
+		
+    
+    
+    <section id="about-panel" class="panel">
+      <div class="centerer">
+        <img class="shadow-up" src="img/nav_placeholder.svg" />
+      </div>
+    </section>
+    
+		<section class="panel">
+  		  <div class="scroll"></div>
+        <div class="about-title"></div>
+		</section>
+			
+    
+  </body>
+    <script>
+      $(".hider").delay(2500).fadeOut(1000);
+			setTimeout(function(){
+      	// Unlock scrolling after fadout
+				document.body.style.position = "relative";
+        document.documentElement.style.position = "relative";
+			}, 2500);
+    </script> 
+    <script src="script/purple-triangles.js"></script>
+    <script src="script/lighter-mesh.js"></script>
+    <script src="script/scrolling.js"></script>
+</html>
