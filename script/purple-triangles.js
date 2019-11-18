@@ -256,7 +256,7 @@ function purple_triangles() {
         newVertices.push(mesh.vertices[i+2]);
       }
     }
-    let newNormals = computeNormalsUnindexed(newVertices);
+    let newNormals = computeNormalsUnindexed(newVertices, false);
 
     // Update time uniform
     gl.uniform1f(programInfo.uniformLocations.time, now);

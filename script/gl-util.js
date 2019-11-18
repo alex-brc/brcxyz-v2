@@ -1,24 +1,17 @@
-function loadTexture(gl, url){
-  const texture = gl.createTexture();
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-  
-  const image = new Image();
-  // Apply this texture when the image has finished loading
-  image.onload = function() {
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-    // If power of 2, generate mip
-    if (powerOf2(image.width) && powerOf2(image.height)) {
-       gl.generateMipmap(gl.TEXTURE_2D);
-    } else {
-       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    }
-  };
-  
-  image.src = url;
-  return texture;
+function normalize(a){
+  var out = [0, 0, 0];
+  var x = a[0];
+  var y = a[1];
+  var z = a[2];
+  var len = x * x + y * y + z * z;
+  if (len > 0) {
+    //TODO: evaluate use of glm_invsqrt here?
+    len = 1 / Math.sqrt(len);
+    out[0] = a[0] * len;
+    out[1] = a[1] * len;
+    out[2] = a[2] * len;
+  }
+  return out;
 }
 
 function powerOf2(value) {
@@ -40,7 +33,24 @@ function gather(sourceArray, indexArray){
 }
 
 /**
- * Compute normals for indexed vertices
+ * Sequential gather by indexArray from sourceArray, 
+ * where sourceArray is flat
+ *
+ * @param indexArray
+ * @param sourceArray
+ */
+function flatGather(sourceArray, indexArray){
+  let result = [];
+  indexArray.forEach(function(e){
+    result.push(sourceArray[3*e]);
+    result.push(sourceArray[3*e + 1]);
+    result.push(sourceArray[3*e + 2]);
+  });
+  return result;
+}
+
+/**
+ * Compute face normals for a set of indexed vertices
  *
  * @param vertices
  * @param indices
@@ -54,7 +64,7 @@ function computeNormalsIndexed(vertices, indices){
   let n;
   for(let i = 0; i < indices.length; i += 3){
     // Compute normals for this surface
-    // All triangle elements are given in counter-clockwise direction
+    // All triangle elements should be in counter-clockwise direction
     n = surfaceNormal(
       vertices[indices[i]], 
       vertices[indices[i+1]], 
@@ -78,12 +88,17 @@ function computeNormalsIndexed(vertices, indices){
 
   return normals;
 }
+
 /**
  * Compute normals for unindexed vertices, considering 3 consecutive
  * vertices to be a triangle.
  * @param vertices
  */
-function computeNormalsUnindexed(vertices){
+function computeNormalsUnindexed(vertices, zFlip){
+  var flip = 1;
+  if(zFlip)
+    flip = -1;
+
   if(vertices.length % 3 !== 0)
     return null;
 
@@ -92,13 +107,13 @@ function computeNormalsUnindexed(vertices){
   for(let i = 0; i < vertices.length; i += 9){
     // Find surface normal of current triangle
     n = surfaceNormal(
-      [vertices[i], vertices[i+1], vertices[i+2]],
-      [vertices[i+3], vertices[i+4], vertices[i+5]],
-      [vertices[i+6], vertices[i+7], vertices[i+8]],);
-    for(let j = 0; j < 9; j += 3){
-      normals.push(n[j%3]);
-      normals.push(n[j%3+1]);
-      normals.push(n[j%3+2]);
+      [vertices[i], vertices[i+1], flip * vertices[i+2]],     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      [vertices[i+3], vertices[i+4], flip * vertices[i+5]],   // This Z-inversion took me 3 days to find. 
+      [vertices[i+6], vertices[i+7], flip * vertices[i+8]],); //              Absolutely sad.
+    for(let j = 0; j < 3; j ++){
+      normals.push(n[0]);
+      normals.push(n[1]);
+      normals.push(n[2]);
     }
   }
 
@@ -260,9 +275,8 @@ function loadShader(gl, type, source) {
   return shader;
 }
 
-function readMeshFile(meshFileString, aocFileString){
+function readMeshFile(meshFileString, indexed = true){
   var mesh = "";
-  var aoc = "";
   $.ajax({ 
     url: meshFileString, 
     dataType: 'text', 
@@ -271,46 +285,31 @@ function readMeshFile(meshFileString, aocFileString){
         mesh = data;
     } 
   });
-  $.ajax({ 
-    url: aocFileString, 
-    dataType: 'text', 
-    async: false, 
-    success: function(data){ 
-        aoc = data;
-    } 
-  });
-        
-  return parseOBJ(mesh, aoc);
+       
+  return parseOBJ(mesh, indexed);
 }
 
-
-
-function parseOBJ(meshString, aocString){
+function parseOBJ(meshString, indexed){
   var meshLines = meshString.split("\n");
-  var aocLines = aocString.split("\n");
   var vertices = [];
-  var colors = [];
-  var aocs = [];
   var normals = [];
-  var texture = [];
   var vIndices = [];
-  var tIndices = [];
   var nIndices = [];
+  var meshIds = [];
+  var currentId = -1;
   
   for(var i = 0; i < meshLines.length; i++){
     var tokens = meshLines[i].split(' ');
     if(tokens.length > 0){
       switch(tokens[0]){
+        case "o": // Start of a new mesh
+          currentId++;
+          break;
         case "v": // Vertex
           vertices.push(parseFloat(tokens[1]));
           vertices.push(parseFloat(tokens[2]));
           vertices.push(parseFloat(tokens[3]));
-          if(tokens.length > 4){
-            // We have colors
-            colors.push(parseFloat(tokens[4]));
-            colors.push(parseFloat(tokens[5]));
-            colors.push(parseFloat(tokens[6]));
-          }
+          meshIds.push(currentId);
           break;
         case "vn": // Normal
           normals.push(parseFloat(tokens[1]));
@@ -318,8 +317,6 @@ function parseOBJ(meshString, aocString){
           normals.push(parseFloat(tokens[3]));
           break;
         case "vt": // Texture
-          texture.push(parseFloat(tokens[1]));
-          texture.push(parseFloat(tokens[2]));
           break;
         case "f": // Face: vI/tI/nI ././. ././. 
           var p1 = tokens[1].split('/');
@@ -330,36 +327,37 @@ function parseOBJ(meshString, aocString){
           vIndices.push(parseInt(p2[0]) - 1);
           vIndices.push(parseInt(p3[0]) - 1);
           
-          tIndices.push(parseInt(p1[1]) - 1);
-          tIndices.push(parseInt(p2[1]) - 1);
-          tIndices.push(parseInt(p3[1]) - 1);
-          
+          // Skip [1] - texture index
+
           nIndices.push(parseInt(p1[2]) - 1);
           nIndices.push(parseInt(p2[2]) - 1);
           nIndices.push(parseInt(p3[2]) - 1);
+          break;
+        default: 
           break;
       }
     }
   }
   
-  for(var i = 0; i < aocLines.length; i++){
-    var tokens = aocLines[i].split(' ');
-    if(tokens.length > 0){
-      aocs.push(parseFloat(tokens[0]));
-      aocs.push(parseFloat(tokens[1]));
-      aocs.push(parseFloat(tokens[2]));
-    }
+  var gatheredNormals = flatGather(normals, nIndices);
+  
+  if(indexed)
+    return {
+      vertices: vertices,
+      normals: normals,
+      meshIds: meshIds,
+      indices: vIndices
+    };
+  else {
+    // Duplicate vertices
+    var gatheredVertices = flatGather(vertices, vIndices);
+    // Recompute face normals
+    var newNormals = computeNormalsUnindexed(gatheredVertices, true);
+
+    return {
+      vertices: gatheredVertices,
+      normals: newNormals,
+      indices: []
+    };
   }
-  
-  var gatheredTextures = gather(texture, tIndices);
-  var gatheredNormals = gather(normals, nIndices);
-  
-  return {
-    vertices: vertices,
-    colors: colors,
-    aoc: aocs,
-    texture: gatheredTextures,
-    normals: normals,
-    indices: vIndices
-  };
 }
