@@ -3,14 +3,15 @@ quat.identity(QUATERNION_ID);
 const INDEXED = false;
 const DAMPENING_FACTOR = 1;
 const DRAG_MULTIPLIER = 30;
+const INITIAL_ROTATION = 0.2;
 // Camera
 const L_CAMERA_POSITION = [10, 0.5, 0];
-const L_CAMERA_LOOK_AT = [0, 0.5, 0];
+const L_CAMERA_LOOK_AT = [0, 0, 0];
 const L_CAMERA_UP = [0.0, 1.0, 0.0];
 // Lights
-const L_DIRECTIONAL_LIGHT_REVERSE_A = normalize([0.0, -5.0, 5.0]);
+const L_DIRECTIONAL_LIGHT_REVERSE_A = normalize([-1.0, -0.25, -0.5]);
 const L_DIRECTIONAL_LIGHT_COLOR_A = rgb(255, 10, 201, 0.7);
-const L_DIRECTIONAL_LIGHT_REVERSE_B = normalize([0.0, 5.0, 5.0]);
+const L_DIRECTIONAL_LIGHT_REVERSE_B = normalize([1.0, -0.25, -0.5]);
 const L_DIRECTIONAL_LIGHT_COLOR_B = rgb(0, 200, 255, 0.7);
 const L_AMBIENT_LIGHT = rgb(30, 33, 47, 0.7);
 
@@ -122,6 +123,11 @@ function logo_mesh(){
   const outerObject = buildObject(gl, globalMatrices, "mesh/Outer.obj");
   const middleObject = buildObject(gl, globalMatrices, "mesh/Middle.obj");
   const innerObject = buildObject(gl, globalMatrices, "mesh/Inner.obj");
+
+  // Set initial rotation
+  quat.fromEuler(outerObject.matrices.rotationQuat, 0, INITIAL_ROTATION, -INITIAL_ROTATION); 
+  quat.fromEuler(middleObject.matrices.rotationQuat, -INITIAL_ROTATION, 0, INITIAL_ROTATION);
+  quat.fromEuler(innerObject.matrices.rotationQuat, INITIAL_ROTATION, -INITIAL_ROTATION, 0);
 
   // Use shader program
   gl.useProgram(programInfo.program);

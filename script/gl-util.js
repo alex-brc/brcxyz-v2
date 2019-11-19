@@ -94,9 +94,9 @@ function computeNormalsIndexed(vertices, indices){
  * vertices to be a triangle.
  * @param vertices
  */
-function computeNormalsUnindexed(vertices, zFlip){
+function computeNormalsUnindexed(vertices, yFlip){
   var flip = 1;
-  if(zFlip)
+  if(yFlip)
     flip = -1;
 
   if(vertices.length % 3 !== 0)
@@ -107,10 +107,10 @@ function computeNormalsUnindexed(vertices, zFlip){
   for(let i = 0; i < vertices.length; i += 9){
     // Find surface normal of current triangle
     n = surfaceNormal(
-      [vertices[i], vertices[i+1], flip * vertices[i+2]],     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      [vertices[i+3], vertices[i+4], flip * vertices[i+5]],   // This Z-inversion took me 3 days to find. 
-      [vertices[i+6], vertices[i+7], flip * vertices[i+8]],); //              Absolutely sad.
-    for(let j = 0; j < 3; j ++){
+      [vertices[i], flip * vertices[i+1], vertices[i+2]],     
+      [vertices[i+3], flip * vertices[i+4], vertices[i+5]],   
+      [vertices[i+6], flip * vertices[i+7], vertices[i+8]],);         
+    for(let j = 0; j < 3; j ++){                             
       normals.push(n[0]);
       normals.push(n[1]);
       normals.push(n[2]);
