@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <title>Pink Lighter</title>
+    <title>brc.xyz</title>
     <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="style.css" />
     <link rel="icon" href="favicon.png">
@@ -14,25 +14,34 @@
   </head>
 
   <body>
-    <div class="hider centerer">
-		  <img class="title flicker-in" src="img/title.svg" />
-    </div>
+    <div class="hider"></div>
     
-    <div class="centerer" top=0 left=0>
-      <img class="title" z-index=9 src="img/title.svg" />
-    </div>
-		
+    <div class="centerer">
+      <h1 class="title pink" color="#f00090"> brc </h1>
+      <h1 class="title darkpink" color="#d60080"> .xyz </h1> 
+		</div>
+
     <div class="navigation">
-      <div class="nav-button"><a href="#logo-mesh">
-        <img class="nav-element-image" src="img/about_button.svg" /></a></div>
-      <div class="nav-button"><a href="#home">
-        <img class="nav-element-image" src="img/nav_placeholder.svg" /></a></div>
-      <div class="nav-button"><a href="#contact">
-        <img class="nav-element-image" src="img/contact_button.svg" /></a></div>
-      <div id="arrow-up" class="nav-button"><a href="#purple-triangles">
-        <img class="nav-element-image" src="img/backup_button.svg" /></a></div>
-      <div class="nav-handle"><img class="nav-element-image" src="img/nav_handle.svg" /></div>
-      
+      <div class="nav-button">
+        <a class="nav-text" href="#logo-mesh">
+          about
+        </a>
+      </div>
+      <div class="nav-button">
+        <a class="nav-text" href="#home">
+          home
+        </a>
+      </div>
+      <div class="nav-button">
+        <a class="nav-text" href="#contact">
+          contact
+        </a>
+      </div>
+      <div id="arrow-up" class="nav-button">
+        <a class="nav-text" href="#purple-triangles">
+          top
+        </a>
+      </div>
     </div>
     
     <canvas id="purple-triangles" class="gl-backdrop">
@@ -58,6 +67,7 @@
   </body>
     <script>
       $(".hider").delay(2500).fadeOut(1000);
+      $(".title").fadeIn(1000);
 			setTimeout(function(){
       	// Unlock scrolling after fadout
 				document.body.style.position = "relative";
