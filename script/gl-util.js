@@ -107,9 +107,9 @@ function computeNormalsUnindexed(vertices, yFlip){
   for(let i = 0; i < vertices.length; i += 9){
     // Find surface normal of current triangle
     n = surfaceNormal(
-      [vertices[i], flip * vertices[i+1], vertices[i+2]],     
+      [vertices[i], flip * vertices[i+1], vertices[i+2]],       
       [vertices[i+3], flip * vertices[i+4], vertices[i+5]],   
-      [vertices[i+6], flip * vertices[i+7], vertices[i+8]],);         
+      [vertices[i+6], flip * vertices[i+7], vertices[i+8]]);         
     for(let j = 0; j < 3; j ++){                             
       normals.push(n[0]);
       normals.push(n[1]);

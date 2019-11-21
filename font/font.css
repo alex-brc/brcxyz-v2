@@ -1,0 +1,73 @@
+@font-face {
+    font-family: 'brcxyz-Title';
+    src: url('brcxyz-Title.eot');
+    src: url('brcxyz-Title.eot?#iefix') format('embedded-opentype'),
+        url('brcxyz-Title.woff2') format('woff2'),
+        url('brcxyz-Title.woff') format('woff'),
+        url('brcxyz-Title.ttf') format('truetype'),
+        url('brcxyz-Title.svg#brcxyz-Title') format('svg');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'brcxyz-Regular';
+    src: url('brcxyz-Reg.eot');
+    src: url('brcxyz-Reg.eot?#iefix') format('embedded-opentype'),
+        url('brcxyz-Reg.woff2') format('woff2'),
+        url('brcxyz-Reg.woff') format('woff'),
+        url('brcxyz-Reg.ttf') format('truetype'),
+        url('brcxyz-Reg.svg#brcxyz-Reg') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'brcxyz-Light';
+    src: url('brcxyz-Light.eot');
+    src: url('brcxyz-Light.eot?#iefix') format('embedded-opentype'),
+        url('brcxyz-Light.woff2') format('woff2'),
+        url('brcxyz-Light.woff') format('woff'),
+        url('brcxyz-Light.ttf') format('truetype'),
+        url('brcxyz-Light.svg#brcxyz-Light') format('svg');
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'brcxyz-Light';
+    src: url('brcxyz-LightItali.eot');
+    src: url('brcxyz-LightItali.eot?#iefix') format('embedded-opentype'),
+        url('brcxyz-LightItali.woff2') format('woff2'),
+        url('brcxyz-LightItali.woff') format('woff'),
+        url('brcxyz-LightItali.ttf') format('truetype'),
+        url('brcxyz-LightItali.svg#brcxyz-LightItali') format('svg');
+    font-weight: 300;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'brcxyz-Bold';
+    src: url('brcxyz-Bold.eot');
+    src: url('brcxyz-Bold.eot?#iefix') format('embedded-opentype'),
+        url('brcxyz-Bold.woff2') format('woff2'),
+        url('brcxyz-Bold.woff') format('woff'),
+        url('brcxyz-Bold.ttf') format('truetype'),
+        url('brcxyz-Bold.svg#brcxyz-Bold') format('svg');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'brcxyz-Regular';
+    src: url('brcxyz-Italic.eot');
+    src: url('brcxyz-Italic.eot?#iefix') format('embedded-opentype'),
+        url('brcxyz-Italic.woff2') format('woff2'),
+        url('brcxyz-Italic.woff') format('woff'),
+        url('brcxyz-Italic.ttf') format('truetype'),
+        url('brcxyz-Italic.svg#brcxyz-Italic') format('svg');
+    font-weight: normal;
+    font-style: italic;
+}
+
+
