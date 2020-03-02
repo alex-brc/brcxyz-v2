@@ -22,8 +22,6 @@ const MAX_SHIFT = 0.08;
 const MAX_HEIGHT = 0.55;
 
 // Animation
-var FLASHING;
-var FLASH_START;
 const V_SHIFT = 0.12;
 const V_SHIFT_PS = 1.6; // radians/s, before multiplying by Z value
 const SHIFT_THRESH = 0; // only shift vertices with Z > this
@@ -57,12 +55,12 @@ const trianglesVertexShader = `
       vec4 vertexNormal = uNormalMatrix * vec4(aVertexNormal, 1.0);
 
       // Vary light intensity with time for coolness points
-      float lightAmplificationA = max(cos(uTime / 4.0), 0.0);
+      float lightAmplificationA = max(cos(uTime / 2.0 + 20.0), 0.0);
       lightAmplificationA = pow(lightAmplificationA,3.0);
       float directionalLightA = max(dot(vertexNormal.xyz, uDirectionalLightReverseA), 0.0);
       vec3 vLightingA = (1.0 + 0.5 * lightAmplificationA) * uDirectionalLightColorA * directionalLightA;
 
-      float lightAmplificationB = max(sin(uTime / 5.0), 0.0);
+      float lightAmplificationB = max(sin(uTime / 2.0 + 22.0), 0.0);
       lightAmplificationB = pow(lightAmplificationB,3.0);
       float directionalLightB = max(dot(vertexNormal.xyz, uDirectionalLightReverseB), 0.0);
       vec3 vLightingB = (1.0 + 0.5 * lightAmplificationB) * uDirectionalLightColorB * directionalLightB;

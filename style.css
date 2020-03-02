@@ -1,5 +1,7 @@
 :root {
   --the-pink: #f00090;
+  --max-blue: #00c8ff;
+  --max-pink: #ff0ac9;
   --the-darker-pink: #d60080;
   --bg-color: #1e212f;
   --shadow-color: #151621;
@@ -52,48 +54,9 @@ body {
   font-size: 10vw;
   z-index: 10;
   -webkit-animation: 
-    flicker-in 1s linear both, 
-    shadow-pop-bl 1s 2.5s both;
-  animation: 
-    flicker-in 1s linear both, 
-    shadow-pop-bl 1s 2.5s both;
-}
-
-.navigation {
-  position: fixed;
-  z-index: 10;
-  padding-bottom: 10vh;
-  top: -12vh;
-  width: 100vw;
-  height: 9vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: all 0.2s;
-}
-
-.navigation:hover, .navigation:focus {
-    transform: translateY(14vh);
-}
-
-.nav-button {
-  margin: 10px;
-  display: inline-block;
-  -webkit-animation: shadow-pop-bl 0.3s cubic-bezier(0.470, 0.000, 0.745, 0.715) both;
-	        animation: shadow-pop-bl 0.3s cubic-bezier(0.470, 0.000, 0.745, 0.715) both;
-}
-  .nav-button:hover {
-  -webkit-animation: shadow-pop-bl-rev 0.1s cubic-bezier(0.470, 0.000, 0.745, 0.715) both;
-	        animation: shadow-pop-bl-rev 0.1s cubic-bezier(0.470, 0.000, 0.745, 0.715) both;
-  }
-
-.nav-text {
-  text-align: center;
-  text-decoration: none;
-  color: var(--the-darker-pink);
-  font-family: 'brcxyz-Title', normal;
-  font-size: 3vw;
-  display: block;
+    shadow-pop-bl 1s 1.7s both;
+  animation:  
+    shadow-pop-bl 1s 1.7s both;
 }
 
 .hidden {

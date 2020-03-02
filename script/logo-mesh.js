@@ -5,8 +5,8 @@ const DAMPENING_FACTOR = 1;
 const DRAG_MULTIPLIER = 30;
 const INITIAL_ROTATION = 0.2;
 // Camera
-const L_CAMERA_POSITION = [10, 0.5, 0];
-const L_CAMERA_LOOK_AT = [0, 0, 0];
+const L_CAMERA_POSITION = [10, 0, 2];
+const L_CAMERA_LOOK_AT = [0, 0, 2];
 const L_CAMERA_UP = [0.0, 1.0, 0.0];
 // Lights
 const L_DIRECTIONAL_LIGHT_REVERSE_A = normalize([-1.0, -0.25, -0.5]);

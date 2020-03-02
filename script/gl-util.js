@@ -1,3 +1,4 @@
+// Copied from gl-matrix.js, modified slightly.
 function normalize(a){
   var out = [0, 0, 0];
   var x = a[0];

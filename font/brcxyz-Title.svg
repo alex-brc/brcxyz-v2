@@ -2,7 +2,7 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">
 <metadata>
-Created by FontForge 20170731 at Wed Nov 20 18:47:25 2019
+Created by FontForge 20170731 at Fri Nov 22 13:41:33 2019
  By Aleksey,,,
 Copyright (c) Typographer Yining Chen, 2017. All rights reserved.
 </metadata>
@@ -320,7 +320,7 @@ q-170 116 -369 116q-201 0 -374 -119q-28 -19 -81 -69q-48 -49 -67 -78q-25 -36 -45 
     <glyph glyph-name="ordfeminine" unicode="&#xaa;" horiz-adv-x="648" 
  />
     <glyph glyph-name="guillemotleft" unicode="&#xab;" horiz-adv-x="1350" 
-d="M117 403v134l350 242l48 33h1q5 -6 58 -83l52 -75v-1l-266 -183l266 -184q-105 -153 -110 -159l-398 274zM667 403v134l350 242l48 33h1q5 -6 58 -83l52 -75v-1l-266 -183l266 -184q-105 -153 -110 -159l-398 274z" />
+d="M573 970h208l306 362l-227 4l-184 -212l-182 212l-239 3z" />
     <glyph glyph-name="logicalnot" unicode="&#xac;" horiz-adv-x="1053" 
 d="M150 810h752l1 -1v-459h-193v267h-560v193z" />
     <glyph glyph-name="registered" unicode="&#xae;" horiz-adv-x="1303" 

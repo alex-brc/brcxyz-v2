@@ -3,78 +3,54 @@
   <head>
     <title>brc.xyz</title>
     <meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" href="style.css" />
-    <link rel="stylesheet" type="text/css" href="animation.css" />
+    <link rel="stylesheet" type="text/css" href="script/style.css" />
+    <link rel="stylesheet" type="text/css" href="script/animation.css" />
     <link rel="stylesheet" type="text/css" href="font/font.css" />
+    <link rel="stylesheet" type="text/css" href="vendor/onepage-scroll.css" />
     <link rel="icon" href="favicon.png">
     
     <script src="vendor/delaunator.js"></script>
     <script src="vendor/gl-matrix.js"></script>
     <script src="vendor/jquery-3.4.1.js"></script>
+    <script src="vendor/jquery.onepage-scroll.js"></script>
     <script src="script/gl-util.js"></script>
 			
   </head>
 
   <body>
-    <div class="hider"></div>
-    
-    <div class="centerer">
-      <h1 class="title pink" color="#f00090"> brc </h1>
-      <h1 class="title darkpink" color="#d60080"> .xyz </h1> 
-		</div>
-
-    <div class="navigation">
-      <div class="nav-button">
-        <a class="nav-text" href="#logo-mesh">
-          about
-        </a>
-      </div>
-      <div class="nav-button">
-        <a class="nav-text" href="#home">
-          home
-        </a>
-      </div>
-      <div class="nav-button">
-        <a class="nav-text" href="#contact">
-          contact
-        </a>
-      </div>
-      <div id="arrow-up" class="nav-button">
-        <a class="nav-text" href="#purple-triangles">
-          top
-        </a>
-      </div>
+    <div class="main">
+      <section id="title-page"> 
+        <div class="hider"></div>
+        <div class="centerer">
+          <h1 class="title pink" color="#f00090"> brc </h1>
+          <h1 class="title darkpink" color="#d60080"> .xyz </h1> 
+        </div>
+        <canvas id="purple-triangles" class="gl-backdrop"></canvas>
+      </section id="about-page">
+      <section>
+        <canvas id="logo-mesh" class="gl-backdrop"></canvas>
+      </section>
+      <section id="test-page">
+        TEST
+      </section>
     </div>
-    
-    <canvas id="purple-triangles" class="gl-backdrop">
-    </canvas>
-      
-    <canvas id="logo-mesh" class="gl-backdrop">
-    </canvas>
-		
-    
-    
-    <section id="about-panel" class="panel">
-      <div class="centerer">
-        <img class="shadow-up" src="img/nav_placeholder.svg" />
-      </div>
-    </section>
-    
-		<section class="panel">
-  		  <div class="scroll"></div>
-        <div class="about-title"></div>
-		</section>
-			
-    
+
   </body>
     <script>
-      $(".hider").delay(2500).fadeOut(1000);
-      $(".title").fadeIn(1000);
-			setTimeout(function(){
-      	// Unlock scrolling after fadout
-				document.body.style.position = "relative";
+      $(".hider").delay(1000).fadeOut(1000);
+      setTimeout(function(){
+        // Unlock scrolling after fadout
+        document.body.style.position = "relative";
         document.documentElement.style.position = "relative";
-			}, 2500);
+      }, 2500);
+
+      $(".main").onepage_scroll({
+         animationTime: 700,             // AnimationTime let you define how long each section takes to animate
+         pagination: true,                // You can either show or hide the pagination. Toggle true for show, false for hide.
+         updateURL: true,                // Toggle this true if you want the URL to be updated automatically when the user scroll to each page.
+         loop: false,                     // You can have the page loop back to the top/bottom when the user navigates at up/down on the first/last page.
+         keyboard: true,                  // You can activate the keyboard controls  
+      });
     </script> 
     <script src="script/purple-triangles.js"></script>
     <script src="script/logo-mesh.js"></script>
