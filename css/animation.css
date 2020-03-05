@@ -64,7 +64,7 @@
     shadow-pop-gold 1s 1.7s both;
 }
 
-@-webkit-keyframes shadow-pop-green {
+@-webkit-keyframes shadow-pop-gold {
   0% {
     text-shadow: 0 0 var(--russian-green), 0 0 var(--russian-green), 0 0 var(--russian-green), 0 0 var(--russian-green), 0 0 var(--russian-green), 0 0 var(--russian-green), 0 0 var(--russian-green), 0 0 var(--russian-green);
     -webkit-transform: translateX(0) translateY(0);
@@ -81,7 +81,7 @@
             transform: translateX(8px) translateY(-8px);
   }
 }
-@keyframes shadow-pop-green {
+@keyframes shadow-pop-gold {
   0% {
     text-shadow: 0 0 var(--russian-green), 0 0 var(--russian-green), 0 0 var(--russian-green), 0 0 var(--russian-green), 0 0 var(--russian-green), 0 0 var(--russian-green), 0 0 var(--russian-green), 0 0 var(--russian-green);
     -webkit-transform: translateX(0) translateY(0);
@@ -98,7 +98,7 @@
             transform: translateX(8px) translateY(-8px);
   }
 }
-@-webkit-keyframes shadow-pop-green-rev {
+@-webkit-keyframes shadow-pop-gold-rev {
   100% {
     text-shadow: -1px 1px var(--gold-light), -2px 2px var(--gold-light), -3px 3px var(--gold-light), -4px 4px var(--gold-light), -5px 5px var(--gold-light), -6px 6px var(--gold-light), -7px 7px var(--gold-light), -8px 8px var(--gold-light);
     -webkit-transform: translateX(0) translateY(0);
@@ -115,7 +115,7 @@
             transform: translateX(8px) translateY(-8px);
   }
 }
-@keyframes shadow-pop-green-rev {
+@keyframes shadow-pop-gold-rev {
   100% {
     text-shadow: -1px 1px var(--gold-light), -2px 2px var(--gold-light), -3px 3px var(--gold-light), -4px 4px var(--gold-light), -5px 5px var(--gold-light), -6px 6px var(--gold-light), -7px 7px var(--gold-light), -8px 8px var(--gold-light);
     -webkit-transform: translateX(0) translateY(0);
@@ -133,7 +133,7 @@
   }
 }
 
-@-webkit-keyframes shadow-pop-gold {
+@-webkit-keyframes shadow-pop-green {
   0% {
     text-shadow: 0 0 var(--gold-light), 0 0 var(--gold-light), 0 0 var(--gold-light), 0 0 var(--gold-light), 0 0 var(--gold-light), 0 0 var(--gold-light), 0 0 var(--gold-light), 0 0 var(--gold-light);
     -webkit-transform: translateX(0) translateY(0);
@@ -150,7 +150,7 @@
             transform: translateX(8px) translateY(-8px);
   }
 }
-@keyframes shadow-pop-gold {
+@keyframes shadow-pop-green {
   0% {
     text-shadow: 0 0 var(--gold-light), 0 0 var(--gold-light), 0 0 var(--gold-light), 0 0 var(--gold-light), 0 0 var(--gold-light), 0 0 var(--gold-light), 0 0 var(--gold-light), 0 0 var(--gold-light);
     -webkit-transform: translateX(0) translateY(0);
@@ -167,7 +167,7 @@
             transform: translateX(8px) translateY(-8px);
   }
 }
-@-webkit-keyframes shadow-pop-gold-rev {
+@-webkit-keyframes shadow-pop-green-rev {
   100% {
     text-shadow: -1px 1px var(--russian-green), -2px 2px var(--russian-green), -3px 3px var(--russian-green), -4px 4px var(--russian-green), -5px 5px var(--russian-green), -6px 6px var(--russian-green), -7px 7px var(--russian-green), -8px 8px var(--russian-green);
     -webkit-transform: translateX(0) translateY(0);
@@ -184,7 +184,7 @@
             transform: translateX(8px) translateY(-8px);
   }
 }
-@keyframes shadow-pop-gold-rev {
+@keyframes shadow-pop-green-rev {
   100% {
     text-shadow: -1px 1px var(--russian-green), -2px 2px var(--russian-green), -3px 3px var(--russian-green), -4px 4px var(--russian-green), -5px 5px var(--russian-green), -6px 6px var(--russian-green), -7px 7px var(--russian-green), -8px 8px var(--russian-green);
     -webkit-transform: translateX(0) translateY(0);

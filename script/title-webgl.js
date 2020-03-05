@@ -1,15 +1,13 @@
-
 const INDEXED = true;
 const DAMPENING_FACTOR = 1;
 // Waterfall 
 const ROTATION_SPEED = [0.3, 1];
 const INITIAL_POSITION_Z = [-20, 20]; // Sideways
-const INITIAL_POSITION_Y = [20, 50]; // Up
+const INITIAL_POSITION_Y = [25, 50]; // Up
 const INITIAL_POSITION_X = [-30, 0]; // Forward
 
 const FALL_SPEED = [-3, -1];
 const CULL_POSITION_Y = -25;
-const SPAWN_POSITION_Y = 20;
 const OBJECT_POOL_SIZE = 25;
 // Camera
 const L_CAMERA_POSITION = [25, 0, 0];
@@ -33,7 +31,7 @@ function title_webgl(){
   }
   
   // Compile and link shader
-  const shaderProgram = linkShader(gl, logoVertexShader, logoFragmentShader);
+  const shaderProgram = linkShader(gl, titleVertexShader, titleFragmentShader);
   
   // Lookup shader memory locations
   const programInfo = {
@@ -41,14 +39,12 @@ function title_webgl(){
     attribLocations: {
       vertexPosition:  gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
       vertexTexture:   gl.getAttribLocation(shaderProgram, 'aVertexTexture'),
-      vertexNormal:    gl.getAttribLocation(shaderProgram, 'aVertexNormal'),
       vertexColor:     gl.getAttribLocation(shaderProgram, 'aVertexColor'),
     },
     uniformLocations: {
       projectionMatrix:          gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
       modelMatrix:               gl.getUniformLocation(shaderProgram, 'uModelMatrix'),
       viewMatrix:                gl.getUniformLocation(shaderProgram, 'uViewMatrix'),
-      normalMatrix:              gl.getUniformLocation(shaderProgram, 'uNormalMatrix'),
       cameraPosition:            gl.getUniformLocation(shaderProgram, 'uCameraPosition'),
       ambientLight:              gl.getUniformLocation(shaderProgram, 'uAmbientLight'),
     },
@@ -88,9 +84,6 @@ function title_webgl(){
   gl.useProgram(programInfo.program);
 
   // Set the shader uniforms
-  gl.uniformMatrix4fv(programInfo.uniformLocations.modelViewMatrix, false, cubeObject.matrices.modelViewMatrix);
-  gl.uniformMatrix4fv(programInfo.uniformLocations.normalMatrix, false, cubeObject.matrices.normalMatrix);
-  // Update uniforms
   gl.uniformMatrix4fv(programInfo.uniformLocations.projectionMatrix, false, globalMatrices.projectionMatrix);
   gl.uniformMatrix4fv(programInfo.uniformLocations.viewMatrix, false, globalMatrices.viewMatrix);
   gl.uniform3fv(programInfo.uniformLocations.ambientLight, L_AMBIENT_LIGHT);
@@ -114,10 +107,7 @@ function title_webgl(){
           350.0);
 
       // Push the uniform
-      gl.uniformMatrix4fv(
-          programInfo.uniformLocations.projectionMatrix,
-          false,
-          globalMatrices.projectionMatrix);
+      gl.uniformMatrix4fv(programInfo.uniformLocations.projectionMatrix, false, globalMatrices.projectionMatrix);
     }
 
     // Draw the scene
@@ -131,14 +121,11 @@ function title_webgl(){
       // Move object
       animate(obj, delta, now);
 
-      // Update normal matrices
+      // Update model matrices
       mat4.mul(obj.matrices.modelViewMatrix, globalMatrices.viewMatrix, obj.matrices.modelMatrix);
-      mat4.invert(obj.matrices.normalMatrix, obj.matrices.modelViewMatrix);
-      mat4.transpose(obj.matrices.normalMatrix, obj.matrices.normalMatrix);
 
       // Push uniforms
       gl.uniformMatrix4fv(programInfo.uniformLocations.modelMatrix, false, obj.matrices.modelMatrix);
-      gl.uniformMatrix4fv(programInfo.uniformLocations.normalMatrix, false, obj.matrices.normalMatrix);
       
       // Bind VAOs
       updateMeshAttributePointers(gl, programInfo, obj.buffers);
@@ -227,19 +214,12 @@ function animate(object, delta, now){
 function genMeshBuffers(gl, mesh){
   var vertexBuffer = gl.createBuffer();
   var colorBuffer = gl.createBuffer();
-  var normalBuffer = gl.createBuffer();
   var indexBuffer = gl.createBuffer();
   
   // Buffer vertices
   gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
   gl.bufferData(gl.ARRAY_BUFFER,
       new Float32Array(mesh.vertices),
-      gl.STATIC_DRAW);
-
-  // Buffer normals
-  gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER,
-      new Float32Array(mesh.normals),
       gl.STATIC_DRAW);
 
   // Buffer vertex colors
@@ -256,7 +236,6 @@ function genMeshBuffers(gl, mesh){
   
   return {
     vertexBuffer,
-    normalBuffer,
     colorBuffer,
     indexBuffer
   }
@@ -265,20 +244,16 @@ function genMeshBuffers(gl, mesh){
 function genMeshMatrices(globalMatrices){
   var modelMatrix = mat4.create();
   var modelViewMatrix = mat4.create();
-  var normalMatrix = mat4.create();
   
   // Define model matrices
   mat4.identity(modelMatrix);
   
-  // Build the normal matrices
+  // Build the model matrices
   mat4.mul(modelViewMatrix, globalMatrices.viewMatrix, modelMatrix);
-  mat4.invert(normalMatrix, modelViewMatrix);
-  mat4.transpose(normalMatrix, normalMatrix);
 
   return {
     modelMatrix,
     modelViewMatrix,
-    normalMatrix,
   };
 }
 
@@ -294,18 +269,6 @@ function updateMeshAttributePointers(gl, programInfo, buffers){
       0);
   gl.enableVertexAttribArray(
       programInfo.attribLocations.vertexPosition);
-  
-  // Bind VERTEX NORMAL ATTRIBUTE
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffers.normalBuffer);
-  gl.vertexAttribPointer(
-      programInfo.attribLocations.vertexNormal,
-      3,
-      gl.FLOAT,
-      false,
-      0,
-      0);
-  gl.enableVertexAttribArray(
-      programInfo.attribLocations.vertexNormal);
       
   // Bind VERTEX COLOR ATTRIBUTE
   gl.bindBuffer(gl.ARRAY_BUFFER, buffers.colorBuffer);
