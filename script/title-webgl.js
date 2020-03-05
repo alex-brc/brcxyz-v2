@@ -43,8 +43,7 @@ function title_webgl(){
     },
     uniformLocations: {
       projectionMatrix:          gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
-      modelMatrix:               gl.getUniformLocation(shaderProgram, 'uModelMatrix'),
-      viewMatrix:                gl.getUniformLocation(shaderProgram, 'uViewMatrix'),
+      modelViewMatrix:           gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
       cameraPosition:            gl.getUniformLocation(shaderProgram, 'uCameraPosition'),
       ambientLight:              gl.getUniformLocation(shaderProgram, 'uAmbientLight'),
     },
@@ -85,7 +84,6 @@ function title_webgl(){
 
   // Set the shader uniforms
   gl.uniformMatrix4fv(programInfo.uniformLocations.projectionMatrix, false, globalMatrices.projectionMatrix);
-  gl.uniformMatrix4fv(programInfo.uniformLocations.viewMatrix, false, globalMatrices.viewMatrix);
   gl.uniform3fv(programInfo.uniformLocations.ambientLight, L_AMBIENT_LIGHT);
   
   var then, delta = 0;
@@ -121,11 +119,11 @@ function title_webgl(){
       // Move object
       animate(obj, delta, now);
 
-      // Update model matrices
+      // Update modelView matrices
       mat4.mul(obj.matrices.modelViewMatrix, globalMatrices.viewMatrix, obj.matrices.modelMatrix);
 
       // Push uniforms
-      gl.uniformMatrix4fv(programInfo.uniformLocations.modelMatrix, false, obj.matrices.modelMatrix);
+      gl.uniformMatrix4fv(programInfo.uniformLocations.modelViewMatrix, false, obj.matrices.modelViewMatrix);
       
       // Bind VAOs
       updateMeshAttributePointers(gl, programInfo, obj.buffers);

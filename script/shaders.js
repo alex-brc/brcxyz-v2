@@ -9,14 +9,13 @@ const titleVertexShader = `
 
     uniform vec3 uCameraPosition;
     uniform mat4 uProjectionMatrix;
-    uniform mat4 uModelMatrix;
-    uniform mat4 uViewMatrix;
+    uniform mat4 uModelViewMatrix;
 
     varying vec3 vLighting;
     varying vec3 vColor;
 
     void main(void) {
-      gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * aVertexPosition;
+      gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
 
       vLighting = uAmbientLight;
       vColor = aVertexColor;
