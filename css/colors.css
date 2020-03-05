@@ -1,0 +1,44 @@
+:root {
+    --russian-green: #6a8d73;
+    --green-shadow: #2b3b2e;
+
+    --satin-gold: #de9e36;
+    --gold-shadow: #563b0e;
+    --gold-light: #e3b23c;
+
+    --color-gray: #423e37;
+    --color-dark: #23201b;
+    --color-light: #edebd7;
+
+    --accent: #fd5e53;
+  }
+
+  /* Wrappers */
+
+.russian-green {
+    color: var(--russian-green);
+}
+
+.green-shadow {
+    color: var(--green-shadow);
+}
+
+.satin-gold {
+    color: var(--satin-gold);
+}
+
+.gold-shadow {
+    color: var(--gold-shadow);
+}
+
+.gold-light {
+    color: var(--gold-light);
+}
+
+.color-dark {
+    color: var(--color-dark);
+}
+
+.color-light {
+    color: var(--color-light);
+}

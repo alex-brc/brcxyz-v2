@@ -2,56 +2,42 @@
 <html lang="en">
   <head>
     <title>brc.xyz</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" href="script/style.css" />
-    <link rel="stylesheet" type="text/css" href="script/animation.css" />
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
     <link rel="stylesheet" type="text/css" href="font/font.css" />
-    <link rel="stylesheet" type="text/css" href="vendor/onepage-scroll.css" />
+    <link rel="stylesheet" type="text/css" href="vendor/fullpage.css" />
     <link rel="icon" href="favicon.png">
     
     <script src="vendor/delaunator.js"></script>
     <script src="vendor/gl-matrix.js"></script>
     <script src="vendor/jquery-3.4.1.js"></script>
-    <script src="vendor/jquery.onepage-scroll.js"></script>
+    <script src="vendor/fullpage.js"></script>
     <script src="script/gl-util.js"></script>
-			
+    <script src="script/shaders.js"></script>
   </head>
 
   <body>
-    <div class="main">
-      <section id="title-page"> 
-        <div class="hider"></div>
+    <div id="fullpage">
+      <div class="section action" id="title-page"> 
         <div class="centerer">
-          <h1 class="title pink" color="#f00090"> brc </h1>
-          <h1 class="title darkpink" color="#d60080"> .xyz </h1> 
+          <h1 class="title gold-light pop-gold"> brc </h1>
+          <h1 class="title russian-green pop-green"> .xyz </h1>
         </div>
-        <canvas id="purple-triangles" class="gl-backdrop"></canvas>
-      </section id="about-page">
-      <section>
-        <canvas id="logo-mesh" class="gl-backdrop"></canvas>
-      </section>
-      <section id="test-page">
-        TEST
-      </section>
+        <canvas id="title-webgl" class="gl-backdrop"></canvas>
+      </div>
+      <div class="section" id="test-page">
+        Section TEST
+      </div>
     </div>
-
-  </body>
     <script>
-      $(".hider").delay(1000).fadeOut(1000);
-      setTimeout(function(){
-        // Unlock scrolling after fadout
-        document.body.style.position = "relative";
-        document.documentElement.style.position = "relative";
-      }, 2500);
-
-      $(".main").onepage_scroll({
-         animationTime: 700,             // AnimationTime let you define how long each section takes to animate
-         pagination: true,                // You can either show or hide the pagination. Toggle true for show, false for hide.
-         updateURL: true,                // Toggle this true if you want the URL to be updated automatically when the user scroll to each page.
-         loop: false,                     // You can have the page loop back to the top/bottom when the user navigates at up/down on the first/last page.
-         keyboard: true,                  // You can activate the keyboard controls  
+      new fullpage('#fullpage', {
+      licenseKey: 'CEAEB2F9-D07E42AF-A8725A3C-A5162A1F', // hide this somehow 
       });
-    </script> 
-    <script src="script/purple-triangles.js"></script>
-    <script src="script/logo-mesh.js"></script>
+    </script>
+    
+    <script src="script/title-webgl.js"></script>
+  </body> 
 </html>

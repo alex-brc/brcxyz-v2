@@ -15,6 +15,16 @@ function normalize(a){
   return out;
 }
 
+function random(params){
+  if(params.length == 1){
+    return Math.random() * params[0];
+  }
+  if(params.length == 2){
+    return Math.random()*(params[1]-params[0]) + params[0];
+  }
+  return Math.random();
+}
+
 function powerOf2(value) {
   return (value & (value - 1)) == 0;
 }
@@ -225,7 +235,7 @@ function rgb(r, g, b, intensity){
 }
 
 // Client updates
-function updateCanvasSize(gl){
+function canvasSizeChanged(gl){
   // Lookup the size the browser is displaying the canvas.
   var displayWidth  = gl.canvas.clientWidth;
   var displayHeight = gl.canvas.clientHeight;
@@ -294,23 +304,24 @@ function parseOBJ(meshString, indexed){
   var meshLines = meshString.split("\n");
   var vertices = [];
   var normals = [];
+  var colors = [];
   var vIndices = [];
   var nIndices = [];
-  var meshIds = [];
-  var currentId = -1;
   
   for(var i = 0; i < meshLines.length; i++){
     var tokens = meshLines[i].split(' ');
     if(tokens.length > 0){
       switch(tokens[0]){
-        case "o": // Start of a new mesh
-          currentId++;
-          break;
         case "v": // Vertex
           vertices.push(parseFloat(tokens[1]));
           vertices.push(parseFloat(tokens[2]));
           vertices.push(parseFloat(tokens[3]));
-          meshIds.push(currentId);
+          if(tokens.length > 4){
+            // We have colors
+            colors.push(parseFloat(tokens[4]));
+            colors.push(parseFloat(tokens[5]));
+            colors.push(parseFloat(tokens[6]));
+          }
           break;
         case "vn": // Normal
           normals.push(parseFloat(tokens[1]));
@@ -340,13 +351,13 @@ function parseOBJ(meshString, indexed){
     }
   }
   
-  var gatheredNormals = flatGather(normals, nIndices);
+  // var gatheredNormals = flatGather(normals, nIndices);
   
   if(indexed)
     return {
       vertices: vertices,
       normals: normals,
-      meshIds: meshIds,
+      colors: colors,
       indices: vIndices
     };
   else {
