@@ -9,24 +9,19 @@
     <meta name="description" content="Placeholder meta description.">
 
     <link rel="stylesheet" type="text/css" href="css/style.css" />
-    <link rel="stylesheet" type="text/css" href="css/font.css" />
-    <link rel="stylesheet" type="text/css" href="css/fullpage.css" />
     <link rel="icon" href="favicon.png">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fullPage.js/3.0.8/fullpage.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
-
-    <script src="js/gl-util.js"></script>
-    <script src="vendor/jquery.easings.js"></script>
+    <script src="js/util.js"></script>
   </head>
 
   <body>
-    <canvas id="webgl"></canvas>
-    <script src="js/webgl.js"></script>
-
     <div id="fullpage">
       <div class="section action" id="title-page"> 
+        <canvas id="webgl"></canvas>
+        <script src="js/webgl.js"></script>
         <div class="centerer">
           <h1 class="title gold-light pop-green"> brc </h1>
           <h1 class="title russian-green pop-gold"> .xyz </h1>
@@ -46,6 +41,35 @@
       </div>
     </div>
 
-    <script src="js/fullpage-options.js"></script>
+    <script>
+      // Easings from: 
+      // jQuery Easing v1.3 - http://gsgd.co.uk/sandbox/jquery/easing/
+      // Copyright 2008 George McGinley Smith All rights reserved
+      // (but honestly, can you really copyright maths? hmm...)
+      $.easing.jswing = $.easing.swing;
+      $.extend($.easing, {
+          def: 'easeOutQuad',
+          easeOutQuad: function (x, t, b, c, d) {
+              return -c *(t/=d)*(t-2) + b;
+          },});
+
+      new fullpage('#fullpage', {
+        licenseKey: 'CEAEB2F9-D07E42AF-A8725A3C-A5162A1F', // hide this somehow 
+        scrollingSpeed: 1000,
+        easing: 'easeOutQuad',
+        // Disabled parallaxing background cause it's a bit too intense
+        /* onLeave: function(origin, destination, direction){
+          if(direction == 'down')
+            // parallax down
+            $("#webgl").css("position", "absolute").animate({
+              top: '-=15vh'
+            }, 1000, 'easeOutQuad');
+          else if(direction == 'up')
+            // parallax up
+            $("#webgl").css("position", "absolute").animate({
+              top:  '+=15vh'
+            }, 1000, 'easeOutQuad'); }*/
+      });
+    </script>
   </body> 
 </html>
