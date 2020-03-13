@@ -15,45 +15,12 @@ const L_CAMERA_UP = [0.0, 1.0, 0.0];
 // Lights
 const L_AMBIENT_LIGHT = rgb(255, 255, 255, 1);
 
-const cubeString = `
-v 1.000000 1.000000 -1.000000 0.403922 0.568627 0.403922
-v 1.000000 -1.000000 -1.000000 0.403922 0.568627 0.403922
-v 1.000000 1.000000 1.000000 0.886275 0.694118 0.231373
-v 1.000000 -1.000000 1.000000 0.886275 0.694118 0.231373
-v -1.000000 1.000000 -1.000000 0.403922 0.568627 0.403922
-v -1.000000 -1.000000 -1.000000 0.403922 0.568627 0.403922
-v -1.000000 1.000000 1.000000 0.886275 0.694118 0.231373
-v -1.000000 -1.000000 1.000000 0.992157 0.364706 0.321569
-v -1.000000 -1.000000 -1.000000 0.886275 0.694118 0.231373
-v -1.000000 -1.000000 -1.000000 0.992157 0.364706 0.321569
-v -1.000000 -1.000000 1.000000 0.886275 0.694118 0.231373
-v -1.000000 -1.000000 1.000000 0.403922 0.568627 0.403922
-v 1.000000 -1.000000 -1.000000 0.992157 0.364706 0.321569
-v 1.000000 -1.000000 -1.000000 0.886275 0.694118 0.231373
-v 1.000000 1.000000 -1.000000 0.886275 0.694118 0.231373
-v 1.000000 1.000000 -1.000000 0.992157 0.364706 0.321569
-v -1.000000 1.000000 1.000000 0.403922 0.568627 0.403922
-v -1.000000 1.000000 1.000000 0.992157 0.364706 0.321569
-v 1.000000 1.000000 1.000000 0.403922 0.568627 0.403922
-v 1.000000 1.000000 1.000000 0.992157 0.364706 0.321569
-v 1.000000 -1.000000 1.000000 0.403922 0.568627 0.403922
-v 1.000000 -1.000000 1.000000 0.992157 0.364706 0.321569
-v -1.000000 1.000000 -1.000000 0.886275 0.694118 0.231373
-v -1.000000 1.000000 -1.000000 0.992157 0.364706 0.321569
+const cubeMesh = {
+  vertices: [1, 1, -1, 1, -1, -1, 1, 1, 1, 1, -1, 1, -1, 1, -1, -1, -1, -1, -1, 1, 1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, 1, 1, -1, -1, 1, -1, -1, 1, 1, -1, 1, 1, -1, -1, 1, 1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, 1, 1, -1, 1, -1, 1, -1, -1, 1, -1],
+  colors: [0.403922, 0.568627, 0.403922, 0.403922, 0.568627, 0.403922, 0.886275, 0.694118, 0.231373, 0.886275, 0.694118, 0.231373, 0.403922, 0.568627, 0.403922, 0.403922, 0.568627, 0.403922, 0.886275, 0.694118, 0.231373, 0.992157, 0.364706, 0.321569, 0.886275, 0.694118, 0.231373, 0.992157, 0.364706, 0.321569, 0.886275, 0.694118, 0.231373, 0.403922, 0.568627, 0.403922, 0.992157, 0.364706, 0.321569, 0.886275, 0.694118, 0.231373, 0.886275, 0.694118, 0.231373, 0.992157, 0.364706, 0.321569, 0.403922, 0.568627, 0.403922, 0.992157, 0.364706, 0.321569, 0.403922, 0.568627, 0.403922, 0.992157, 0.364706, 0.321569, 0.403922, 0.568627, 0.403922, 0.992157, 0.364706, 0.321569, 0.886275, 0.694118, 0.231373, 0.992157, 0.364706, 0.321569],
+  indices: [23, 19, 15, 18, 11, 20, 6, 8, 10, 12, 7, 9, 14, 3, 13, 4, 1, 5, 23, 17, 19, 18, 16, 11, 6, 22, 8, 12, 21, 7, 14, 2, 3, 4, 0, 1],
+}
 
-f 24 20 16
-f 19 12 21
-f 7 9 11
-f 13 8 10
-f 15 4 14
-f 5 2 6
-f 24 18 20
-f 19 17 12
-f 7 23 9
-f 13 22 8
-f 15 3 4
-f 5 1 2
-`;
 const titleVertexShader = `
     precision highp float;
 
@@ -63,7 +30,6 @@ const titleVertexShader = `
 
     uniform vec3 uAmbientLight;
 
-    uniform vec3 uCameraPosition;
     uniform mat4 uProjectionMatrix;
     uniform mat4 uModelViewMatrix;
 
@@ -92,7 +58,7 @@ const titleFragmentShader = `
 title_webgl();
 
 function title_webgl(){
-  var canvas = document.querySelector('#title-webgl');
+  var canvas = document.querySelector('#webgl');
   const gl = canvas.getContext('webgl');
 
   if (!gl) {
@@ -115,7 +81,6 @@ function title_webgl(){
     uniformLocations: {
       projectionMatrix:          gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
       modelViewMatrix:           gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
-      cameraPosition:            gl.getUniformLocation(shaderProgram, 'uCameraPosition'),
       ambientLight:              gl.getUniformLocation(shaderProgram, 'uAmbientLight'),
     },
   };
@@ -143,8 +108,7 @@ function title_webgl(){
   );
 
   // Construct objects
-  const cubeObject = buildObject(gl, globalMatrices, cubeString);
-  console.log(cubeObject);
+  const cubeObject = buildObject(gl, globalMatrices, cubeMesh);
   // Make copies with unique matrices
   let objectPool = [];
   for(let i = 0; i < OBJECT_POOL_SIZE; i++){
@@ -193,17 +157,13 @@ function title_webgl(){
 
       // Update modelView matrices
       mat4.mul(obj.matrices.modelViewMatrix, globalMatrices.viewMatrix, obj.matrices.modelMatrix);
-
       // Push uniforms
       gl.uniformMatrix4fv(programInfo.uniformLocations.modelViewMatrix, false, obj.matrices.modelViewMatrix);
-      
       // Bind VAOs
       updateMeshAttributePointers(gl, programInfo, obj.buffers);
 
       if(!isNaN(delta))
         gl.drawElements(gl.TRIANGLES, obj.mesh.indices.length, gl.UNSIGNED_SHORT, 0);
-      
-
     });
     
 
@@ -352,13 +312,12 @@ function updateMeshAttributePointers(gl, programInfo, buffers){
       programInfo.attribLocations.vertexColor);
 }
 
-function buildObject(gl, globalMatrices, objectString){
-  const mesh = customParseOBJ(objectString);
-  const buffers = genMeshBuffers(gl, mesh);
+function buildObject(gl, globalMatrices, objectMesh){
+  const buffers = genMeshBuffers(gl, objectMesh);
   const matrices = genMeshMatrices(globalMatrices);
 
   return {
-    mesh,
+    mesh: objectMesh,
     buffers,
     matrices
   };
