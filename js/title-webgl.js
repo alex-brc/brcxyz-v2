@@ -1,4 +1,3 @@
-const INDEXED = true;
 const DAMPENING_FACTOR = 1;
 // Waterfall 
 const ROTATION_SPEED = [0.3, 1];
@@ -16,6 +15,78 @@ const L_CAMERA_UP = [0.0, 1.0, 0.0];
 // Lights
 const L_AMBIENT_LIGHT = rgb(255, 255, 255, 1);
 
+const cubeString = `
+v 1.000000 1.000000 -1.000000 0.403922 0.568627 0.403922
+v 1.000000 -1.000000 -1.000000 0.403922 0.568627 0.403922
+v 1.000000 1.000000 1.000000 0.886275 0.694118 0.231373
+v 1.000000 -1.000000 1.000000 0.886275 0.694118 0.231373
+v -1.000000 1.000000 -1.000000 0.403922 0.568627 0.403922
+v -1.000000 -1.000000 -1.000000 0.403922 0.568627 0.403922
+v -1.000000 1.000000 1.000000 0.886275 0.694118 0.231373
+v -1.000000 -1.000000 1.000000 0.992157 0.364706 0.321569
+v -1.000000 -1.000000 -1.000000 0.886275 0.694118 0.231373
+v -1.000000 -1.000000 -1.000000 0.992157 0.364706 0.321569
+v -1.000000 -1.000000 1.000000 0.886275 0.694118 0.231373
+v -1.000000 -1.000000 1.000000 0.403922 0.568627 0.403922
+v 1.000000 -1.000000 -1.000000 0.992157 0.364706 0.321569
+v 1.000000 -1.000000 -1.000000 0.886275 0.694118 0.231373
+v 1.000000 1.000000 -1.000000 0.886275 0.694118 0.231373
+v 1.000000 1.000000 -1.000000 0.992157 0.364706 0.321569
+v -1.000000 1.000000 1.000000 0.403922 0.568627 0.403922
+v -1.000000 1.000000 1.000000 0.992157 0.364706 0.321569
+v 1.000000 1.000000 1.000000 0.403922 0.568627 0.403922
+v 1.000000 1.000000 1.000000 0.992157 0.364706 0.321569
+v 1.000000 -1.000000 1.000000 0.403922 0.568627 0.403922
+v 1.000000 -1.000000 1.000000 0.992157 0.364706 0.321569
+v -1.000000 1.000000 -1.000000 0.886275 0.694118 0.231373
+v -1.000000 1.000000 -1.000000 0.992157 0.364706 0.321569
+
+f 24 20 16
+f 19 12 21
+f 7 9 11
+f 13 8 10
+f 15 4 14
+f 5 2 6
+f 24 18 20
+f 19 17 12
+f 7 23 9
+f 13 22 8
+f 15 3 4
+f 5 1 2
+`;
+const titleVertexShader = `
+    precision highp float;
+
+    attribute vec4 aVertexPosition;
+    attribute vec2 aVertexTexture;
+    attribute vec3 aVertexColor;
+
+    uniform vec3 uAmbientLight;
+
+    uniform vec3 uCameraPosition;
+    uniform mat4 uProjectionMatrix;
+    uniform mat4 uModelViewMatrix;
+
+    varying vec3 vLighting;
+    varying vec3 vColor;
+
+    void main(void) {
+      gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
+
+      vLighting = uAmbientLight;
+      vColor = aVertexColor;
+    }
+  `;
+const titleFragmentShader = `
+    precision highp float;
+
+    varying vec3 vLighting;
+    varying vec3 vColor;
+    
+    void main(void) { 
+      gl_FragColor = vec4(vColor * vLighting, 1.0);
+    }
+  `;
 
 // Entry point
 title_webgl();
@@ -72,7 +143,8 @@ function title_webgl(){
   );
 
   // Construct objects
-  const cubeObject = buildObject(gl, globalMatrices, "mesh/Cube.obj");
+  const cubeObject = buildObject(gl, globalMatrices, cubeString);
+  console.log(cubeObject);
   // Make copies with unique matrices
   let objectPool = [];
   for(let i = 0; i < OBJECT_POOL_SIZE; i++){
@@ -128,10 +200,9 @@ function title_webgl(){
       // Bind VAOs
       updateMeshAttributePointers(gl, programInfo, obj.buffers);
 
-      if(INDEXED)
+      if(!isNaN(delta))
         gl.drawElements(gl.TRIANGLES, obj.mesh.indices.length, gl.UNSIGNED_SHORT, 0);
-      else
-        gl.drawArrays(gl.TRIANGLES, 0, obj.mesh.vertices.length / 3);
+      
 
     });
     
@@ -281,8 +352,8 @@ function updateMeshAttributePointers(gl, programInfo, buffers){
       programInfo.attribLocations.vertexColor);
 }
 
-function buildObject(gl, globalMatrices, meshString){
-  const mesh = readMeshFile(meshString, INDEXED);
+function buildObject(gl, globalMatrices, objectString){
+  const mesh = customParseOBJ(objectString);
   const buffers = genMeshBuffers(gl, mesh);
   const matrices = genMeshMatrices(globalMatrices);
 
