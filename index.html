@@ -3,15 +3,16 @@
   <head>
     <title>brc.xyz</title>
     <meta charset="utf-8">
+    <meta name="theme-color" content="#6a8d73">
     <link rel="stylesheet" type="text/css" href="css/style.css" />
-    <link rel="stylesheet" type="text/css" href="font/font.css" />
-    <link rel="stylesheet" type="text/css" href="vendor/fullpage.css" />
+    <link rel="stylesheet" type="text/css" href="css/font.css" />
+    <link rel="stylesheet" type="text/css" href="css/fullpage.css" />
     <link rel="icon" href="favicon.png">
-    
-    <script src="vendor/delaunator.js"></script>
-    <script src="vendor/gl-matrix.js"></script>
-    <script src="vendor/jquery-3.4.1.js"></script>
-    <script src="vendor/fullpage.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="vendor/fullpage.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
     <script src="script/gl-util.js"></script>
     <script src="script/shaders.js"></script>
   </head>
@@ -24,17 +25,15 @@
           <h1 class="title russian-green pop-gold"> .xyz </h1>
         </div>
         <canvas id="title-webgl" class="gl-backdrop"></canvas>
+        <script src="script/title-webgl.js"></script>
       </div>
-      <div class="section" id="test-page">
-        Section TEST
+      <div class="section">
+        <div class="flexer">
+
+        </div>
       </div>
     </div>
-    <script>
-      new fullpage('#fullpage', {
-      licenseKey: 'CEAEB2F9-D07E42AF-A8725A3C-A5162A1F', // hide this somehow 
-      });
-    </script>
-    
-    <script src="script/title-webgl.js"></script>
+
+    <script src="script/fullpage-options.js"></script>
   </body> 
 </html>

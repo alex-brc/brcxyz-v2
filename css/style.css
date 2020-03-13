@@ -1,21 +1,15 @@
 @import "colors.css";
 @import "animation.css";
 
-/* borderless, marginless */
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-	margin: 0;
-	border: 0;
-	background-color: var(--color-light);
-	position: fixed;
-  overflow-x: hidden;
-}
-
 .section {
   text-align: center;
+  background-color: var(--color-light);
+}
+
+/* Hide nav on first page */
+body.fp-viewing-0 #fp-nav{
+  opacity: 0;
+  transition: opacity 0.2s;
 }
 
 .centerer {
@@ -25,28 +19,25 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.hider {
-  position: absolute;
-  width: 100vw;
-  height: 100vh;
-  top: 0;
-  left: 0;
-  background-color: var(--color-light);
-  background-size: 100% 100%;
-	z-index: 9;
+  flex-direction: row;
 }
 
 .title {
   text-align: center;
   font-family: 'brcxyz-Title', normal;
-  font-size: 10vw;
+  font-size: 20vh;
   z-index: 10;
 }
 
-.hidden {
-  display: none;
+@media only screen and (orientation: portrait) {
+  .title {
+    font-size: 20vmin;
+    margin-top: -5vw;
+    margin-bottom: -5vw;
+  }
+  .centerer {
+    flex-direction: column;
+  }
 }
 
 .gl-backdrop {
@@ -58,21 +49,4 @@ body {
 #purple-triangles {
   background-image: url('../img/background.jpg');
   background-size: 100% 100%;
-}
-
-.panel {
-  height: 102vh;
-  width: 100%;
-  overflow: hidden;
-}
-
-.scroll {
-  background-image: url(img/logo-bg.svg);
-  top: 0px;
-  left: 0px;
-  height: 200%;
-  width: 200%;
-  z-index: 1;
-  -webkit-animation: scrolling 12s linear 0s infinite;
-          animation: scrolling 12s linear 0s infinite;
 }
