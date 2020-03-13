@@ -1,13 +1,13 @@
 const DAMPENING_FACTOR = 1;
 // Waterfall 
 const ROTATION_SPEED = [0.3, 1];
-const INITIAL_POSITION_Z = [-20, 20]; // Sideways
+const INITIAL_POSITION_Z = [-30, 30]; // Sideways
 const INITIAL_POSITION_Y = [25, 50]; // Up
 const INITIAL_POSITION_X = [-30, 0]; // Forward
 
 const FALL_SPEED = [-3, -1];
 const CULL_POSITION_Y = -25;
-const OBJECT_POOL_SIZE = 25;
+const OBJECT_POOL_SIZE = 40;
 // Camera
 const L_CAMERA_POSITION = [25, 0, 0];
 const L_CAMERA_LOOK_AT = [0, 0, 0];
