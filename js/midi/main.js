@@ -36,15 +36,16 @@ function main(){
     .load(setup);
 
     // Create the components
-    var controller;
+    var audioEngine, controller;
         
     function setup() {
         // Alias the spritesheets
         const spritesheet = loader.resources["../sprite/controller.json"].spritesheet;
         const buttonsheet = loader.resources["../sprite/buttons.json"].spritesheet;
 
-        // Build the main controller
-        controller = new Controller(spritesheet, buttonsheet, renderer);
+        // Build the components
+        audioEngine = new AudioEngine();
+        controller = new Controller(spritesheet, buttonsheet, renderer, audioEngine);
         
         // Add the controller to the stagex
         stage.addChild(controller.base);
