@@ -28,11 +28,11 @@ function main(){
     const ticker = PIXI.Ticker.shared;
     const loader = PIXI.Loader.shared;
 
-
     // Load all sprites
     loader
-    .add("../sprite/controller.json")
-    .add("../sprite/buttons.json")
+    .add("controller", "../sprite/controller.json")
+    .add("buttons", "../sprite/buttons.json")
+    .add("tooltipFont", "../sprite/LilliputSteps.fnt")
     .load(setup);
 
     // Create the components
@@ -40,12 +40,14 @@ function main(){
         
     function setup() {
         // Alias the spritesheets
-        const spritesheet = loader.resources["../sprite/controller.json"].spritesheet;
-        const buttonsheet = loader.resources["../sprite/buttons.json"].spritesheet;
+        const spritesheet = loader.resources["controller"].spritesheet;
+        const buttonsheet = loader.resources["buttons"].spritesheet;
 
         // Build the components
         audioEngine = new AudioEngine();
         controller = new Controller(spritesheet, buttonsheet, renderer, audioEngine);
+
+        audioEngine.masterGain = 1.0 * controller.searchComponent("master").value / 10;
         
         // Add the controller to the stagex
         stage.addChild(controller.base);

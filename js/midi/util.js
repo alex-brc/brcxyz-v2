@@ -1,11 +1,28 @@
 
-function decNote(note){
-    let octave = note / 12;
-    note %= 12;
-    return {
-        key: note,
-        octave
+function tooltip(text, align){
+    if(text == "")
+        text = "placeholder";
+    var anchor = {
+        x: 0,
+        y: 1
     };
+    if(align == 'right'){
+        anchor.x = 1;
+    }
+    // Create text object
+    var text = new PIXI.BitmapText(text, {
+        font: '-8px LilliputSteps',
+        align: align,
+      });
+    
+    // Create background object
+    // Later, let's see how many chars we need
+    
+    text.visible = false;
+    text.anchor.x = anchor.x;
+    text.anchor.y = anchor.y;
+
+    return text;
 }
 
 if (!Array.prototype.last){
@@ -20,6 +37,15 @@ function round(number, step) {
 
 function remap(number, from, to){
     return to[0] + (number-from[0])*(to[1]-to[0])/(from[1]-from[0]); 
+}
+
+function decNote(note){
+    let octave = note / 12;
+    note %= 12;
+    return {
+        key: note,
+        octave
+    };
 }
 
 const NUMBER_TO_NAME = 

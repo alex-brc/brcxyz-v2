@@ -12,9 +12,9 @@ class Controller {
 
         // Setup all the components of the keyboard
         setup_sine(spritesheet, this.base);
-        setup_keys(spritesheet, this.base);
-        setup_knobs(buttonsheet, this.base);
-        setup_sliders(buttonsheet, this.base);
+        this.keys = setup_keys(spritesheet, this.base);
+        this.knobs = setup_knobs(buttonsheet, this.base);
+        this.sliders = setup_sliders(buttonsheet, this.base);
 
         // Setup the base object
         this.base.x = renderer.screen.width / 2;
@@ -28,9 +28,9 @@ class Controller {
         // Setup definitions
         function setup_keys(spritesheet, base) {
             // Locations of keys on base sprite
-            const keysX = [34, 43, 47, 56, 60, 73, 82, 86, 95, 99, 108, 112,
+            const x = [34, 43, 47, 56, 60, 73, 82, 86, 95, 99, 108, 112,
                 125, 134, 138, 147, 151, 164, 173, 177, 186, 190, 199, 203, 216];
-            const keysY = 54;
+            const y = 54;
             const keysTex = [
                 "leftkey", "blackkey", "midkey", "blackkey", "rightkey",
                 "leftkey", "blackkey", "midkey", "blackkey", "midkey", "blackkey", "rightkey",
@@ -48,8 +48,8 @@ class Controller {
                 // Give it an ID
                 keys[i].keyId = i;
                 // Position them
-                keys[i].x = -base.width / 2 + keysX[i];
-                keys[i].y = -base.height / 2 + keysY;
+                keys[i].x = -base.width / 2 + x[i];
+                keys[i].y = -base.height / 2 + y;
                 // Add event listeners
                 keys[i].buttonMode = true;
                 keys[i].interactive = true;
@@ -143,6 +143,8 @@ class Controller {
                         noteOn(noteStack.last()[0], noteStack.last()[1]);
                     }
                 }
+
+                return keys;
             }
             function onDown(event) {
                 mouseDown = true;
@@ -184,39 +186,75 @@ class Controller {
         }
         function setup_knobs(spritesheet, base) {
             // Set knob positionings
-            const knobsX = [12, 27, 42, 57, 72, 87, 17, 32, 47, 62, 77, 92];
-            const knobsY = [27, 27, 27, 27, 27, 27, 40, 40, 40, 40, 40, 40];
+            const x = [12, 27, 42, 57, 72, 87, 17, 32, 47, 62, 77, 92];
+            const y = [27, 27, 27, 27, 27, 27, 40, 40, 40, 40, 40, 40];
             // Define initial knob values
             const knobsVals = [7, 2, 5, 7, 4, 1, 3, 1, 6, 3, 2, 5];
             const knobsTex = ["up.png", "top-right.png", "right.png", "bottom-right.png",
                 "bottom.png", "bottom-left.png", "left.png", "top-left.png"];
+            let tooltips = [
+                tooltip("shape", 'left'), tooltip("attack", 'left'), 
+                tooltip("sustain", 'left'), tooltip("decay", 'left'), 
+                tooltip("release", 'left'), tooltip("gain", 'left'), 
+                tooltip("shape", 'left'), tooltip("attack", 'left'), 
+                tooltip("sustain", 'left'), tooltip("decay", 'left'), 
+                tooltip("release", 'left'), tooltip("gain", 'left'), 
+            ];
+            let names = [
+                "shape1", "attack1", "sustain1", "decay1", "release1", "gain1", 
+                "shape2", "attack2", "sustain2", "decay2", "release2", "gain2", ];
             let knobs = [];
-            for (let i = 0; i < 12; i++) {
+            for (let i = 11; i >= 0; i--) {
                 // Create the sprite from the texture
-                knobs.push(new PIXI.Sprite(spritesheet.textures[knobsTex[knobsVals[i]]]));
-                // Give it an ID
-                knobs[i].knobId = i;
+                knobs[i] = new PIXI.Sprite(spritesheet.textures[knobsTex[knobsVals[i]]]);
+                // Set initial value
+                knobs[i].value = knobsVals[i];
+                // Give it a name
+                knobs[i].name = names[i];
                 // Position them accordingly
                 knobs[i].pivot.x = 2;
                 knobs[i].pivot.y = 2;
-                knobs[i].x = -base.width / 2 + knobsX[i]; // -2 adjusts for anchor
-                knobs[i].y = -base.height / 2 + knobsY[i];
+                knobs[i].x = -base.width / 2 + x[i]; // -2 adjusts for anchor
+                knobs[i].y = -base.height / 2 + y[i];
                 // Make them clickable
                 knobs[i].buttonMode = true;
                 knobs[i].interactive = true;
-                knobs[i].on('mousedown', onDown);
-                knobs[i].on('touchstart', onDown);
+                knobs[i]
+                    .on('mousedown', onDown)
+                    .on('touchstart', onDown);
+
+                // Add tooltips
+                knobs[i].addChild(tooltips[i]);
+                knobs[i]
+                    .on('mouseover', showTooltip)
+                    .on('mouseout', hideTooltip);
+
                 base.addChild(knobs[i]);
             }
             function onDown(event) {
-                knobsVals[this.knobId] = (knobsVals[this.knobId] + 1) % 8;
-                this.texture = spritesheet.textures[knobsTex[knobsVals[this.knobId]]];
+                this.value = (this.value + 1) % 8;
+                this.texture = spritesheet.textures[knobsTex[this.value]];
             }
+            function showTooltip(event) {
+                this.children[0].visible = true;
+            }
+            function hideTooltip(event) {
+                this.children[0].visible = false;
+            }
+            
+            return knobs;
         }
         function setup_sliders(spritesheet, base) {
             // Set initial slider positions
-            const slidersX = [110, 118, 126, 134, 142, 150, 158, 166, 224];
-            const slidersY = [31, 25, 31, 35, 29, 31, 23, 25, 31];
+            const x = [110, 118, 126, 134, 142, 150, 158, 166, 224];
+            const y = [31,  25,  31,  35,  29,  31,  23,  25,  31];
+            // Write up tooltips
+            let tooltips = [
+                tooltip("", 'right'), tooltip("", 'right'), tooltip("", 'right'), tooltip("", 'right'), 
+                tooltip("", 'right'), tooltip("", 'right'), tooltip("", 'right'), tooltip("", 'right'), 
+                tooltip("master", 'right'), 
+            ];
+            let names = ["", "", "", "", "", "", "", "", "master"];
             let sliders = [];
             for (let i = 0; i < 9; i++) {
                 // Create the sprite
@@ -224,8 +262,12 @@ class Controller {
                 // Position it
                 sliders[i].pivot.x = 3;
                 sliders[i].pivot.y = 1;
-                sliders[i].x = -base.width / 2 + slidersX[i]; // adjustments for anchors
-                sliders[i].y = -base.height / 2 + slidersY[i];
+                sliders[i].x = -base.width / 2 + x[i]; // adjustments for anchors
+                sliders[i].y = -base.height / 2 + y[i];
+                // Initial value
+                sliders[i].value = (-sliders[i].position.y - 12) / 2;
+                // Searchable name
+                sliders[i].name = names[i];
                 // Add event listeners for dragging
                 sliders[i]
                     .on('mousedown', onDragStart)
@@ -238,6 +280,13 @@ class Controller {
                     .on('touchmove', onDragMove);
                 sliders[i].buttonMode = true;
                 sliders[i].interactive = true;
+
+                // Add tooltip
+                sliders[i]
+                    .on('mouseover', showTooltip)
+                    .on('mouseout', hideTooltip);
+                sliders[i].addChild(tooltips[i]);
+
                 base.addChild(sliders[i]);
             }
             function onDragStart(event) {
@@ -251,11 +300,38 @@ class Controller {
             function onDragMove(event) {
                 if (this.dragging) {
                     var newPosition = this.eventData.getLocalPosition(this.parent);
-                    if (newPosition.y > -32 && newPosition.y < -10)
-                        // Pixel perfect
+                    if (newPosition.y > -32 && newPosition.y <= -10){
+                        // Also update value and master gain
                         this.position.y = round(newPosition.y, 2);
+                        this.value = (-this.position.y - 12) / 2;
+                        audioEngine.masterGain = 1.0 * this.value / 10;
+                    }
                 }
             }
+            function showTooltip(event) {
+                this.children[0].visible = true;
+            }
+            function hideTooltip(event) {
+                this.children[0].visible = false;
+            }
+
+            return sliders;
         }
     }
+
+    searchComponent(string){
+        // Search knobs
+        for(var e of this.knobs)
+            if(e.name == string)
+                return e;
+        
+        // Search sliders
+        for(var e of this.sliders){
+            if(e.name == string)
+                return e;
+        }
+        
+        return undefined;
+    }
+
 }
