@@ -11,10 +11,14 @@ class Controller {
         this.base = new PIXI.Sprite(spritesheet.textures["base.png"]);
 
         // Setup all the components of the keyboard
+        var tooltipsContainer = new PIXI.Container();
         setup_sine(spritesheet, this.base);
         this.keys = setup_keys(spritesheet, this.base);
-        this.knobs = setup_knobs(buttonsheet, this.base);
         this.sliders = setup_sliders(buttonsheet, this.base);
+        this.knobs = setup_knobs(buttonsheet, this.base);
+
+        // Add the tooltips last
+        this.base.addChild(tooltipsContainer);
 
         // Setup the base object
         this.base.x = renderer.screen.width / 2;
@@ -193,24 +197,20 @@ class Controller {
             const knobsTex = ["up.png", "top-right.png", "right.png", "bottom-right.png",
                 "bottom.png", "bottom-left.png", "left.png", "top-left.png"];
             let tooltips = [
-                tooltip("shape", 'left'), tooltip("attack", 'left'), 
-                tooltip("sustain", 'left'), tooltip("decay", 'left'), 
-                tooltip("release", 'left'), tooltip("gain", 'left'), 
-                tooltip("shape", 'left'), tooltip("attack", 'left'), 
-                tooltip("sustain", 'left'), tooltip("decay", 'left'), 
-                tooltip("release", 'left'), tooltip("gain", 'left'), 
+                "shape", "attack", "sustain", "decay", "release", "gain", 
+                "shape", "attack", "sustain", "decay", "release", "gain"
             ];
             let names = [
                 "shape1", "attack1", "sustain1", "decay1", "release1", "gain1", 
                 "shape2", "attack2", "sustain2", "decay2", "release2", "gain2", ];
             let knobs = [];
-            for (let i = 11; i >= 0; i--) {
+            for (let i = 0; i < 12; i++) {
                 // Create the sprite from the texture
                 knobs[i] = new PIXI.Sprite(spritesheet.textures[knobsTex[knobsVals[i]]]);
                 // Set initial value
                 knobs[i].value = knobsVals[i];
                 // Give it a name
-                knobs[i].name = names[i];
+                knobs[i].name = tooltips[i] + (Math.floor(i / 6) + 1).toString();
                 // Position them accordingly
                 knobs[i].pivot.x = 2;
                 knobs[i].pivot.y = 2;
@@ -224,22 +224,18 @@ class Controller {
                     .on('touchstart', onDown);
 
                 // Add tooltips
-                knobs[i].addChild(tooltips[i]);
                 knobs[i]
                     .on('mouseover', showTooltip)
                     .on('mouseout', hideTooltip);
+                knobs[i].tooltip = tooltip(tooltips[i], 'left');
+                // Add it to the render group
+                tooltipsContainer.addChild(knobs[i].tooltip);
 
                 base.addChild(knobs[i]);
             }
             function onDown(event) {
                 this.value = (this.value + 1) % 8;
                 this.texture = spritesheet.textures[knobsTex[this.value]];
-            }
-            function showTooltip(event) {
-                this.children[0].visible = true;
-            }
-            function hideTooltip(event) {
-                this.children[0].visible = false;
             }
             
             return knobs;
@@ -250,11 +246,9 @@ class Controller {
             const y = [31,  25,  31,  35,  29,  31,  23,  25,  31];
             // Write up tooltips
             let tooltips = [
-                tooltip("", 'right'), tooltip("", 'right'), tooltip("", 'right'), tooltip("", 'right'), 
-                tooltip("", 'right'), tooltip("", 'right'), tooltip("", 'right'), tooltip("", 'right'), 
-                tooltip("master", 'right'), 
+                "LFO1 frequency", "LFO2 frequency", "LFO1 amplitude", "LFO2 amplitude",
+                "pan1", "pan2" ,"", "", "master"
             ];
-            let names = ["", "", "", "", "", "", "", "", "master"];
             let sliders = [];
             for (let i = 0; i < 9; i++) {
                 // Create the sprite
@@ -267,7 +261,7 @@ class Controller {
                 // Initial value
                 sliders[i].value = (-sliders[i].position.y - 12) / 2;
                 // Searchable name
-                sliders[i].name = names[i];
+                sliders[i].name = tooltips[i];
                 // Add event listeners for dragging
                 sliders[i]
                     .on('mousedown', onDragStart)
@@ -285,7 +279,9 @@ class Controller {
                 sliders[i]
                     .on('mouseover', showTooltip)
                     .on('mouseout', hideTooltip);
-                sliders[i].addChild(tooltips[i]);
+                sliders[i].tooltip = tooltip(tooltips[i], 'right');
+                // Add it to the render group
+                tooltipsContainer.addChild(sliders[i].tooltip);
 
                 base.addChild(sliders[i]);
             }
@@ -307,12 +303,6 @@ class Controller {
                         audioEngine.masterGain = 1.0 * this.value / 10;
                     }
                 }
-            }
-            function showTooltip(event) {
-                this.children[0].visible = true;
-            }
-            function hideTooltip(event) {
-                this.children[0].visible = false;
             }
 
             return sliders;

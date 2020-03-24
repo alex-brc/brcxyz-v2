@@ -34,7 +34,7 @@
         <key>dataFormat</key>
         <string>pixijs4</string>
         <key>textureFileName</key>
-        <filename>../../sprite/buttons.png</filename>
+        <filename>../../sprite/common.png</filename>
         <key>flipPVR</key>
         <false/>
         <key>pvrCompressionQuality</key>
@@ -132,7 +132,7 @@
             <key>data</key>
             <struct type="DataFile">
                 <key>name</key>
-                <filename>../../sprite/buttons.json</filename>
+                <filename>../../sprite/common.json</filename>
             </struct>
         </map>
         <key>multiPack</key>

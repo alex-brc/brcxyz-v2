@@ -1,4 +1,3 @@
-
 function tooltip(text, align){
     if(text == "")
         text = "placeholder";
@@ -9,20 +8,44 @@ function tooltip(text, align){
     if(align == 'right'){
         anchor.x = 1;
     }
+
+    // Create the container
+    var container = new PIXI.Container();
     // Create text object
     var text = new PIXI.BitmapText(text, {
-        font: '-8px LilliputSteps',
+        font: '8px pixelmix',
         align: align,
       });
     
     // Create background object
-    // Later, let's see how many chars we need
-    
-    text.visible = false;
-    text.anchor.x = anchor.x;
-    text.anchor.y = anchor.y;
+    let bg = new PIXI.NineSlicePlane(
+        PIXI.Loader.shared.resources.tooltip.texture,
+        4, 4, 4, 4);
+    bg.height = 13;
+    bg.width = text.width + 8;
 
-    return text;
+    // Position text
+    text.x += 4;
+    text.y += 2;
+    
+    // Assemble and position
+    container.addChild(bg);
+    container.addChild(text);
+    container.pivot.x = container.width * anchor.x;
+    container.pivot.y = container.height * anchor.y;
+    container.visible = false;
+
+    return container;
+}
+
+
+function showTooltip(event) {
+    this.tooltip.visible = true;
+    this.tooltip.position = this.position;
+}
+function hideTooltip(event) {
+    this.tooltip.visible = false;
+    this.tooltip.position = this.position;
 }
 
 if (!Array.prototype.last){

@@ -31,8 +31,9 @@ function main(){
     // Load all sprites
     loader
     .add("controller", "../sprite/controller.json")
-    .add("buttons", "../sprite/buttons.json")
-    .add("tooltipFont", "../sprite/LilliputSteps.fnt")
+    .add("common", "../sprite/common.json")
+    .add("tooltipFont", "../sprite/pixelmix.fnt")
+    .add("tooltip", "../sprite/tooltip.png")
     .load(setup);
 
     // Create the components
@@ -40,12 +41,12 @@ function main(){
         
     function setup() {
         // Alias the spritesheets
-        const spritesheet = loader.resources["controller"].spritesheet;
-        const buttonsheet = loader.resources["buttons"].spritesheet;
+        const spritesheet = loader.resources.controller.spritesheet;
+        const commonsheet = loader.resources.common.spritesheet;
 
         // Build the components
         audioEngine = new AudioEngine();
-        controller = new Controller(spritesheet, buttonsheet, renderer, audioEngine);
+        controller = new Controller(spritesheet, commonsheet, renderer, audioEngine);
 
         audioEngine.masterGain = 1.0 * controller.searchComponent("master").value / 10;
         
