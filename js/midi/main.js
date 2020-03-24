@@ -1,5 +1,6 @@
 // Globals
 var noteRange = [48, 72];
+var audioEngine = new AudioEngine();
 
 // Pixi Settings
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
@@ -37,7 +38,7 @@ function main(){
     .load(setup);
 
     // Create the components
-    var audioEngine, controller;
+    var controller;
         
     function setup() {
         // Alias the spritesheets
@@ -45,9 +46,9 @@ function main(){
         const commonsheet = loader.resources.common.spritesheet;
 
         // Build the components
-        audioEngine = new AudioEngine();
-        controller = new Controller(spritesheet, commonsheet, renderer, audioEngine);
+        controller = new Controller(spritesheet, commonsheet, renderer);
 
+        // Bind controls
         audioEngine.masterGain = 1.0 * controller.searchComponent("master").value / 10;
         
         // Add the controller to the stagex

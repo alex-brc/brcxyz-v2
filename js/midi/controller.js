@@ -1,7 +1,6 @@
 class Controller {
-    constructor(spritesheet, buttonsheet, renderer, audioEngine) {
+    constructor(spritesheet, buttonsheet, renderer) {
         this._renderer = renderer;
-        this._audioEngine = audioEngine;
         var noteStack = [];
 
         this.spritesheet = spritesheet;
@@ -235,67 +234,35 @@ class Controller {
             
             return knobs;
         }
-        function setup_sliders(spritesheet, base) {
+        function setup_sliders(base) {
             // Set initial slider positions
             const x = [110, 118, 126, 134, 142, 150, 158, 166, 224];
             const y = [31,  25,  31,  35,  29,  31,  23,  25,  31];
             // Write up tooltips
-            let tooltips = [
-                "LFO1 frequency", "LFO2 frequency", "LFO1 amplitude", "LFO2 amplitude",
-                "pan1", "pan2" ,"", "", "master"
+            let tooltips = [ "LFO1 frequency", "LFO2 frequency", 
+                             "LFO1 amplitude", "LFO2 amplitude",
+                             "pan1", "pan2" ,"", "", "master"];
+            let callbacks = [
+                function (v) {audioEngine.masterGain = 1.0 * v / 10;},
+                function (v) {audioEngine.masterGain = 1.0 * v / 10;},
+                function (v) {audioEngine.masterGain = 1.0 * v / 10;},
+                function (v) {audioEngine.masterGain = 1.0 * v / 10;},
+                function (v) {audioEngine.masterGain = 1.0 * v / 10;},
+                function (v) {audioEngine.masterGain = 1.0 * v / 10;},
+                function (v) {audioEngine.masterGain = 1.0 * v / 10;},
+                function (v) {audioEngine.masterGain = 1.0 * v / 10;},
+                function (v) {audioEngine.masterGain = 1.0 * v / 10;}
             ];
             let sliders = [];
             for (let i = 0; i < 9; i++) {
-                // Create the sprite
-                sliders[i] = new PIXI.Sprite(spritesheet.textures["slider.png"]);
-                // Position it
-                sliders[i].pivot.x = 3;
-                sliders[i].pivot.y = 1;
-                sliders[i].x = -base.width / 2 + x[i]; // adjustments for anchors
-                sliders[i].y = -base.height / 2 + y[i];
-                // Initial value
-                sliders[i].value = (-sliders[i].position.y - 12) / 2;
-                // Searchable name
-                sliders[i].name = tooltips[i];
-                // Add event listeners for dragging
-                sliders[i]
-                    .on('mousedown', onDragStart)
-                    .on('touchstart', onDragStart)
-                    .on('mouseup', onDragEnd)
-                    .on('mouseupoutside', onDragEnd)
-                    .on('touchend', onDragEnd)
-                    .on('touchendoutside', onDragEnd)
-                    .on('mousemove', onDragMove)
-                    .on('touchmove', onDragMove);
-                sliders[i].buttonMode = true;
-                sliders[i].interactive = true;
-
-                // Add tooltip
-                sliders[i]
-                    .on('mouseover', Tooltip.showTooltip)
-                    .on('mouseout', Tooltip.hideTooltip);
-                sliders[i].tooltip = tooltipSet.create(tooltips[i], 'right');
+                sliders[i] = new Slider(
+                    -base.width / 2 + x[i], -base.height / 2 + y[i], // position
+                    tooltips[i], // name
+                    tooltipSet.create(tooltips[i], 'right'),
+                    callbacks[i]
+                );
 
                 base.addChild(sliders[i]);
-            }
-            function onDragStart(event) {
-                this.eventData = event.data;
-                this.dragging = true;
-            }
-            function onDragEnd(event) {
-                this.eventData = null;
-                this.dragging = false;
-            }
-            function onDragMove(event) {
-                if (this.dragging) {
-                    var newPosition = this.eventData.getLocalPosition(this.parent);
-                    if (newPosition.y > -32 && newPosition.y <= -10){
-                        // Also update value and master gain
-                        this.position.y = round(newPosition.y, 2);
-                        this.value = (-this.position.y - 12) / 2;
-                        audioEngine.masterGain = 1.0 * this.value / 10;
-                    }
-                }
             }
 
             return sliders;
@@ -316,5 +283,113 @@ class Controller {
         
         return undefined;
     }
+}
 
+/** 
+ * Basic component class for the synth controls. Does not
+ * define any interactivity and should be overriden
+ */
+class Component extends PIXI.Sprite {
+    /**
+     * @param {PIXI.Texture} texture Texture to generate sprite from
+     * @param {number} x Position x
+     * @param {number} y Position y
+     * @param {number} px Pivot x
+     * @param {number} py Pivot y
+     * @param {string} name Searchable component name
+     * @param {number} maxValue Maximum acceptable value (inclusive)
+     * @param {number} initialValue Initial value (0 to maxValue)
+     * @param {PIXI.Container} tooltip Tooltip object
+     * @param {*} propagationFunction Function to execute when this.value changes
+     */
+    constructor(texture, x, y, px, py, name, maxValue, initialValue, tooltip, propagationFunction){
+        // Sprite details
+        super(texture);
+        this.x = x;
+        this.y = y;
+        this.pivot.x = px;
+        this.pivot.y = py;
+
+        // Component details
+        this.propagationFunction = propagationFunction;
+        this.name = name;
+        this.maxValue = maxValue;
+        this._value = initialValue;
+        this.tooltip = tooltip;
+        this.on('mouseover', Tooltip.showTooltip)
+            .on('mouseout', Tooltip.hideTooltip);
+    }
+
+    /** @param {number} value */
+    set value(value){
+        this.propagationFunction();
+    }
+    
+    get value(){
+        return this._value;
+    }
+}
+class Slider extends Component {
+    /**
+     * @param {number} x Position x
+     * @param {number} y Position y
+     * @param {number} px Pivot x
+     * @param {number} py Pivot y
+     * @param {PIXI.Container} tooltip Tooltip object
+     * @param {*} propagationFunction Function to execute when this.value changes
+     */
+    constructor(x, y, name, tooltip, propagationFunction){
+        super(PIXI.Loader.shared.resources.common.spritesheet.textures["slider.png"],
+        x, y, 3, 1, name, 10, (-y-12)/2, tooltip, propagationFunction);
+
+        // Bind interactions
+        this.on('mousedown', onDragStart)
+            .on('touchstart', onDragStart)
+            .on('mouseup', onDragEnd)
+            .on('mouseupoutside', onDragEnd)
+            .on('touchend', onDragEnd)
+            .on('touchendoutside', onDragEnd)
+            .on('mousemove', onDragMove)
+            .on('touchmove', onDragMove);
+        this.buttonMode = true;
+        this.interactive = true;
+
+        
+        function onDragStart(event) {
+            this.eventData = event.data;
+            this.dragging = true;
+        }
+        function onDragEnd(event) {
+            this.eventData = null;
+            this.dragging = false;
+        }
+        function onDragMove(event) {
+            if (this.dragging) {
+                var newPosition = this.eventData.getLocalPosition(this.parent);
+                if (newPosition.y > -32 && newPosition.y <= -10){
+                    // Also update value and master gain
+                    this.value = (-round(newPosition.y, 2) - 12) / 2;
+                }
+            }
+        }
+    }
+
+    /**
+     * @param {number} value
+     */
+    set value(value){
+        // Clamp to [0, maxValue]
+        if(value >= 0 && value <= this.maxValue){
+            this._value = value;
+            // Propagate
+            this.position.y = - value * 2 - 12;
+            this.propagationFunction(value);
+        }
+    }
+
+}
+class Knob extends Component {
+    constructor(x, y, ){
+
+    }
 }
