@@ -21,6 +21,7 @@ class Tooltip {
             font: '8px pixelmix',
             align: align,
         });
+        tooltip.text = text;
         
         // Create background object
         let bg = new PIXI.NineSlicePlane(
@@ -40,6 +41,9 @@ class Tooltip {
         tooltip.pivot.y = tooltip.height * anchor.y;
         tooltip.visible = false;
         
+        // Cache it
+        tooltip.cacheAsBitmap = true;
+
         // Add the new tooltip to this collection
         this.container.addChild(tooltip);
 

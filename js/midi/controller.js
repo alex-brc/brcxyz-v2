@@ -11,9 +11,10 @@ class Controller {
 
         // Setup all the components of the keyboard
         var tooltipSet = new Tooltip();
+        var componentDictionary = {};
         setup_sine(spritesheet, this.base);
         this.keys = setup_keys(spritesheet, this.base);
-        this.sliders = setup_sliders(buttonsheet, this.base);
+        this.sliders = setup_sliders(this.base);
         this.knobs = setup_knobs(buttonsheet, this.base);
 
         // Add the tooltips last
@@ -191,46 +192,38 @@ class Controller {
             // Set knob positionings
             const x = [12, 27, 42, 57, 72, 87, 17, 32, 47, 62, 77, 92];
             const y = [27, 27, 27, 27, 27, 27, 40, 40, 40, 40, 40, 40];
-            // Define initial knob values
-            const knobsVals = [7, 2, 5, 7, 4, 1, 3, 1, 6, 3, 2, 5];
-            const knobsTex = ["up.png", "top-right.png", "right.png", "bottom-right.png",
-                "bottom.png", "bottom-left.png", "left.png", "top-left.png"];
-            let tooltips = [
-                "shape", "attack", "sustain", "decay", "release", "gain", 
-                "shape", "attack", "sustain", "decay", "release", "gain"
-            ];
+            const tooltips = ["shape", "attack", "sustain", "decay", "release", "gain", 
+                                "shape", "attack", "sustain", "decay", "release", "gain"];
+            const initialValues = [0, 2, 5, 7, 4, 1, 
+                                    2, 1, 6, 3, 2, 5];
+            const types = [4, 8, 8, 8, 8, 8, 
+                            4, 8, 8, 8, 8, 8];
+            let callbacks = [
+                function (v) {audioEngine.shape('A',v)},
+                function (v) {},
+                function (v) {},
+                function (v) {},
+                function (v) {},
+                function (v) {audioEngine.gain('A',remap(v, [0,7], [0, 0.5]))},
+                function (v) {audioEngine.shape('B',v)},
+                function (v) {},
+                function (v) {},
+                function (v) {},
+                function (v) {},
+                function (v) {audioEngine.gain('B',remap(v, [0,7], [0, 0.5]))}];
             let knobs = [];
             for (let i = 0; i < 12; i++) {
-                // Create the sprite from the texture
-                knobs[i] = new PIXI.Sprite(spritesheet.textures[knobsTex[knobsVals[i]]]);
-                // Set initial value
-                knobs[i].value = knobsVals[i];
-                // Give it a name
-                knobs[i].name = tooltips[i] + (Math.floor(i / 6) + 1).toString();
-                // Position them accordingly
-                knobs[i].pivot.x = 2;
-                knobs[i].pivot.y = 2;
-                knobs[i].x = -base.width / 2 + x[i]; // -2 adjusts for anchor
-                knobs[i].y = -base.height / 2 + y[i];
-                // Make them clickable
-                knobs[i].buttonMode = true;
-                knobs[i].interactive = true;
-                knobs[i]
-                    .on('mousedown', onDown)
-                    .on('touchstart', onDown);
-
-                // Add tooltips
-                knobs[i]
-                    .on('mouseover', Tooltip.showTooltip)
-                    .on('mouseout', Tooltip.hideTooltip);
-                knobs[i].tooltip = tooltipSet.create(tooltips[i], 'left');
-
+                knobs[i] = new Knob(
+                    -base.width / 2 + x[i], -base.height / 2 + y[i],
+                    tooltips[i] + (Math.floor(i / 6) + 1).toString(),
+                    tooltipSet.create(tooltips[i], 'left'),
+                    initialValues[i],
+                    types[i],
+                    callbacks[i]);
+                
+                componentDictionary[knobs[i].name] = knobs[i];
                 base.addChild(knobs[i]);
-            }
-            function onDown(event) {
-                this.value = (this.value + 1) % 8;
-                this.texture = spritesheet.textures[knobsTex[this.value]];
-            }
+            }   
             
             return knobs;
         }
@@ -239,19 +232,19 @@ class Controller {
             const x = [110, 118, 126, 134, 142, 150, 158, 166, 224];
             const y = [31,  25,  31,  35,  29,  31,  23,  25,  31];
             // Write up tooltips
-            let tooltips = [ "LFO1 frequency", "LFO2 frequency", 
+            const tooltips = [ "LFO1 frequency", "LFO2 frequency", 
                              "LFO1 amplitude", "LFO2 amplitude",
-                             "pan1", "pan2" ,"", "", "master"];
+                             "pan1", "pan2" ,"shift1", "shift2", "master"];
             let callbacks = [
-                function (v) {audioEngine.masterGain = 1.0 * v / 10;},
-                function (v) {audioEngine.masterGain = 1.0 * v / 10;},
-                function (v) {audioEngine.masterGain = 1.0 * v / 10;},
-                function (v) {audioEngine.masterGain = 1.0 * v / 10;},
-                function (v) {audioEngine.masterGain = 1.0 * v / 10;},
-                function (v) {audioEngine.masterGain = 1.0 * v / 10;},
-                function (v) {audioEngine.masterGain = 1.0 * v / 10;},
-                function (v) {audioEngine.masterGain = 1.0 * v / 10;},
-                function (v) {audioEngine.masterGain = 1.0 * v / 10;}
+                function (v) {},
+                function (v) {},
+                function (v) {},
+                function (v) {},
+                function (v) {},
+                function (v) {},
+                function (v) {audioEngine.shiftA = v - 5;},
+                function (v) {audioEngine.shiftB = v - 5;},
+                function (v) {audioEngine.gain('M', v/10);}
             ];
             let sliders = [];
             for (let i = 0; i < 9; i++) {
@@ -262,6 +255,8 @@ class Controller {
                     callbacks[i]
                 );
 
+                // Add to base and dictionary
+                componentDictionary[sliders[i].name] = sliders[i];
                 base.addChild(sliders[i]);
             }
 
@@ -270,18 +265,7 @@ class Controller {
     }
 
     searchComponent(string){
-        // Search knobs
-        for(var e of this.knobs)
-            if(e.name == string)
-                return e;
-        
-        // Search sliders
-        for(var e of this.sliders){
-            if(e.name == string)
-                return e;
-        }
-        
-        return undefined;
+        return componentDictionary[string];
     }
 }
 
@@ -300,9 +284,9 @@ class Component extends PIXI.Sprite {
      * @param {number} maxValue Maximum acceptable value (inclusive)
      * @param {number} initialValue Initial value (0 to maxValue)
      * @param {PIXI.Container} tooltip Tooltip object
-     * @param {*} propagationFunction Function to execute when this.value changes
+     * @param {*} callbackFunc Function to execute when this.value changes
      */
-    constructor(texture, x, y, px, py, name, maxValue, initialValue, tooltip, propagationFunction){
+    constructor(texture, x, y, px, py, name, maxValue, initialValue, tooltip, callbackFunc){
         // Sprite details
         super(texture);
         this.x = x;
@@ -311,10 +295,10 @@ class Component extends PIXI.Sprite {
         this.pivot.y = py;
 
         // Component details
-        this.propagationFunction = propagationFunction;
+        this.callbackFunc = callbackFunc;
         this.name = name;
         this.maxValue = maxValue;
-        this._value = initialValue;
+        this.value = initialValue;
         this.tooltip = tooltip;
         this.on('mouseover', Tooltip.showTooltip)
             .on('mouseout', Tooltip.hideTooltip);
@@ -322,7 +306,7 @@ class Component extends PIXI.Sprite {
 
     /** @param {number} value */
     set value(value){
-        this.propagationFunction();
+        this.callbackFunc();
     }
     
     get value(){
@@ -336,24 +320,19 @@ class Slider extends Component {
      * @param {number} px Pivot x
      * @param {number} py Pivot y
      * @param {PIXI.Container} tooltip Tooltip object
-     * @param {*} propagationFunction Function to execute when this.value changes
+     * @param {*} callbackFunc Function to execute when this.value changes
      */
-    constructor(x, y, name, tooltip, propagationFunction){
+    constructor(x, y, name, tooltip, callbackFunc){
         super(PIXI.Loader.shared.resources.common.spritesheet.textures["slider.png"],
-        x, y, 3, 1, name, 10, (-y-12)/2, tooltip, propagationFunction);
+        x, y, 3, 1, name, 10, (-y-12)/2, tooltip, callbackFunc);
 
         // Bind interactions
-        this.on('mousedown', onDragStart)
-            .on('touchstart', onDragStart)
-            .on('mouseup', onDragEnd)
-            .on('mouseupoutside', onDragEnd)
-            .on('touchend', onDragEnd)
-            .on('touchendoutside', onDragEnd)
-            .on('mousemove', onDragMove)
-            .on('touchmove', onDragMove);
+        this.on('mousedown', onDragStart).on('touchstart', onDragStart)
+            .on('mouseup', onDragEnd).on('mouseupoutside', onDragEnd)
+            .on('touchend', onDragEnd).on('touchendoutside', onDragEnd)
+            .on('mousemove', onDragMove).on('touchmove', onDragMove);
         this.buttonMode = true;
         this.interactive = true;
-
         
         function onDragStart(event) {
             this.eventData = event.data;
@@ -383,13 +362,71 @@ class Slider extends Component {
             this._value = value;
             // Propagate
             this.position.y = - value * 2 - 12;
-            this.propagationFunction(value);
+            this.callbackFunc(value);
         }
+    }
+
+    get value() {
+        return this._value;
     }
 
 }
 class Knob extends Component {
-    constructor(x, y, ){
+    constructor(x, y, name, tooltip, initialValue, type, callbackFunc){
+        if(type != 4 && type != 8)
+            return undefined;
+        // Find corresponding initial texture
+        var tex = Knob.matchTexture(initialValue, type);
+        super(tex, x, y, 2, 2, name, type - 1, initialValue, tooltip, callbackFunc);
 
+        this._type = type;
+        this.value = initialValue;
+        // Bind interactions
+        this.on('mousedown', onDown)
+            .on('touchstart', onDown);
+        this.buttonMode = true;
+        this.interactive = true;
+
+        function onDown(event) {
+            this.value++;
+        }
+    }
+
+    /**
+     * @param {number} value
+     */
+    set value(value){
+        value = value % (this.maxValue + 1);
+        // Clamp to [0, maxValue]
+        if(value >= 0 && value <= this.maxValue){
+            this._value = value;
+            this.texture = Knob.matchTexture(value, this._type);
+            this.callbackFunc(value);
+        }
+    }
+
+    get value(){
+        return this._value;
+    }
+
+
+    static matchTexture(value, type){
+        // Alias resources
+        let textures = PIXI.Loader.shared.resources.common.spritesheet.textures;
+        // Shift value for 
+        if(type == 4)
+            value = value * 2
+        
+        switch(value){
+            case 0: return textures["bottom.png"];
+            case 1: return textures["bottom-left.png"];
+            case 2: return textures["left.png"];
+            case 3: return textures["top-left.png"];
+            case 4: return textures["up.png"];
+            case 5: return textures["top-right.png"];
+            case 6: return textures["right.png"];
+            case 7: return textures["bottom-right.png"];
+            default: return undefined;
+        }
     }
 }

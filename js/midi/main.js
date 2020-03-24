@@ -47,9 +47,6 @@ function main(){
 
         // Build the components
         controller = new Controller(spritesheet, commonsheet, renderer);
-
-        // Bind controls
-        audioEngine.masterGain = 1.0 * controller.searchComponent("master").value / 10;
         
         // Add the controller to the stagex
         stage.addChild(controller.base);
