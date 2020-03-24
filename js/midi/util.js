@@ -1,51 +1,59 @@
-function tooltip(text, align){
-    if(text == "")
-        text = "placeholder";
-    var anchor = {
-        x: 0,
-        y: 1
-    };
-    if(align == 'right'){
-        anchor.x = 1;
+class Tooltip {
+    constructor(){
+        this.container = new PIXI.Container();
     }
 
-    // Create the container
-    var container = new PIXI.Container();
-    // Create text object
-    var text = new PIXI.BitmapText(text, {
-        font: '8px pixelmix',
-        align: align,
-      });
-    
-    // Create background object
-    let bg = new PIXI.NineSlicePlane(
-        PIXI.Loader.shared.resources.tooltip.texture,
-        4, 4, 4, 4);
-    bg.height = 13;
-    bg.width = text.width + 8;
+    create(text, align){
+        if(text == "")
+            text = "placeholder";
+        var anchor = {
+            x: 0,
+            y: 1
+        };
+        if(align == 'right'){
+            anchor.x = 1;
+        }
 
-    // Position text
-    text.x += 4;
-    text.y += 2;
-    
-    // Assemble and position
-    container.addChild(bg);
-    container.addChild(text);
-    container.pivot.x = container.width * anchor.x;
-    container.pivot.y = container.height * anchor.y;
-    container.visible = false;
+        // Create the container
+        var tooltip = new PIXI.Container();
+        // Create text object
+        var text = new PIXI.BitmapText(text, {
+            font: '8px pixelmix',
+            align: align,
+        });
+        
+        // Create background object
+        let bg = new PIXI.NineSlicePlane(
+            PIXI.Loader.shared.resources.tooltip.texture,
+            4, 4, 4, 4);
+        bg.height = 13;
+        bg.width = text.width + 8;
 
-    return container;
-}
+        // Position text
+        text.x += 4;
+        text.y += 2;
+        
+        // Assemble and position
+        tooltip.addChild(bg);
+        tooltip.addChild(text);
+        tooltip.pivot.x = tooltip.width * anchor.x;
+        tooltip.pivot.y = tooltip.height * anchor.y;
+        tooltip.visible = false;
+        
+        // Add the new tooltip to this collection
+        this.container.addChild(tooltip);
 
+        return tooltip;
+    }
 
-function showTooltip(event) {
-    this.tooltip.visible = true;
-    this.tooltip.position = this.position;
-}
-function hideTooltip(event) {
-    this.tooltip.visible = false;
-    this.tooltip.position = this.position;
+    static showTooltip(event) {
+        this.tooltip.visible = true;
+        this.tooltip.position = this.position;
+    }
+    static hideTooltip(event) {
+        this.tooltip.visible = false;
+        this.tooltip.position = this.position;
+    }
 }
 
 if (!Array.prototype.last){

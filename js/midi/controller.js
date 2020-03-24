@@ -11,14 +11,14 @@ class Controller {
         this.base = new PIXI.Sprite(spritesheet.textures["base.png"]);
 
         // Setup all the components of the keyboard
-        var tooltipsContainer = new PIXI.Container();
+        var tooltipSet = new Tooltip();
         setup_sine(spritesheet, this.base);
         this.keys = setup_keys(spritesheet, this.base);
         this.sliders = setup_sliders(buttonsheet, this.base);
         this.knobs = setup_knobs(buttonsheet, this.base);
 
         // Add the tooltips last
-        this.base.addChild(tooltipsContainer);
+        this.base.addChild(tooltipSet.container);
 
         // Setup the base object
         this.base.x = renderer.screen.width / 2;
@@ -200,9 +200,6 @@ class Controller {
                 "shape", "attack", "sustain", "decay", "release", "gain", 
                 "shape", "attack", "sustain", "decay", "release", "gain"
             ];
-            let names = [
-                "shape1", "attack1", "sustain1", "decay1", "release1", "gain1", 
-                "shape2", "attack2", "sustain2", "decay2", "release2", "gain2", ];
             let knobs = [];
             for (let i = 0; i < 12; i++) {
                 // Create the sprite from the texture
@@ -225,11 +222,9 @@ class Controller {
 
                 // Add tooltips
                 knobs[i]
-                    .on('mouseover', showTooltip)
-                    .on('mouseout', hideTooltip);
-                knobs[i].tooltip = tooltip(tooltips[i], 'left');
-                // Add it to the render group
-                tooltipsContainer.addChild(knobs[i].tooltip);
+                    .on('mouseover', Tooltip.showTooltip)
+                    .on('mouseout', Tooltip.hideTooltip);
+                knobs[i].tooltip = tooltipSet.create(tooltips[i], 'left');
 
                 base.addChild(knobs[i]);
             }
@@ -277,11 +272,9 @@ class Controller {
 
                 // Add tooltip
                 sliders[i]
-                    .on('mouseover', showTooltip)
-                    .on('mouseout', hideTooltip);
-                sliders[i].tooltip = tooltip(tooltips[i], 'right');
-                // Add it to the render group
-                tooltipsContainer.addChild(sliders[i].tooltip);
+                    .on('mouseover', Tooltip.showTooltip)
+                    .on('mouseout', Tooltip.hideTooltip);
+                sliders[i].tooltip = tooltipSet.create(tooltips[i], 'right');
 
                 base.addChild(sliders[i]);
             }
