@@ -1,6 +1,10 @@
 const DEFAULT_VOLUME = 0.5;
 
 class AudioEngine {
+    
+    #gainM; #noteOn; 
+    shiftA; shiftB;
+    
     constructor(){
         // Create the audiocontext
         var AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -8,34 +12,36 @@ class AudioEngine {
         this.slideSpeed = 0.15;
         this.velocity = true;
 
-        this.gainM = 0;
-        this.shiftA = 0;
-        this.shiftB = 0;
+        this._shiftA = 0;
+        this._shiftB = 0;
 
-        // Generate components
-        this._oscillatorA = this.audioContext.createOscillator();
-        this._oscillatorB = this.audioContext.createOscillator();
-        this._gainA = this.audioContext.createGain();
-        this._gainB = this.audioContext.createGain();
-        this._gainM = this.audioContext.createGain(); // Master gain
-
+        // Master gain -- inaccesible, used to turn keys on and off
+        this.#gainM = this.audioContext.createGain();
+        // Generate Components
+        this.oscillatorA = new Oscillator(this.audioContext);
+        this.oscillatorB = new Oscillator(this.audioContext);
+        this.filterA = new Filter(this.audioContext);
+        this.filterB = new Filter(this.audioContext);
+        this.lfo = new LFO(this.audioContext);
+        
         // Setup core loop
         this._noteOn = false;
 
-        // Gain will always be wired to output
-        this._gainM.connect(this.audioContext.destination);
-        this._gainA.connect(this._gainM);
-        this._gainB.connect(this._gainM);
-        this._oscillatorA.connect(this._gainA);
-        this._oscillatorB.connect(this._gainB);
+        // Connect everything -- Reference the map
+        this.oscillatorA.node.connect(this.filterA.node);
+        this.filterA.node.connect(this.lfo.node);
+        this.lfo.node.connect(this.#gainM);
 
-        // 0 gain while key is not pressed
-        this._gainM.gain.value = 0;
-        this._gainB.gain.value = 0.5; // Max 1/2 for these two
-        this._gainA.gain.value = 0.5;
-        
-        this._oscillatorA.start(0);
-        this._oscillatorB.start(0);
+        this.oscillatorB.node.connect(this.filterB.node);
+        this.filterB.node.connect(this.#gainM);
+
+        this.#gainM.connect(this.audioContext.destination);
+
+        // Start everything
+        this.#gainM.gain.value = 0;
+        this.lfo.start(0);
+        this.oscillatorA.start(0);
+        this.oscillatorB.start(0);
     }
 
     start(note, volume) {
@@ -46,26 +52,23 @@ class AudioEngine {
         // Slide to next note
         if(this._noteOn){
             // Slide osc frequency
-            this._oscillatorA.frequency.exponentialRampToValueAtTime(
-                    NOTE_TO_FREQ[note + this.shiftA], 
+            this.oscillatorA._oscillator.frequency.exponentialRampToValueAtTime(
+                    NOTE_TO_FREQ[note + this._shiftA], 
                     this.audioContext.currentTime + this.slideSpeed);
-            this._oscillatorB.frequency.exponentialRampToValueAtTime(
-                    NOTE_TO_FREQ[note + this.shiftB], 
+            this.oscillatorB._oscillator.frequency.exponentialRampToValueAtTime(
+                    NOTE_TO_FREQ[note + this._shiftB], 
                     this.audioContext.currentTime + this.slideSpeed);
-            // Slide gain value
-            if(this.velocity == true){
-                this._gainM.gain.setTargetAtTime(volume * this.gainM, this.audioContext.currentTime, 0.001);
-            }
+            // Maintain initial velocity
         }
         // Else start a new note
         else {
             if(this.velocity == false)
                 volume = DEFAULT_VOLUME;
             // Set oscillator freq
-            this._oscillatorA.frequency.value = NOTE_TO_FREQ[note + this.shiftA];
-            this._oscillatorB.frequency.value = NOTE_TO_FREQ[note + this.shiftB];
+            this.oscillatorA._oscillator.frequency.value = NOTE_TO_FREQ[note + this._shiftA];
+            this.oscillatorB._oscillator.frequency.value = NOTE_TO_FREQ[note + this._shiftB];
             // Turn on gain to sound the note
-            this._gainM.gain.setTargetAtTime(volume * this.gainM, this.audioContext.currentTime, 0.001);
+            this.#gainM.gain.setTargetAtTime(volume, this.audioContext.currentTime, 0.001);
             this._noteOn = true;
         }
     }
@@ -74,11 +77,34 @@ class AudioEngine {
             this.audioContext.resume();
         
         // Mute gain to stop note
-        this._gainM.gain.setTargetAtTime(0, this.audioContext.currentTime, 0.001);
+        this.#gainM.gain.setTargetAtTime(0, this.audioContext.currentTime, 0.001);
         this._noteOn = false;
     }
 
-    shape(oscillator, value){
+    shift(oscillator, value){
+        switch(oscillator){
+            case 'A': this._shiftA = value;
+                return;
+            case 'B': this._shiftB = value;
+                return;
+        }
+    }
+}
+
+
+class Oscillator {
+    // Protected
+    _oscillator;
+
+    constructor(audioContext){
+        this.audioContext = audioContext;
+        this._oscillator = audioContext.createOscillator();
+        this.node = audioContext.createGain();
+
+        this._oscillator.connect(this.node);
+    }
+
+    set shape(value){
         let type = '';
         switch(value){
             case 0: type = 'sine';
@@ -89,39 +115,75 @@ class AudioEngine {
                 break;
             case 3: type = 'triangle';
                 break;
-            default: type = 'triangle';
+            default: type = 'sine';
                 break;
         }
 
-        if(oscillator == 'A')
-            this._oscillatorA.type = type;
-        else if(oscillator == 'B')
-            this._oscillatorB.type = type;
+        this._oscillator.type = type;
     }
 
-    gain(gain, value){
-        switch(gain){
-            case 'A': 
-                this._gainA.gain.setTargetAtTime(value, this.audioContext.currentTime, 0.001);
-                return;
-            case 'B': 
-                this._gainB.gain.setTargetAtTime(value, this.audioContext.currentTime, 0.001);
-                return;
-            case 'M':
-                if(this._noteOn)
-                    this._gainM.gain.setTargetAtTime(value, this.audioContext.currentTime, 0.001);
-                else
-                    this.gainM = value;
-                return;
-        }
+    get frequency() { return this._oscillator.frequency.value; }
+    set frequency(value){
+        this._oscillator.frequency.setTargetAtTime(value, this.audioContext.currentTime, 0.001);
     }
 
-    shift(oscillator, value){
-        switch(oscillator){
-            case 'A': this.shiftA = value;
-                return;
-            case 'B': this.shiftB = value;
-                return;
-        }
+    get gain() { return this.node.gain.value; }
+    set gain(value){
+        this.node.gain.setTargetAtTime(value, this.audioContext.currentTime, 0.001);
+    }
+
+    start(value){ this._oscillator.start(value); }
+    stop(value){ this._oscillator.stop(value); }
+}
+
+class LFO extends Oscillator {
+    static frequencyCurve = [0, 1/8, 1/2, 1, 2, 3, 5, 8, 12, 16, 20];
+
+    // Private
+    #gain; #constant; 
+
+    constructor(audioContext){
+        super(audioContext);
+        // Oscillator and node were previously connected
+        this._oscillator.disconnect(this.node);
+    
+        this.#constant = audioContext.createConstantSource();
+        this.#gain = audioContext.createGain();
+        
+        this._oscillator.connect(this.#gain);
+        this.#constant.connect(this.#gain);
+        this.#gain.connect(this.node.gain);
+    }
+
+    get frequency(){ return this._oscillator.frequency.value; }
+    set frequency(value){
+        value = LFO.frequencyCurve[value];
+        this._oscillator.frequency.setTargetAtTime(value, this.audioContext.currentTime, 0.001);
+    }
+
+    get gain(){ return this.#gain.value; }
+    set gain(value){``
+        // Scale the sine wave
+        this.#gain.gain.setTargetAtTime(value, this.audioContext.currentTime, 0.001);
+        // Shift it up by a constant
+        value = (1 - value) / 2;
+        this.#constant.offset.setTargetAtTime(value, this.audioContext.currentTime, 0.001);
+    }
+}
+
+/** This is me trying to cram a lowpass and a high pass onta single slider */
+class Filter {
+    static cutoffCurve = [300, 700, 1800, 2000, 4000, 7500, 10000, 0, 300, 700, 1800];
+    constructor(audioContext){
+        this.audioContext = audioContext;
+        this.node = audioContext.createBiquadFilter();
+    }
+
+    get frequency() { return this.node.frequency.value }
+    set frequency(value) {
+        // Set filtering algorithm
+        this.node.type = (value >= 7) ? 'highpass' : 'lowpass';
+        // Select frequency from curve
+        this.node.frequency.setTargetAtTime(Filter.cutoffCurve[value], this.audioContext.currentTime, 0.001);
     }
 }

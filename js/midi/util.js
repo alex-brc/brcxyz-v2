@@ -103,7 +103,7 @@ const NAME_TO_NUMBER =
     'A#': 10,'Bb': 10,
     'B':  11,'Cb': 11 }
 
-// Index = note number 
+// Index = note number. All midi notes from 0 - 127
 const NOTE_TO_FREQ =[   
     8.1757989156,
     8.6619572180,

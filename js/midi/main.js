@@ -1,5 +1,6 @@
 // Globals
 var noteRange = [48, 72];
+var currentOctave = 4;
 var audioEngine = new AudioEngine();
 
 // Pixi Settings
@@ -41,12 +42,8 @@ function main(){
     var controller;
         
     function setup() {
-        // Alias the spritesheets
-        const spritesheet = loader.resources.controller.spritesheet;
-        const commonsheet = loader.resources.common.spritesheet;
-
         // Build the components
-        controller = new Controller(spritesheet, commonsheet, renderer);
+        controller = new Controller(renderer);
         
         // Add the controller to the stagex
         stage.addChild(controller.base);

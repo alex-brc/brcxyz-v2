@@ -188,7 +188,7 @@
             <key type="filename">right.png</key>
             <key type="filename">top-left.png</key>
             <key type="filename">top-right.png</key>
-            <key type="filename">up.png</key>
+            <key type="filename">top.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0,0</point_f>
@@ -200,6 +200,43 @@
                 <rect>1,1,3,3</rect>
                 <key>scale9Paddings</key>
                 <rect>1,1,3,3</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">button-down-blue.png</key>
+            <key type="filename">button-down-green.png</key>
+            <key type="filename">button-down-yellow.png</key>
+            <key type="filename">button-down.png</key>
+            <key type="filename">button-up-blue.png</key>
+            <key type="filename">button-up-green.png</key>
+            <key type="filename">button-up-yellow.png</key>
+            <key type="filename">button-up.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>2,2,5,3</rect>
+                <key>scale9Paddings</key>
+                <rect>2,2,5,3</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">red-mark.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>1,0,1,1</rect>
+                <key>scale9Paddings</key>
+                <rect>1,0,1,1</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -229,7 +266,16 @@
             <filename>slider.png</filename>
             <filename>top-left.png</filename>
             <filename>top-right.png</filename>
-            <filename>up.png</filename>
+            <filename>red-mark.png</filename>
+            <filename>top.png</filename>
+            <filename>button-down-blue.png</filename>
+            <filename>button-down-green.png</filename>
+            <filename>button-down-yellow.png</filename>
+            <filename>button-down.png</filename>
+            <filename>button-up-blue.png</filename>
+            <filename>button-up-green.png</filename>
+            <filename>button-up-yellow.png</filename>
+            <filename>button-up.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

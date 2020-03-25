@@ -1,10 +1,10 @@
 class Controller {
-    constructor(spritesheet, buttonsheet, renderer) {
+    constructor(renderer) {
         this._renderer = renderer;
         var noteStack = [];
 
-        this.spritesheet = spritesheet;
-        this.buttonsheet = buttonsheet;
+        var spritesheet = PIXI.Loader.shared.resources.controller.spritesheet;
+        var buttonsheet = PIXI.Loader.shared.resources.common.spritesheet;
 
         // Prep base sprite
         this.base = new PIXI.Sprite(spritesheet.textures["base.png"]);
@@ -12,10 +12,11 @@ class Controller {
         // Setup all the components of the keyboard
         var tooltipSet = new Tooltip();
         var componentDictionary = {};
-        setup_sine(spritesheet, this.base);
-        this.keys = setup_keys(spritesheet, this.base);
+        setup_sine(this.base);
+        this.keys = setup_keys(this.base);
         this.sliders = setup_sliders(this.base);
-        this.knobs = setup_knobs(buttonsheet, this.base);
+        this.knobs = setup_knobs(this.base);
+        this.octaveButtons = setup_octaveButtons(this.base);
 
         // Add the tooltips last
         this.base.addChild(tooltipSet.container);
@@ -30,7 +31,7 @@ class Controller {
         // Controller now ready to be staged
 
         // Setup definitions
-        function setup_keys(spritesheet, base) {
+        function setup_keys(base) {
             // Locations of keys on base sprite
             const x = [34, 43, 47, 56, 60, 73, 82, 86, 95, 99, 108, 112,
                 125, 134, 138, 147, 151, 164, 173, 177, 186, 190, 199, 203, 216];
@@ -101,51 +102,53 @@ class Controller {
                 }
             }
             function noteOn(note, velocity) {
-                // If note is outside range, ignore
+                // Add this pressed note to the list
+                if((noteStack.length > 0 && noteStack.last()[0] != note) || noteStack.length == 0){
+                    noteStack.push([note, velocity]);
+                }
+                
+                // Compute gain volume
+                let volume = remap(velocity, [0, 127], [0, 1]);
+                // Play note
+                audioEngine.start(note, volume);
+                // If note is outside range, don't light up key
                 if (note >= noteRange[0] && note <= noteRange[1]) {
-                    // Add this pressed note to the list
-                    if((noteStack.length > 0 && noteStack.last()[0] != note) || noteStack.length == 0){
-                        noteStack.push([note, velocity]);
-                    }
                     // Find the key corresponding to the note
                     let key = note - noteRange[0];
                     // Retexture the pressed key
                     keys[key].texture = spritesheet.textures[keysTex[key] + "-on.png"]; // on texture
-                    // Compute gain volume
-                    let volume = remap(velocity, [0, 127], [0, 1]);
-                    // Play note
-                    audioEngine.start(note, volume);
                 }
             }
             function noteOff(note) {
-                // If note is outside range, ignore
-                if (note >= noteRange[0] && note <= noteRange[1]) {
-                    // Remove this note from the list
-                    {
-                        let p = -1;
-                        // Find its index
-                        for(let i = 0; i < noteStack.length; i++){
-                            if(noteStack[i][0] == note){
-                                p = i;
-                                break;
-                            }
-                        }
-                        // Remove it
-                        if(p != -1){
-                            noteStack.splice(p, 1);
+                // Remove this note from the list
+                {
+                    let p = -1;
+                    // Find its index
+                    for(let i = 0; i < noteStack.length; i++){
+                        if(noteStack[i][0] == note){
+                            p = i;
+                            break;
                         }
                     }
+                    // Remove it
+                    if(p != -1){
+                        noteStack.splice(p, 1);
+                    }
+                }
+                // If the last active key is depressed, stop
+                if(noteStack.length == 0){
+                    audioEngine.stop();
+                }// Else play the last key that was pressed
+                else{
+                    noteOn(noteStack.last()[0], noteStack.last()[1]);
+                }
+            
+                // If note is outside range, don't light up key
+                if (note >= noteRange[0] && note <= noteRange[1]) {
                     // Find the key corresponding to the note
                     let key = note - noteRange[0];
                     // Retexture the depressed key
                     keys[key].texture = spritesheet.textures[keysTex[key] + ".png"]; // off texture
-                    // If the last active key is depressed, stop
-                    if(noteStack.length == 0){
-                        audioEngine.stop();
-                    }// Else play the last key that was pressed
-                    else{
-                        noteOn(noteStack.last()[0], noteStack.last()[1]);
-                    }
                 }
 
                 return keys;
@@ -177,7 +180,7 @@ class Controller {
                 }
             }
         }       
-        function setup_sine(spritesheet, base) {
+        function setup_sine(base) {
             // Make sine animation
             let sineAnimation = new PIXI.AnimatedSprite(spritesheet.animations["sine"]);
             sineAnimation.animationSpeed = 0.3;
@@ -188,34 +191,34 @@ class Controller {
             // Add it to base
             base.addChild(sineAnimation);
         }
-        function setup_knobs(spritesheet, base) {
+        function setup_knobs(base) {
             // Set knob positionings
             const x = [12, 27, 42, 57, 72, 87, 17, 32, 47, 62, 77, 92];
             const y = [27, 27, 27, 27, 27, 27, 40, 40, 40, 40, 40, 40];
-            const tooltips = ["shape", "attack", "sustain", "decay", "release", "gain", 
-                                "shape", "attack", "sustain", "decay", "release", "gain"];
-            const initialValues = [0, 2, 5, 7, 4, 1, 
-                                    2, 1, 6, 3, 2, 5];
+            const tooltips = ["A>shape", "A>attack", "A>sustain", "A>decay", "A>release", "A>gain", 
+                                "B>shape", "B>attack", "B>sustain", "B>decay", "B>release", "B>gain"];
+            const initialValues = [2, 2, 5, 7, 4, 5, 
+                                    1, 1, 6, 3, 2, 3];
             const types = [4, 8, 8, 8, 8, 8, 
                             4, 8, 8, 8, 8, 8];
             let callbacks = [
-                function (v) {audioEngine.shape('A',v)},
+                function (v) {audioEngine.oscillatorA.shape = v},
                 function (v) {},
                 function (v) {},
                 function (v) {},
                 function (v) {},
-                function (v) {audioEngine.gain('A',remap(v, [0,7], [0, 0.5]))},
-                function (v) {audioEngine.shape('B',v)},
+                function (v) {audioEngine.oscillatorA.gain = remap(v, [0,7], [0, 0.5])},
+                function (v) {audioEngine.oscillatorB.shape = v},
                 function (v) {},
                 function (v) {},
                 function (v) {},
                 function (v) {},
-                function (v) {audioEngine.gain('B',remap(v, [0,7], [0, 0.5]))}];
+                function (v) {audioEngine.oscillatorB.gain = remap(v, [0,7], [0, 0.5])}];
             let knobs = [];
             for (let i = 0; i < 12; i++) {
                 knobs[i] = new Knob(
                     -base.width / 2 + x[i], -base.height / 2 + y[i],
-                    tooltips[i] + (Math.floor(i / 6) + 1).toString(),
+                    tooltips[i],
                     tooltipSet.create(tooltips[i], 'left'),
                     initialValues[i],
                     types[i],
@@ -228,39 +231,141 @@ class Controller {
             return knobs;
         }
         function setup_sliders(base) {
-            // Set initial slider positions
-            const x = [110, 118, 126, 134, 142, 150, 158, 166, 224];
-            const y = [31,  25,  31,  35,  29,  31,  23,  25,  31];
-            // Write up tooltips
-            const tooltips = [ "LFO1 frequency", "LFO2 frequency", 
-                             "LFO1 amplitude", "LFO2 amplitude",
-                             "pan1", "pan2" ,"shift1", "shift2", "master"];
+            const x = [110, 118, 126, 134, 142, 150, 158, 166];
+            const initialValues = [9, 1, 5, 8, 0, 0, 5, 10];
+            const tooltips = [ "A>LFO freq.", "A>LFO gain", "A>filter", "B>filter",
+                             "", "", "", "B>shift"];
+            const neutralValues = [0, 0, 7, 7, 5, 5, 5, 5];
             let callbacks = [
+                function (v) {audioEngine.lfo.frequency = v},
+                function (v) {audioEngine.lfo.gain = v / 10},
+                function (v) {audioEngine.filterA.frequency = v},
+                function (v) {audioEngine.filterB.frequency = v},
                 function (v) {},
                 function (v) {},
                 function (v) {},
-                function (v) {},
-                function (v) {},
-                function (v) {},
-                function (v) {audioEngine.shiftA = v - 5;},
-                function (v) {audioEngine.shiftB = v - 5;},
-                function (v) {audioEngine.gain('M', v/10);}
+                function (v) {audioEngine.shift('B', v - 5);},
             ];
             let sliders = [];
-            for (let i = 0; i < 9; i++) {
+            for (let i = 0; i < x.length; i++) {
+                // Make slider
                 sliders[i] = new Slider(
-                    -base.width / 2 + x[i], -base.height / 2 + y[i], // position
+                    -base.width / 2 + x[i],
+                    initialValues[i],
+                    neutralValues[i],
                     tooltips[i], // name
                     tooltipSet.create(tooltips[i], 'right'),
                     callbacks[i]
                 );
 
+                // Place red markers at neutral positions
+                // base.addChild(sliders[i].marker);
+
                 // Add to base and dictionary
                 componentDictionary[sliders[i].name] = sliders[i];
                 base.addChild(sliders[i]);
+                
             }
 
             return sliders;
+        }
+        function setup_octaveButtons(base){
+            var octaveUp = new PIXI.Sprite(buttonsheet.textures["button-up.png"]);
+            var octaveDown = new PIXI.Sprite(buttonsheet.textures["button-down.png"]);
+            
+            // Cross link them
+            octaveUp.other = octaveDown;
+            octaveDown.other = octaveUp;
+
+            // Different textures for different octaves
+            octaveUp.updateTexture = function () {
+                switch (currentOctave) {
+                    case 5:
+                        this.texture = buttonsheet.textures["button-up-green.png"];
+                        break;
+                    case 6:
+                        this.texture = buttonsheet.textures["button-up-yellow.png"];
+                        break;
+                    case 7:
+                        this.texture = buttonsheet.textures["button-up-blue.png"];
+                        break;
+                    default:
+                        this.texture = buttonsheet.textures["button-up.png"];
+                        break;
+                }
+            }
+            octaveDown.updateTexture = function () {
+                switch (currentOctave) {
+                    case 3:
+                        this.texture = buttonsheet.textures["button-down-green.png"];
+                        break;
+                    case 2:
+                        this.texture = buttonsheet.textures["button-down-yellow.png"];
+                        break;
+                    case 1:
+                        this.texture = buttonsheet.textures["button-down-blue.png"];
+                        break;
+                    default:
+                        this.texture = buttonsheet.textures["button-down.png"];
+                        break;
+                }
+            }
+
+            // Position
+            octaveUp.x = -base.width / 2 + 5;
+            octaveUp.y = -base.height / 2 + 95;
+            octaveDown.x = -base.width / 2 + 17;
+            octaveDown.y = -base.height / 2 + 95;
+
+            // Bind callbacks
+            octaveUp.interactive = true;
+            octaveUp.buttonMode = true;
+            octaveUp
+                .on('mousedown', up)
+                .on('touchstart', up);
+            octaveDown.interactive = true;
+            octaveDown.buttonMode = true;
+            octaveDown
+                .on('mousedown', down)
+                .on('touchstart', down);
+
+
+            base.addChild(octaveUp);
+            base.addChild(octaveDown);
+
+            return {
+                octaveUp,
+                octaveDown
+            };
+
+            function up () {
+                // Max 3 octaves up and down
+                if(currentOctave == 7)
+                    return;
+                currentOctave++;
+                console.log(currentOctave);
+                // Move note range up one octave
+                noteRange[0] += 12;
+                noteRange[1] += 12;
+
+                // Alter sprite
+                this.updateTexture();
+                this.other.updateTexture();
+            }
+            function down () {
+                // Max 3 octaves up and down
+                if(currentOctave == 1)
+                    return;
+                currentOctave--;
+                console.log(currentOctave);
+                // Move note range up one octave
+                noteRange[0] -= 12;
+                noteRange[1] -= 12;
+
+                // Alter sprite
+                this.updateTexture();
+                this.other.updateTexture();
+            }
         }
     }
 
@@ -322,9 +427,15 @@ class Slider extends Component {
      * @param {PIXI.Container} tooltip Tooltip object
      * @param {*} callbackFunc Function to execute when this.value changes
      */
-    constructor(x, y, name, tooltip, callbackFunc){
+    constructor(x, initialValue, neutralValue, name, tooltip, callbackFunc){
         super(PIXI.Loader.shared.resources.common.spritesheet.textures["slider.png"],
-        x, y, 3, 1, name, 10, (-y-12)/2, tooltip, callbackFunc);
+        x, -initialValue*2-12, 3, 1, name, 10, initialValue, tooltip, callbackFunc);
+
+        /* 
+        this.marker = new PIXI.Sprite(PIXI.Loader.shared.resources.common.spritesheet.textures["red-mark.png"]);
+        this.marker.y = -neutralValue*2-12;
+        this.marker.x = x;
+        */
 
         // Bind interactions
         this.on('mousedown', onDragStart).on('touchstart', onDragStart)
@@ -422,7 +533,7 @@ class Knob extends Component {
             case 1: return textures["bottom-left.png"];
             case 2: return textures["left.png"];
             case 3: return textures["top-left.png"];
-            case 4: return textures["up.png"];
+            case 4: return textures["top.png"];
             case 5: return textures["top-right.png"];
             case 6: return textures["right.png"];
             case 7: return textures["bottom-right.png"];
