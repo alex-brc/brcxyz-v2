@@ -1,6 +1,4 @@
 // Globals
-var noteRange = [48, 72];
-var currentOctave = 4;
 var audioEngine = new AudioEngine();
 
 // Pixi Settings

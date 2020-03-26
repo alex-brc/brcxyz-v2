@@ -1,5 +1,8 @@
+var noteRange = [48, 72];
+var currentOctave = 4;
+
 class Controller extends PIXI.Sprite {
-    #noteStack;
+    #noteStack; _mouseDown;
     constructor(x, y, anchorX, anchorY, scale) {
         // Alias resources
         var spritesheet = PIXI.Loader.shared.resources.controller.spritesheet;
@@ -43,69 +46,21 @@ class Controller extends PIXI.Sprite {
             const x = [34, 43, 47, 56, 60, 73, 82, 86, 95, 99, 108, 112,
                 125, 134, 138, 147, 151, 164, 173, 177, 186, 190, 199, 203, 216];
             const y = 54;
-            const keysTex = [
-                "leftkey", "blackkey", "midkey", "blackkey", "rightkey",
-                "leftkey", "blackkey", "midkey", "blackkey", "midkey", "blackkey", "rightkey",
-                "leftkey", "blackkey", "midkey", "blackkey", "rightkey",
-                "leftkey", "blackkey", "midkey", "blackkey", "midkey", "blackkey", "rightkey-logo", "lastkey"
-            ];
             // Draw black keys last, for raycast priority
             const drawingOrder = [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24,
                 1, 3, 6, 8, 10, 13, 15, 18, 20, 22];
             let keys = [];
-            let mouseDown = false;
-            drawingOrder.forEach((i) => {
-                // Create sprite
-                keys[i] = new PIXI.Sprite(spritesheet.textures[keysTex[i] + ".png"]);
-                // Give it an ID
-                keys[i].keyId = i;
-                // Position them
-                keys[i].x = -base.width / 2 + x[i];
-                keys[i].y = -base.height / 2 + y;
-                // Add event listeners
-                keys[i].buttonMode = true;
-                keys[i].interactive = true;
-                keys[i]
-                    .on('mousedown', onDown)
-                    .on('touchstart', onDown)
-                    .on('mouseup', onUp)
-                    .on('mouseupoutside', onUp)
-                    .on('touchend', onUp)
-                    .on('touchendoutside', onUp)
-                    .on('mouseover', onEnter)
-                    .on('mouseout', onExit);
-                // Add to base
-                base.addChild(keys[i]);
-            });
+            for(var i of drawingOrder) {
+                keys[i] = new Key(
+                    -base.width / 2 + x[i], 
+                    -base.height / 2 + y,
+                    i,
+                    base.tooltipSet.create(Key.keyButton[i]));
+
+                base.addChild(keys[i]); 
+            }
             
             return keys;
-            
-            function onDown(event) {
-                mouseDown = true;
-                // Get local mouse y to calculate velocity
-                let y = this.toLocal(event.data.global).y;
-                let velocity = remap(y, [0, this.height], [0, 127])
-                velocity = Math.floor(velocity);
-                this.parent.noteOn(this.keyId + noteRange[0], velocity);
-            }
-            function onUp(event) {
-                mouseDown = false;
-                this.parent.noteOff(this.keyId + noteRange[0]);
-            }
-            function onEnter(event) {
-                if (mouseDown){
-                    // Get local mouse y to calculate velocity
-                    let y = this.toLocal(event.data.global).y;
-                    let velocity = remap(y, [0, this.height], [0, 127])
-                    velocity = Math.floor(velocity);
-                    this.parent.noteOn(this.keyId + noteRange[0], velocity);
-                }
-            }
-            function onExit(event) {
-                if (mouseDown){
-                    this.parent.noteOff(this.keyId + noteRange[0]);
-                }
-            }
         }       
         function setupSine(base) {
             // Make sine animation
@@ -198,65 +153,21 @@ class Controller extends PIXI.Sprite {
             return sliders;
         }
         function setupOctaveButtons(base){
-            var octaveUp = new PIXI.Sprite(buttonsheet.textures["button-up.png"]);
-            var octaveDown = new PIXI.Sprite(buttonsheet.textures["button-down.png"]);
+            var octaveDown = new OctaveButton(
+                'down', 
+                -base.width / 2 + 5,
+                -base.height / 2 + 95,
+                base.tooltipSet.create("[z] octave-"));
+
+            var octaveUp = new OctaveButton(
+                'up', 
+                -base.width / 2 + 17,
+                -base.height / 2 + 95,
+                base.tooltipSet.create("[x] octave+"));
             
             // Cross link them
             octaveUp.other = octaveDown;
             octaveDown.other = octaveUp;
-
-            // Different textures for different octaves
-            octaveUp.updateTexture = function () {
-                switch (currentOctave) {
-                    case 5:
-                        this.texture = buttonsheet.textures["button-up-green.png"];
-                        break;
-                    case 6:
-                        this.texture = buttonsheet.textures["button-up-yellow.png"];
-                        break;
-                    case 7:
-                        this.texture = buttonsheet.textures["button-up-blue.png"];
-                        break;
-                    default:
-                        this.texture = buttonsheet.textures["button-up.png"];
-                        break;
-                }
-            }
-            octaveDown.updateTexture = function () {
-                switch (currentOctave) {
-                    case 3:
-                        this.texture = buttonsheet.textures["button-down-green.png"];
-                        break;
-                    case 2:
-                        this.texture = buttonsheet.textures["button-down-yellow.png"];
-                        break;
-                    case 1:
-                        this.texture = buttonsheet.textures["button-down-blue.png"];
-                        break;
-                    default:
-                        this.texture = buttonsheet.textures["button-down.png"];
-                        break;
-                }
-            }
-
-            // Position
-            octaveUp.x = -base.width / 2 + 5;
-            octaveUp.y = -base.height / 2 + 95;
-            octaveDown.x = -base.width / 2 + 17;
-            octaveDown.y = -base.height / 2 + 95;
-
-            // Bind callbacks
-            octaveUp.interactive = true;
-            octaveUp.buttonMode = true;
-            octaveUp
-                .on('mousedown', up)
-                .on('touchstart', up);
-            octaveDown.interactive = true;
-            octaveDown.buttonMode = true;
-            octaveDown
-                .on('mousedown', down)
-                .on('touchstart', down);
-
 
             base.addChild(octaveUp);
             base.addChild(octaveDown);
@@ -284,7 +195,6 @@ class Controller extends PIXI.Sprite {
                 if(currentOctave == 1)
                     return;
                 currentOctave--;
-                console.log(currentOctave);
                 // Move note range up one octave
                 noteRange[0] -= 12;
                 noteRange[1] -= 12;
@@ -415,6 +325,81 @@ class Component extends PIXI.Sprite {
         return this._value;
     }
 }
+class OctaveButton extends Component {
+    constructor(type, x, y, tooltip){
+        var textures = PIXI.Loader.shared.resources.common.spritesheet.textures;
+        var texture = textures["button-" + type + ".png"];
+        super(texture, x, y, 0, 0, "octave"+type, 0, 0, tooltip, () => {})
+
+        this.type = type;
+        this.textures = textures;
+
+        // Bind interactives
+        this.callbackFunc = (type == 'up') ? up : down;
+        this.interactive = true;
+        this.buttonMode = true;
+        this.on('mousedown', this.callbackFunc)
+            .on('touchstart', this.callbackFunc);
+
+        // Bind keyboard buttons
+        let key = (type == 'up') ? 'x' : 'z';
+        // Lowercase and uppercase
+        this.keyButtonL = keyboard(key);
+        this.keyButtonL.press = () => {
+            this.callbackFunc();
+        };
+        this.keyButtonU = keyboard(key.toUpperCase());
+        this.keyButtonU.press = () => {
+            this.callbackFunc();
+        };
+
+        function up () {
+            // Max 3 octaves up and down
+            if(currentOctave == 7)
+                return;
+            currentOctave++;
+            // Move note range up one octave
+            noteRange[0] += 12;
+            noteRange[1] += 12;
+
+            // Alter sprite
+            this.updateTexture();
+            this.other.updateTexture();
+        }
+        function down () {
+            // Max 3 octaves up and down
+            if(currentOctave == 1)
+                return;
+            currentOctave--;
+            // Move note range up one octave
+            noteRange[0] -= 12;
+            noteRange[1] -= 12;
+
+            // Alter sprite
+            this.updateTexture();
+            this.other.updateTexture();
+        }
+    }
+
+    updateTexture() {
+        // Some napkin maths to avoid large switches
+        let t = -1, shift  = 0;
+        if(this.type == 'down'){
+            t = 4 - currentOctave;
+            shift = 4;
+        }
+        else if(this.type == 'up')
+            t = currentOctave - 4;
+        
+        if(t >= 0)
+            this.texture = this.textures[OctaveButton.buttonTypes[t + shift]];
+    }
+
+    static buttonTypes = [
+        "button-up.png","button-up-green.png","button-up-yellow.png","button-up-blue.png", 
+        "button-down.png","button-down-green.png","button-down-yellow.png","button-down-blue.png", 
+        ]
+}
 class Slider extends Component {
     /**
      * @param {number} x Position x
@@ -490,8 +475,8 @@ class Knob extends Component {
         this._type = type;
         this.value = initialValue;
         // Bind interactions
-        this.on('mousedown', onDown)
-            .on('touchstart', onDown);
+        this.on('click', onDown)
+            .on('tap', onDown);
         this.buttonMode = true;
         this.interactive = true;
 
@@ -539,11 +524,70 @@ class Knob extends Component {
     }
 }
 class Key extends Component {
-    constructor(textureNumber, x, y, name, tooltip, callbackFunc){
+    constructor(x, y, keyId, tooltip){
+        var name = "key" + keyId;
         var tex = PIXI.Loader.shared.resources.controller.spritesheet.
-            textures[Key.keyTypes[textureNumber] + ".png"];
-        super(tex, x, y, 0, 0, name, 1, 0, tooltip, callbackFunc);
+            textures[Key.keyTypes[keyId] + ".png"];
+        super(tex, x, y, 0, 0, name, 0, 0, tooltip, () => {});
+
+        this.keyId = keyId;
+
+        // Bind keyboard
+        this.keyButton = keyboard(Key.keyButton[keyId]);
+        this.keyButton.press = () =>  {
+            this.parent.noteOn(this.keyId + noteRange[0], 63);
+        };
+        this.keyButton.release = () =>  {
+            this.parent.noteOff(this.keyId + noteRange[0]);
+        };
+
+        // Bind callbacks
+        this.interactive = true;
+        this.buttonMode = true;
+        this.on('mousedown', onDown)
+            .on('touchstart', onDown)
+            .on('mouseup', onUp)
+            .on('mouseupoutside', onUp)
+            .on('touchend', onUp)
+            .on('touchendoutside', onUp)
+            .on('mouseover', onEnter)
+            .on('mouseout', onExit);
+        
+        function onDown(event) {
+            this.parent.mouseDown = true;
+            // Get local mouse y to calculate velocity
+            let y = this.toLocal(event.data.global).y;
+            let velocity = remap(y, [0, this.height], [0, 127])
+            velocity = Math.floor(velocity);
+            this.parent.noteOn(this.keyId + noteRange[0], velocity);
+        }
+        function onUp(event) {
+            this.parent.mouseDown = false;
+            this.parent.noteOff(this.keyId + noteRange[0]);
+        }
+        function onEnter(event) {
+            if (this.parent.mouseDown){
+                // Get local mouse y to calculate velocity
+                let y = this.toLocal(event.data.global).y;
+                let velocity = remap(y, [0, this.height], [0, 127])
+                velocity = Math.floor(velocity);
+                this.parent.noteOn(this.keyId + noteRange[0], velocity);
+            }
+        }
+        function onExit(event) {
+            if (this.parent.mouseDown){
+                this.parent.noteOff(this.keyId + noteRange[0]);
+            }
+        }
     }
+
+
+
+    static keyButton = [
+        "a", "w", "s", "e", "d", 
+        "f", "t", "g", "y", "h", "u", "j", 
+        "A", "W", "S", "E", "D", 
+        "F", "T", "G", "Y", "H", "U", "J", "K"]
 
     static keyTypes = [
         "leftkey", "blackkey", "midkey", "blackkey", "rightkey",
