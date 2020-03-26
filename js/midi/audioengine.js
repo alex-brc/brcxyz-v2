@@ -10,7 +10,6 @@ class AudioEngine {
         // Create the audiocontext
         var AudioContext = window.AudioContext || window.webkitAudioContext;
         this.audioContext = new AudioContext();
-        this.slideSpeed = 0.15;
         this.velocity = true;
 
         // Master gain -- inaccesible, used to turn keys on and off
@@ -20,22 +19,26 @@ class AudioEngine {
         this.oscillatorB = new Oscillator(this.audioContext);
         this.filterA = new Filter(this.audioContext);
         this.filterB = new Filter(this.audioContext);
+        this.envelopeA = new Envelope(this.audioContext);
+        this.envelopeB = new Envelope(this.audioContext);
         this.lfo = new LFO(this.audioContext);
         
-        // Setup core loop
-
         // Connect everything -- Reference the map
-        this.oscillatorA.node.connect(this.filterA.node);
-        this.filterA.node.connect(this.lfo.node);
-        this.lfo.node.connect(this.#gainM);
+        // Path A
+        this.oscillatorA.node.connect(this.lfo.node);
+        this.lfo.node.connect(this.filterA.node);
+        this.filterA.node.connect(this.envelopeA.node);
+        this.envelopeA.node.connect(this.#gainM);
 
+        // Path B
         this.oscillatorB.node.connect(this.filterB.node);
-        this.filterB.node.connect(this.#gainM);
+        this.filterB.node.connect(this.envelopeB.node);
+        this.envelopeB.node.connect(this.#gainM);
 
         this.#gainM.connect(this.audioContext.destination);
 
         // Start everything
-        this.#gainM.gain.value = 0;
+        this.#gainM.gain.value = 1;
         this.lfo.start(0);
         this.oscillatorA.start(0);
         this.oscillatorB.start(0);
@@ -53,23 +56,24 @@ class AudioEngine {
         // Slide to next note if already playing one
         if(this._noteOn){
             // Slide osc frequency
-            this.oscillatorA._oscillator.frequency.exponentialRampToValueAtTime(
-                    NOTE_TO_FREQ[pitch], 
-                    this.audioContext.currentTime + this.slideSpeed);
-            this.oscillatorB._oscillator.frequency.exponentialRampToValueAtTime(
-                    NOTE_TO_FREQ[pitch], 
-                    this.audioContext.currentTime + this.slideSpeed);
+            this.oscillatorA.slideTo(NOTE_TO_FREQ[pitch], this.slideSpeed);
+            this.oscillatorB.slideTo(NOTE_TO_FREQ[pitch], this.slideSpeed);
             // Maintain initial velocity
         }
         // Else start a new note
         else {
+            // Clear previous 
+            this.envelopeA.reset(0);
+            this.envelopeB.reset(0);
             if(this.velocity == false)
                 volume = DEFAULT_VOLUME;
             // Set oscillator freq
-            this.oscillatorA._oscillator.frequency.value = NOTE_TO_FREQ[pitch];
-            this.oscillatorB._oscillator.frequency.value = NOTE_TO_FREQ[pitch];
+            this.oscillatorA.frequency = NOTE_TO_FREQ[pitch];
+            this.oscillatorB.frequency = NOTE_TO_FREQ[pitch];
             // Turn on gain to sound the note
             this.#gainM.gain.setTargetAtTime(volume, this.audioContext.currentTime, 0.001);
+            this.envelopeA.start(0);
+            this.envelopeB.start(0);
             this._noteOn = true;
         }
     }
@@ -79,7 +83,9 @@ class AudioEngine {
             this.audioContext.resume();
         
         // Mute gain to stop note
-        this.#gainM.gain.setTargetAtTime(0, this.audioContext.currentTime, 0.001);
+        // this.#gainM.gain.setTargetAtTime(0, this.audioContext.currentTime, 0.001);
+        this.envelopeA.stop(0);
+        this.envelopeB.stop(0);
         this._noteOn = false;
     }
 }
@@ -122,6 +128,11 @@ class Oscillator {
         this._oscillator.frequency.setTargetAtTime(value, this.audioContext.currentTime, 0.001);
     }
 
+    slideTo(value, delay) {
+        delay = delay || 0.0003;
+        this._oscillator.frequency.setTargetAtTime(value, this.audioContext.currentTime + delay, 0.3 * delay);
+    }
+
     get gain() { return this.node.gain.value; }
     set gain(value){
         this.node.gain.setTargetAtTime(value, this.audioContext.currentTime, 0.001);
@@ -129,7 +140,6 @@ class Oscillator {
 
     get detune() { return this._oscillator.detune.value }
     set detune(value) {
-        console.log("detuned by " + Oscillator.detuneCurve[value]);
         this._oscillator.detune.setTargetAtTime(Oscillator.detuneCurve[value], this.audioContext.currentTime, 0.001);
     }
 
@@ -173,7 +183,7 @@ class LFO extends Oscillator {
 }
 
 class Filter {
-/** This is me trying to cram a lowpass and a high pass onta single slider */
+/** This is me trying to cram both a lowpass and a highpass onto a single slider */
     static cutoffCurve = [300, 700, 1800, 2000, 4000, 7500, 10000, 0, 300, 700, 1800];
 
     constructor(audioContext){
@@ -187,5 +197,64 @@ class Filter {
         this.node.type = (value >= 7) ? 'highpass' : 'lowpass';
         // Select frequency from curve
         this.node.frequency.setTargetAtTime(Filter.cutoffCurve[value], this.audioContext.currentTime, 0.001);
+    }
+}
+
+/** The play() and stop() methods interact with this class 
+ * to control the output of the oscillators, instead of their respective
+ * gain nodes. */
+class Envelope {
+    static releaseCurve = [0, 0.1, 0.2, 0.3, 0.6, 1, 1.5, 2.5];
+    static attackCurve = [0, 0.02, 0.05, 0.1, 0.3, 0.5, 0.8, 1.2]
+    // Private
+    #sustain; #open;
+
+    #attack; decay; #release;
+    
+    constructor(audioContext){
+        this.audioContext = audioContext;
+        this.node = audioContext.createGain();
+        this.node.gain.value = 0;
+    }
+
+    start(delay){
+        this.#open = true;
+        // ATTACK to max gain
+        let dt = delay + this.#attack;
+        this.node.gain.linearRampToValueAtTime(0.5, this.audioContext.currentTime + dt);
+        // DECAY to SUSTAIN value
+        dt += this.decay;
+        this.node.gain.linearRampToValueAtTime(this.#sustain, this.audioContext.currentTime + dt); 
+    }
+
+    stop(delay){
+        this.#open = false;
+        // Clear previous targets
+        this.reset(0);
+        // RELEASE to 0 gain
+        let dt = delay + this.#release;
+        this.node.gain.exponentialRampToValueAtTime(0.0001, this.audioContext.currentTime + dt); 
+    }
+    
+    reset(delay) {
+        this.node.gain.cancelScheduledValues(delay);
+    }
+    
+    get sustain() { return this.#sustain; }
+    set sustain(value){
+        this.#sustain = value;
+        // If the envelope is open, also blend the current sustain nicely
+        if(this.#open)
+            this.node.gain.setTargetAtTime(this.#sustain, this.audioContext.currentTime, 0.001);
+    }
+    
+    get attack() { return this.#attack; }
+    set attack(value) {
+        this.#attack = Envelope.attackCurve[value];
+    }
+
+    get release() { return this.#release; }
+    set release(value) {
+        this.#release = Envelope.releaseCurve[value];
     }
 }

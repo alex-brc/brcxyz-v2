@@ -83,23 +83,23 @@ class Controller extends PIXI.Sprite {
             const y = [27, 27, 27, 27, 27, 27, 40, 40, 40, 40, 40, 40];
             const tooltips = ["A>shape", "A>attack", "A>sustain", "A>decay", "A>release", "A>gain", 
                                 "B>shape", "B>attack", "B>sustain", "B>decay", "B>release", "B>gain"];
-            const initialValues = [2, 2, 5, 7, 4, 5, 
-                                    1, 1, 6, 3, 2, 3];
+            const initialValues = [3, 1, 7, 4, 3, 5, 
+                                    0, 4, 5, 5, 4, 3];
             const types = [4, 8, 8, 8, 8, 8, 
                             4, 8, 8, 8, 8, 8];
             let callbacks = [
                 function (v) {audioEngine.oscillatorA.shape = v},
-                function (v) {},
-                function (v) {},
-                function (v) {},
-                function (v) {},
-                function (v) {audioEngine.oscillatorA.gain = remap(v, [0,7], [0, 0.5])},
+                function (v) {audioEngine.envelopeA.attack = v},
+                function (v) {audioEngine.envelopeA.sustain = remap(v, [0,7], [0, 0.5])},
+                function (v) {audioEngine.envelopeA.decay = remap(v, [0,7], [0, 1])},
+                function (v) {audioEngine.envelopeA.release = v},
+                function (v) {audioEngine.oscillatorA.gain = remap(v, [0,7], [0, 1])},  
                 function (v) {audioEngine.oscillatorB.shape = v},
-                function (v) {},
-                function (v) {},
-                function (v) {},
-                function (v) {},
-                function (v) {audioEngine.oscillatorB.gain = remap(v, [0,7], [0, 0.5])}];
+                function (v) {audioEngine.envelopeB.attack = v},
+                function (v) {audioEngine.envelopeB.sustain = remap(v, [0,7], [0, 0.5])},
+                function (v) {audioEngine.envelopeB.decay = remap(v, [0,7], [0, 1])},
+                function (v) {audioEngine.envelopeB.release = v},
+                function (v) {audioEngine.oscillatorB.gain = remap(v, [0,7], [0, 1])}];
             let knobs = [];
             for (let i = 0; i < 12; i++) {
                 knobs[i] = new Knob(
@@ -118,19 +118,19 @@ class Controller extends PIXI.Sprite {
         }
         function setupSliders(base) {
             const x = [110, 118, 126, 134, 142, 150, 158, 166];
-            const initialValues = [9, 1, 5, 8, 0, 0, 5, 9];
+            const initialValues = [9, 1, 5, 9, 8, 5, 5, 3];
             const tooltips = [ "A>LFO freq.", "A>LFO gain", "A>filter", "B>filter",
-                             "", "", "", "B>shift"];
+                             "B>shift", "", "", "slide speed"];
             const neutralValues = [0, 0, 7, 7, 5, 5, 5, 5];
             let callbacks = [
                 function (v) {audioEngine.lfo.frequency = v},
                 function (v) {audioEngine.lfo.gain = v / 10},
                 function (v) {audioEngine.filterA.frequency = v},
                 function (v) {audioEngine.filterB.frequency = v},
-                function (v) {},
-                function (v) {},
-                function (v) {},
                 function (v) {audioEngine.oscillatorB.detune = v},
+                function (v) {},
+                function (v) {},
+                function (v) {audioEngine.slideSpeed = v / 50;},
             ];
             let sliders = [];
             for (let i = 0; i < x.length; i++) {
@@ -333,7 +333,8 @@ class Component extends PIXI.Sprite {
 
     /** @param {number} value */
     set value(value){
-        this.callbackFunc();
+        console
+        this.callbackFunc(value);
     }
     
     get value(){
@@ -508,11 +509,9 @@ class Knob extends Component {
     set value(value){
         value = value % (this.maxValue + 1);
         // Clamp to [0, maxValue]
-        if(value >= 0 && value <= this.maxValue){
-            this._value = value;
-            this.texture = Knob.matchTexture(value, this._type);
-            this.callbackFunc(value);
-        }
+        this._value = value;
+        this.texture = Knob.matchTexture(value, this._type);
+        this.callbackFunc(this._value);
     }
 
     get value(){
