@@ -1,37 +1,44 @@
-class Controller {
-    constructor(renderer) {
-        this._renderer = renderer;
-        var noteStack = [];
-
+class Controller extends PIXI.Sprite {
+    #noteStack;
+    constructor(x, y, anchorX, anchorY, scale) {
+        // Alias resources
         var spritesheet = PIXI.Loader.shared.resources.controller.spritesheet;
         var buttonsheet = PIXI.Loader.shared.resources.common.spritesheet;
 
-        // Prep base sprite
-        this.base = new PIXI.Sprite(spritesheet.textures["base.png"]);
+        // Make this
+        super(spritesheet.textures["base.png"]);
+        this.spritesheet = spritesheet;
+        this.buttonsheet = buttonsheet;
+        
+        this.#noteStack = [];
+        this.tooltipSet = new TooltipSet();
+
+        this.components = {
+            dictionary: {}
+        }
 
         // Setup all the components of the keyboard
-        var tooltipSet = new Tooltip();
-        var componentDictionary = {};
-        setup_sine(this.base);
-        this.keys = setup_keys(this.base);
-        this.sliders = setup_sliders(this.base);
-        this.knobs = setup_knobs(this.base);
-        this.octaveButtons = setup_octaveButtons(this.base);
+        this.components.sine = setupSine(this);
+        this.components.sliders = setupSliders(this);
+        this.components.knobs = setupKnobs(this);
+        this.components.octaveButtons = setupOctaveButtons(this);
+        this.components.keys = setupKeys(this);
 
-        // Add the tooltips last
-        this.base.addChild(tooltipSet.container);
-
+        // Add the tooltips above the others
+        this.addChild(this.tooltipSet);
+        
         // Setup the base object
-        this.base.x = renderer.screen.width / 2;
-        this.base.y = renderer.screen.height / 2;
-        this.base.anchor.x = 0.5;
-        this.base.anchor.y = 0.5;
-        this.base.scale.set(4);
+        this.x = x;
+        this.y = y;
+        this.anchor.x = anchorX;
+        this.anchor.y = anchorY;
+        this.scale.set(scale);
+
 
         // Controller now ready to be staged
 
         // Setup definitions
-        function setup_keys(base) {
+        function setupKeys(base) {
             // Locations of keys on base sprite
             const x = [34, 43, 47, 56, 60, 73, 82, 86, 95, 99, 108, 112,
                 125, 134, 138, 147, 151, 164, 173, 177, 186, 190, 199, 203, 216];
@@ -70,100 +77,20 @@ class Controller {
                 // Add to base
                 base.addChild(keys[i]);
             });
-            // Also set up MIDI here
-            navigator.requestMIDIAccess()
-                .then(onMIDISuccess, onMIDIFailure);
-            function onMIDISuccess(midiAccess) {
-                // Add listeners to all midi inputs
-                for (var input of midiAccess.inputs.values())
-                    input.onmidimessage = getMIDIMessage;
-            }
-            function onMIDIFailure() {
-                // TODO: Tell there's no midi, ask to refresh page
-            }
-            function getMIDIMessage(message) {
-                var command = message.data[0];
-                var note = message.data[1];
-                var velocity = (message.data.length > 2) ? message.data[2] : 0; 
-                switch (command) {
-                    // Key pressed
-                    case 144:
-                        if (velocity > 0) {
-                            noteOn(note, velocity);
-                        }
-                        else {
-                            noteOff(note);
-                        }
-                        break;
-                    // Key lifted
-                    case 128:
-                        noteOff(note);
-                        break;
-                }
-            }
-            function noteOn(note, velocity) {
-                // Add this pressed note to the list
-                if((noteStack.length > 0 && noteStack.last()[0] != note) || noteStack.length == 0){
-                    noteStack.push([note, velocity]);
-                }
-                
-                // Compute gain volume
-                let volume = remap(velocity, [0, 127], [0, 1]);
-                // Play note
-                audioEngine.start(note, volume);
-                // If note is outside range, don't light up key
-                if (note >= noteRange[0] && note <= noteRange[1]) {
-                    // Find the key corresponding to the note
-                    let key = note - noteRange[0];
-                    // Retexture the pressed key
-                    keys[key].texture = spritesheet.textures[keysTex[key] + "-on.png"]; // on texture
-                }
-            }
-            function noteOff(note) {
-                // Remove this note from the list
-                {
-                    let p = -1;
-                    // Find its index
-                    for(let i = 0; i < noteStack.length; i++){
-                        if(noteStack[i][0] == note){
-                            p = i;
-                            break;
-                        }
-                    }
-                    // Remove it
-                    if(p != -1){
-                        noteStack.splice(p, 1);
-                    }
-                }
-                // If the last active key is depressed, stop
-                if(noteStack.length == 0){
-                    audioEngine.stop();
-                }// Else play the last key that was pressed
-                else{
-                    noteOn(noteStack.last()[0], noteStack.last()[1]);
-                }
             
-                // If note is outside range, don't light up key
-                if (note >= noteRange[0] && note <= noteRange[1]) {
-                    // Find the key corresponding to the note
-                    let key = note - noteRange[0];
-                    // Retexture the depressed key
-                    keys[key].texture = spritesheet.textures[keysTex[key] + ".png"]; // off texture
-                }
-
-                return keys;
-            }
+            return keys;
+            
             function onDown(event) {
                 mouseDown = true;
                 // Get local mouse y to calculate velocity
                 let y = this.toLocal(event.data.global).y;
                 let velocity = remap(y, [0, this.height], [0, 127])
                 velocity = Math.floor(velocity);
-                noteOn(this.keyId + noteRange[0], velocity);
+                this.parent.noteOn(this.keyId + noteRange[0], velocity);
             }
             function onUp(event) {
                 mouseDown = false;
-                noteOff(this.keyId + noteRange[0]);
+                this.parent.noteOff(this.keyId + noteRange[0]);
             }
             function onEnter(event) {
                 if (mouseDown){
@@ -171,16 +98,16 @@ class Controller {
                     let y = this.toLocal(event.data.global).y;
                     let velocity = remap(y, [0, this.height], [0, 127])
                     velocity = Math.floor(velocity);
-                    noteOn(this.keyId + noteRange[0], velocity);
+                    this.parent.noteOn(this.keyId + noteRange[0], velocity);
                 }
             }
             function onExit(event) {
                 if (mouseDown){
-                    noteOff(this.keyId + noteRange[0]);
+                    this.parent.noteOff(this.keyId + noteRange[0]);
                 }
             }
         }       
-        function setup_sine(base) {
+        function setupSine(base) {
             // Make sine animation
             let sineAnimation = new PIXI.AnimatedSprite(spritesheet.animations["sine"]);
             sineAnimation.animationSpeed = 0.3;
@@ -190,8 +117,10 @@ class Controller {
             sineAnimation.play();
             // Add it to base
             base.addChild(sineAnimation);
+
+            return sineAnimation;
         }
-        function setup_knobs(base) {
+        function setupKnobs(base) {
             // Set knob positionings
             const x = [12, 27, 42, 57, 72, 87, 17, 32, 47, 62, 77, 92];
             const y = [27, 27, 27, 27, 27, 27, 40, 40, 40, 40, 40, 40];
@@ -219,18 +148,18 @@ class Controller {
                 knobs[i] = new Knob(
                     -base.width / 2 + x[i], -base.height / 2 + y[i],
                     tooltips[i],
-                    tooltipSet.create(tooltips[i], 'left'),
+                    base.tooltipSet.create(tooltips[i], 'left'),
                     initialValues[i],
                     types[i],
                     callbacks[i]);
                 
-                componentDictionary[knobs[i].name] = knobs[i];
+                base.components.dictionary[knobs[i].name] = knobs[i];
                 base.addChild(knobs[i]);
             }   
             
             return knobs;
         }
-        function setup_sliders(base) {
+        function setupSliders(base) {
             const x = [110, 118, 126, 134, 142, 150, 158, 166];
             const initialValues = [9, 1, 5, 8, 0, 0, 5, 10];
             const tooltips = [ "A>LFO freq.", "A>LFO gain", "A>filter", "B>filter",
@@ -254,7 +183,7 @@ class Controller {
                     initialValues[i],
                     neutralValues[i],
                     tooltips[i], // name
-                    tooltipSet.create(tooltips[i], 'right'),
+                    base.tooltipSet.create(tooltips[i], 'right'),
                     callbacks[i]
                 );
 
@@ -262,14 +191,13 @@ class Controller {
                 // base.addChild(sliders[i].marker);
 
                 // Add to base and dictionary
-                componentDictionary[sliders[i].name] = sliders[i];
+                base.components.dictionary[sliders[i].name] = sliders[i];
                 base.addChild(sliders[i]);
-                
             }
 
             return sliders;
         }
-        function setup_octaveButtons(base){
+        function setupOctaveButtons(base){
             var octaveUp = new PIXI.Sprite(buttonsheet.textures["button-up.png"]);
             var octaveDown = new PIXI.Sprite(buttonsheet.textures["button-down.png"]);
             
@@ -343,7 +271,6 @@ class Controller {
                 if(currentOctave == 7)
                     return;
                 currentOctave++;
-                console.log(currentOctave);
                 // Move note range up one octave
                 noteRange[0] += 12;
                 noteRange[1] += 12;
@@ -368,15 +295,85 @@ class Controller {
             }
         }
     }
-
+    
+    noteOn(note, velocity) {
+        // Add this pressed note to the list
+        if((this.#noteStack.length > 0 && this.#noteStack.last()[0] != note) || this.#noteStack.length == 0){
+            this.#noteStack.push([note, velocity]);
+        }
+        
+        // Compute gain volume
+        let volume = remap(velocity, [0, 127], [0, 1]);
+        // Play note
+        audioEngine.start(note, volume);
+        // If note is outside range, don't light up key
+        if (note >= noteRange[0] && note <= noteRange[1]) {
+            // Find the key corresponding to the note
+            let key = note - noteRange[0];
+            // Retexture the pressed key
+            this.components.keys[key].texture = this.spritesheet.textures[Key.keyTypes[key] + "-on.png"]; // on texture
+        }
+    }
+    noteOff(note) {
+        // Remove this note from the list
+        {
+            let p = -1;
+            // Find its index
+            for(let i = 0; i < this.#noteStack.length; i++){
+                if(this.#noteStack[i][0] == note){
+                    p = i;
+                    break;
+                }
+            }
+            // Remove it
+            if(p != -1){
+                this.#noteStack.splice(p, 1);
+            }
+        }
+        // If the last active key is depressed, stop
+        if(this.#noteStack.length == 0){
+            audioEngine.stop();
+        }// Else play the last key that was pressed
+        else{
+            this.noteOn(this.#noteStack.last()[0], this.#noteStack.last()[1]);
+        }
+    
+        // If note is outside range, don't light up key
+        if (note >= noteRange[0] && note <= noteRange[1]) {
+            // Find the key corresponding to the note
+            let key = note - noteRange[0];
+            // Retexture the depressed key
+            this.components.keys[key].texture = this.spritesheet.textures[Key.keyTypes[key] + ".png"]; // off texture
+        }
+    }
+    processMIDIMessage(message) {
+        var command = message.data[0];
+        var note = message.data[1];
+        var velocity = (message.data.length > 2) ? message.data[2] : 0; 
+        switch (command) {
+            // Key pressed
+            case 144:
+                if (velocity > 0) {
+                    this.noteOn(note, velocity);
+                }
+                else {
+                    this.noteOff(note);
+                }
+                break;
+            // Key lifted
+            case 128:
+                this.noteOff(note);
+                break;
+        }
+    }
     searchComponent(string){
-        return componentDictionary[string];
+        return this.components.dictionary[string];
     }
 }
 
 /** 
  * Basic component class for the synth controls. Does not
- * define any interactivity and should be overriden
+ * define any interactivity and should be extended
  */
 class Component extends PIXI.Sprite {
     /**
@@ -405,8 +402,8 @@ class Component extends PIXI.Sprite {
         this.maxValue = maxValue;
         this.value = initialValue;
         this.tooltip = tooltip;
-        this.on('mouseover', Tooltip.showTooltip)
-            .on('mouseout', Tooltip.hideTooltip);
+        this.on('mouseover', TooltipSet.showTooltip)
+            .on('mouseout', TooltipSet.hideTooltip);
     }
 
     /** @param {number} value */
@@ -540,4 +537,18 @@ class Knob extends Component {
             default: return undefined;
         }
     }
+}
+class Key extends Component {
+    constructor(textureNumber, x, y, name, tooltip, callbackFunc){
+        var tex = PIXI.Loader.shared.resources.controller.spritesheet.
+            textures[Key.keyTypes[textureNumber] + ".png"];
+        super(tex, x, y, 0, 0, name, 1, 0, tooltip, callbackFunc);
+    }
+
+    static keyTypes = [
+        "leftkey", "blackkey", "midkey", "blackkey", "rightkey",
+        "leftkey", "blackkey", "midkey", "blackkey", "midkey", "blackkey", "rightkey",
+        "leftkey", "blackkey", "midkey", "blackkey", "rightkey",
+        "leftkey", "blackkey", "midkey", "blackkey", "midkey", "blackkey", "rightkey-logo", "lastkey"
+    ];
 }

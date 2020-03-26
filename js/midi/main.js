@@ -43,10 +43,20 @@ function main(){
         
     function setup() {
         // Build the components
-        controller = new Controller(renderer);
-        
+        controller = new Controller(renderer.screen.width / 2, renderer.screen.height / 2, 0.5, 0.5, 4);
+
+        // Set up MIDI here
+        navigator.requestMIDIAccess()
+            .then(onMIDISuccess, onMIDIFailure);
+        function onMIDISuccess(midiAccess) {
+            // Add listeners to all midi inputs
+            for (var input of midiAccess.inputs.values())
+                input.onmidimessage = controller.processMIDIMessage;
+        }
+        function onMIDIFailure() {/* TODO: Tell there's no midi, ask to refresh page */ }
+            
         // Add the controller to the stagex
-        stage.addChild(controller.base);
+        stage.addChild(controller);
         
         function loop(){
             renderer.render(stage);

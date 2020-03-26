@@ -1,6 +1,6 @@
-class Tooltip {
+class TooltipSet extends PIXI.Container {
     constructor(){
-        this.container = new PIXI.Container();
+        super();
     }
 
     create(text, align){
@@ -45,7 +45,7 @@ class Tooltip {
         tooltip.cacheAsBitmap = true;
 
         // Add the new tooltip to this collection
-        this.container.addChild(tooltip);
+        this.addChild(tooltip);
 
         return tooltip;
     }
