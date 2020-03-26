@@ -4,6 +4,8 @@ class TooltipSet extends PIXI.Container {
     }
 
     create(text, align){
+        align = align || 'left';
+
         if(text == "")
             text = "placeholder";
         var anchor = {
@@ -72,7 +74,9 @@ function keyboard(value) {
     //The `downHandler`
     key.downHandler = event => {
         if (event.key === key.value) {
-            if (key.isUp && key.press) key.press();
+            if (key.isUp && key.press) {
+                key.press();
+            }
             key.isDown = true;
             key.isUp = false;
             event.preventDefault();

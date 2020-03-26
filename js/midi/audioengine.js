@@ -2,8 +2,9 @@ const DEFAULT_VOLUME = 0.5;
 
 class AudioEngine {
     
-    #gainM; #noteOn; 
-    shiftA; shiftB;
+    #gainM; 
+    #noteOn = false; 
+    #currentNote; 
     
     constructor(){
         // Create the audiocontext
@@ -11,9 +12,6 @@ class AudioEngine {
         this.audioContext = new AudioContext();
         this.slideSpeed = 0.15;
         this.velocity = true;
-
-        this._shiftA = 0;
-        this._shiftB = 0;
 
         // Master gain -- inaccesible, used to turn keys on and off
         this.#gainM = this.audioContext.createGain();
@@ -25,7 +23,6 @@ class AudioEngine {
         this.lfo = new LFO(this.audioContext);
         
         // Setup core loop
-        this._noteOn = false;
 
         // Connect everything -- Reference the map
         this.oscillatorA.node.connect(this.filterA.node);
@@ -44,19 +41,23 @@ class AudioEngine {
         this.oscillatorB.start(0);
     }
 
-    start(note, volume) {
+    play(note) {
         // Wake up if suspended
         if(this.audioContext.state === 'suspended')
             this.audioContext.resume();
 
-        // Slide to next note
+        // Compute gain volume
+        let volume = remap(note.velocity, [0, 127], [0, 1]);
+        let pitch = note.pitch;
+
+        // Slide to next note if already playing one
         if(this._noteOn){
             // Slide osc frequency
             this.oscillatorA._oscillator.frequency.exponentialRampToValueAtTime(
-                    NOTE_TO_FREQ[note + this._shiftA], 
+                    NOTE_TO_FREQ[pitch], 
                     this.audioContext.currentTime + this.slideSpeed);
             this.oscillatorB._oscillator.frequency.exponentialRampToValueAtTime(
-                    NOTE_TO_FREQ[note + this._shiftB], 
+                    NOTE_TO_FREQ[pitch], 
                     this.audioContext.currentTime + this.slideSpeed);
             // Maintain initial velocity
         }
@@ -65,13 +66,14 @@ class AudioEngine {
             if(this.velocity == false)
                 volume = DEFAULT_VOLUME;
             // Set oscillator freq
-            this.oscillatorA._oscillator.frequency.value = NOTE_TO_FREQ[note + this._shiftA];
-            this.oscillatorB._oscillator.frequency.value = NOTE_TO_FREQ[note + this._shiftB];
+            this.oscillatorA._oscillator.frequency.value = NOTE_TO_FREQ[pitch];
+            this.oscillatorB._oscillator.frequency.value = NOTE_TO_FREQ[pitch];
             // Turn on gain to sound the note
             this.#gainM.gain.setTargetAtTime(volume, this.audioContext.currentTime, 0.001);
             this._noteOn = true;
         }
     }
+
     stop() {
         if(this.audioContext.state === 'suspended')
             this.audioContext.resume();
@@ -80,19 +82,12 @@ class AudioEngine {
         this.#gainM.gain.setTargetAtTime(0, this.audioContext.currentTime, 0.001);
         this._noteOn = false;
     }
-
-    shift(oscillator, value){
-        switch(oscillator){
-            case 'A': this._shiftA = value;
-                return;
-            case 'B': this._shiftB = value;
-                return;
-        }
-    }
 }
 
 
 class Oscillator {
+    /** Detune in fixed intervals:-8ve, -M7, -p5, -M3, -m3, 0, +m3, +M3, +p5, +M7, 8ve*/
+    static detuneCurve = [-1200, -1100, -700, -400, -300, 0, +300, +400, +700, +1100, +1200]
     // Protected
     _oscillator;
 
@@ -130,6 +125,12 @@ class Oscillator {
     get gain() { return this.node.gain.value; }
     set gain(value){
         this.node.gain.setTargetAtTime(value, this.audioContext.currentTime, 0.001);
+    }
+
+    get detune() { return this._oscillator.detune.value }
+    set detune(value) {
+        console.log("detuned by " + Oscillator.detuneCurve[value]);
+        this._oscillator.detune.setTargetAtTime(Oscillator.detuneCurve[value], this.audioContext.currentTime, 0.001);
     }
 
     start(value){ this._oscillator.start(value); }
@@ -171,9 +172,10 @@ class LFO extends Oscillator {
     }
 }
 
-/** This is me trying to cram a lowpass and a high pass onta single slider */
 class Filter {
+/** This is me trying to cram a lowpass and a high pass onta single slider */
     static cutoffCurve = [300, 700, 1800, 2000, 4000, 7500, 10000, 0, 300, 700, 1800];
+
     constructor(audioContext){
         this.audioContext = audioContext;
         this.node = audioContext.createBiquadFilter();

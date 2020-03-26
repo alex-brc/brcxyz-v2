@@ -49,13 +49,15 @@ class Controller extends PIXI.Sprite {
             // Draw black keys last, for raycast priority
             const drawingOrder = [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24,
                 1, 3, 6, 8, 10, 13, 15, 18, 20, 22];
+            const tooltips = ["a", "w", "s", "e", "d", "f", "t", "g", "y", "h", "u", "j", 
+                "k/A", "W", "l/S", "E", "D", "F", "T", "G", "Y", "H", "U", "J", "K"];
             let keys = [];
             for(var i of drawingOrder) {
                 keys[i] = new Key(
                     -base.width / 2 + x[i], 
                     -base.height / 2 + y,
                     i,
-                    base.tooltipSet.create(Key.keyButton[i]));
+                    base.tooltipSet.create("[" + tooltips[i] + "]", 'left'));
 
                 base.addChild(keys[i]); 
             }
@@ -116,7 +118,7 @@ class Controller extends PIXI.Sprite {
         }
         function setupSliders(base) {
             const x = [110, 118, 126, 134, 142, 150, 158, 166];
-            const initialValues = [9, 1, 5, 8, 0, 0, 5, 10];
+            const initialValues = [9, 1, 5, 8, 0, 0, 5, 9];
             const tooltips = [ "A>LFO freq.", "A>LFO gain", "A>filter", "B>filter",
                              "", "", "", "B>shift"];
             const neutralValues = [0, 0, 7, 7, 5, 5, 5, 5];
@@ -128,7 +130,7 @@ class Controller extends PIXI.Sprite {
                 function (v) {},
                 function (v) {},
                 function (v) {},
-                function (v) {audioEngine.shift('B', v - 5);},
+                function (v) {audioEngine.oscillatorB.detune = v},
             ];
             let sliders = [];
             for (let i = 0; i < x.length; i++) {
@@ -206,31 +208,29 @@ class Controller extends PIXI.Sprite {
         }
     }
     
-    noteOn(note, velocity) {
+    noteOn(note) {
         // Add this pressed note to the list
-        if((this.#noteStack.length > 0 && this.#noteStack.last()[0] != note) || this.#noteStack.length == 0){
-            this.#noteStack.push([note, velocity]);
+        if((this.#noteStack.length > 0 && this.#noteStack.last().pitch != note.pitch) || this.#noteStack.length == 0){
+            this.#noteStack.push(note);
         }
         
-        // Compute gain volume
-        let volume = remap(velocity, [0, 127], [0, 1]);
         // Play note
-        audioEngine.start(note, volume);
+        audioEngine.play(note);
         // If note is outside range, don't light up key
-        if (note >= noteRange[0] && note <= noteRange[1]) {
+        if (note.pitch >= noteRange[0] && note.pitch <= noteRange[1]) {
             // Find the key corresponding to the note
-            let key = note - noteRange[0];
+            let key = note.pitch - noteRange[0];
             // Retexture the pressed key
             this.components.keys[key].texture = this.spritesheet.textures[Key.keyTypes[key] + "-on.png"]; // on texture
         }
     }
-    noteOff(note) {
+    noteOff(pitch) {
         // Remove this note from the list
         {
             let p = -1;
             // Find its index
             for(let i = 0; i < this.#noteStack.length; i++){
-                if(this.#noteStack[i][0] == note){
+                if(this.#noteStack[i].pitch == pitch){
                     p = i;
                     break;
                 }
@@ -245,34 +245,49 @@ class Controller extends PIXI.Sprite {
             audioEngine.stop();
         }// Else play the last key that was pressed
         else{
-            this.noteOn(this.#noteStack.last()[0], this.#noteStack.last()[1]);
+            this.noteOn(this.#noteStack.last());
         }
     
         // If note is outside range, don't light up key
-        if (note >= noteRange[0] && note <= noteRange[1]) {
+        if (pitch >= noteRange[0] && pitch <= noteRange[1]) {
             // Find the key corresponding to the note
-            let key = note - noteRange[0];
+            let key = pitch - noteRange[0];
             // Retexture the depressed key
             this.components.keys[key].texture = this.spritesheet.textures[Key.keyTypes[key] + ".png"]; // off texture
         }
     }
+
+    octaveChange(shiftAmount) {
+        if(this.#noteStack.length == 0)
+            return;
+
+        // Shift all the notes in the stack
+        for(var e of this.#noteStack){
+            e.pitch += 12 * shiftAmount;
+        }
+
+        // Play the note highest in the stack
+        let note = this.#noteStack.last();
+        audioEngine.play(note);
+    }
+
     processMIDIMessage(message) {
         var command = message.data[0];
-        var note = message.data[1];
+        var pitch = message.data[1];
         var velocity = (message.data.length > 2) ? message.data[2] : 0; 
         switch (command) {
             // Key pressed
             case 144:
                 if (velocity > 0) {
-                    this.noteOn(note, velocity);
+                    this.noteOn({pitch, velocity});
                 }
                 else {
-                    this.noteOff(note);
+                    this.noteOff(pitch);
                 }
                 break;
             // Key lifted
             case 128:
-                this.noteOff(note);
+                this.noteOff(pitch);
                 break;
         }
     }
@@ -358,6 +373,7 @@ class OctaveButton extends Component {
             if(currentOctave == 7)
                 return;
             currentOctave++;
+            this.parent.octaveChange(+1);
             // Move note range up one octave
             noteRange[0] += 12;
             noteRange[1] += 12;
@@ -371,6 +387,7 @@ class OctaveButton extends Component {
             if(currentOctave == 1)
                 return;
             currentOctave--;
+            this.parent.octaveChange(-1);
             // Move note range up one octave
             noteRange[0] -= 12;
             noteRange[1] -= 12;
@@ -534,12 +551,20 @@ class Key extends Component {
 
         // Bind keyboard
         this.keyButton = keyboard(Key.keyButton[keyId]);
-        this.keyButton.press = () =>  {
-            this.parent.noteOn(this.keyId + noteRange[0], 63);
-        };
-        this.keyButton.release = () =>  {
-            this.parent.noteOff(this.keyId + noteRange[0]);
-        };
+        this.keyButton.press = () =>  { this.onKeyboardDown(); };
+        this.keyButton.release = () => { this.onKeyboardUp(); };
+
+        // Hack but whatever at this point
+        if(keyId == 12){
+            this.keyButton2 = keyboard("k");
+            this.keyButton2.press = () =>  { this.onKeyboardDown(); };
+            this.keyButton2.release = () => { this.onKeyboardUp(); };
+        }
+        if(keyId == 14){
+            this.keyButton2 = keyboard("l");
+            this.keyButton2.press = () =>  { this.onKeyboardDown(); };
+            this.keyButton2.release = () => { this.onKeyboardUp(); };
+        }
 
         // Bind callbacks
         this.interactive = true;
@@ -559,11 +584,13 @@ class Key extends Component {
             let y = this.toLocal(event.data.global).y;
             let velocity = remap(y, [0, this.height], [0, 127])
             velocity = Math.floor(velocity);
-            this.parent.noteOn(this.keyId + noteRange[0], velocity);
+            let pitch = this.keyId + noteRange[0];
+            this.parent.noteOn({pitch, velocity});
         }
         function onUp(event) {
             this.parent.mouseDown = false;
-            this.parent.noteOff(this.keyId + noteRange[0]);
+            let pitch = this.keyId + noteRange[0];
+            this.parent.noteOff(pitch);
         }
         function onEnter(event) {
             if (this.parent.mouseDown){
@@ -571,14 +598,27 @@ class Key extends Component {
                 let y = this.toLocal(event.data.global).y;
                 let velocity = remap(y, [0, this.height], [0, 127])
                 velocity = Math.floor(velocity);
-                this.parent.noteOn(this.keyId + noteRange[0], velocity);
+                let pitch = this.keyId + noteRange[0];
+                this.parent.noteOn({pitch, velocity});
             }
         }
         function onExit(event) {
             if (this.parent.mouseDown){
-                this.parent.noteOff(this.keyId + noteRange[0]);
+                let pitch = this.keyId + noteRange[0];
+                this.parent.noteOff(pitch);
             }
         }
+    }
+
+    onKeyboardUp(){
+        let pitch = this.keyId + noteRange[0];
+        this.parent.noteOff(pitch);
+    }
+
+    onKeyboardDown(){
+        let pitch = this.keyId + noteRange[0];
+        let velocity = 63;
+        this.parent.noteOn({pitch, velocity});
     }
 
 
@@ -587,7 +627,7 @@ class Key extends Component {
         "a", "w", "s", "e", "d", 
         "f", "t", "g", "y", "h", "u", "j", 
         "A", "W", "S", "E", "D", 
-        "F", "T", "G", "Y", "H", "U", "J", "K"]
+        "F", "T", "G", "Y", "H", "U", "J", "K"];
 
     static keyTypes = [
         "leftkey", "blackkey", "midkey", "blackkey", "rightkey",
