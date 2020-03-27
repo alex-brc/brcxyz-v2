@@ -23,16 +23,19 @@ class AudioEngine {
         this.envelopeB = new Envelope(this.audioContext);
         this.lfo = new LFO(this.audioContext);
         this.delay = new Delay(this.audioContext);
+        this.mod = new GainPan(this.audioContext);
         
         // Connect everything -- Reference the map
         // Path A
-        this.oscillatorA.node.connect(this.lfo.node);
+        this.oscillatorA.node.connect(this.mod.left);
+        this.mod.left.connect(this.lfo.node);
         this.lfo.node.connect(this.filterA.node);
         this.filterA.node.connect(this.envelopeA.node);
         this.envelopeA.node.connect(this.#gainM);
 
         // Path B
-        this.oscillatorB.node.connect(this.filterB.node);
+        this.oscillatorB.node.connect(this.mod.right);
+        this.mod.right.connect(this.filterB.node);
         this.filterB.node.connect(this.envelopeB.node);
         this.envelopeB.node.connect(this.#gainM);
 
@@ -95,9 +98,13 @@ class AudioEngine {
 
 class Oscillator {
     /** Detune in fixed intervals:-8ve, -M7, -p5, -M3, -m3, 0, +m3, +M3, +p5, +M7, 8ve*/
-    static detuneCurve = [-1200, -1100, -700, -400, -300, 0, +300, +400, +700, +1100, +1200];
+    static shiftCurve = [-1200, -1100, -700, -400, -300, 0, +300, +400, +700, +1100, +1200];
     // Protected
     _oscillator;
+    
+    // Private
+    #shift = 0; // Meant for long term detuning
+    #detune = 0; // Meant for short term detuning (e.g. pitch wheels)
 
     constructor(audioContext){
         this.audioContext = audioContext;
@@ -140,9 +147,16 @@ class Oscillator {
         this.node.gain.setTargetAtTime(value, this.audioContext.currentTime, 0.001);
     }
 
-    get detune() { return this._oscillator.detune.value }
+    get shift() { return this.#shift; }
+    set shift(value) {
+        this.#shift = Oscillator.shiftCurve[value];
+        this._oscillator.detune.setTargetAtTime(this.#shift + this.#detune, this.audioContext.currentTime, 0.001);
+    }
+
+    get detune() { return this.#detune; }
     set detune(value) {
-        this._oscillator.detune.setTargetAtTime(Oscillator.detuneCurve[value], this.audioContext.currentTime, 0.001);
+        this.#detune = value;
+        this._oscillator.detune.setTargetAtTime(this.#shift + this.#detune, this.audioContext.currentTime, 0.001);
     }
 
     start(value){ this._oscillator.start(value); }
@@ -290,4 +304,29 @@ class Delay {
         this.#feedback.gain.setTargetAtTime(value, this.audioContext.currentTime, 0.001);
     }
 
+}
+
+/** Not stereo, just two regular gains. Useful for modulating oscillators */
+class GainPan {
+    constructor(audioContext){
+        this.audioContext = audioContext;
+        this.left = audioContext.createGain();
+        this.right = audioContext.createGain();
+    }
+
+    /**
+     * Adjust the gains of the left and right nodes. 
+     * Expects a value in [-1, +1], where -1 is just left, 0 is center and +1 is just right
+     * @param {number} value 
+     */
+    pan(value){
+        let left = 1, right = 1;
+        if(value < 0) // Left will remain full, right decreases linearly
+            right = 1 - value;
+        else          // Right remain full, left decreases linearly
+            left = 1 - value;
+
+        this.left.gain.setTargetAtTime(left, this.audioContext.currentTime, 0.001);
+        this.right.gain.setTargetAtTime(right, this.audioContext.currentTime, 0.001);
+    }
 }

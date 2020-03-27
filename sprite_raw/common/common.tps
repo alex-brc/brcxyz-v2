@@ -255,6 +255,21 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">touch-wheel.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>2,10,5,19</rect>
+                <key>scale9Paddings</key>
+                <rect>2,10,5,19</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
         </map>
         <key>fileList</key>
         <array>
@@ -276,6 +291,7 @@
             <filename>button-up-green.png</filename>
             <filename>button-up-yellow.png</filename>
             <filename>button-up.png</filename>
+            <filename>touch-wheel.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

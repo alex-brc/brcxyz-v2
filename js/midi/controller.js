@@ -16,16 +16,16 @@ class Controller extends PIXI.Sprite {
         this.#noteStack = [];
         this.tooltipSet = new TooltipSet();
 
-        this.components = {
-            dictionary: {}
-        }
 
         // Setup all the components of the keyboard
+        this.components = {};
+        this.components.dictionary = {};
         this.components.sine = setupSine(this);
         this.components.sliders = setupSliders(this);
         this.components.knobs = setupKnobs(this);
         this.components.octaveButtons = setupOctaveButtons(this);
         this.components.keys = setupKeys(this);
+        this.components.wheels = setupWheels(this);
 
         // Add the tooltips above the others
         this.addChild(this.tooltipSet);
@@ -36,7 +36,6 @@ class Controller extends PIXI.Sprite {
         this.anchor.x = anchorX;
         this.anchor.y = anchorY;
         this.scale.set(scale);
-
 
         // Controller now ready to be staged
 
@@ -83,8 +82,8 @@ class Controller extends PIXI.Sprite {
             const y = [27, 27, 27, 27, 27, 27, 40, 40, 40, 40, 40, 40];
             const tooltips = ["A>shape", "A>attack", "A>sustain", "A>decay", "A>release", "A>gain", 
                                 "B>shape", "B>attack", "B>sustain", "B>decay", "B>release", "B>gain"];
-            const initialValues = [3, 1, 7, 4, 3, 5, 
-                                    0, 4, 5, 5, 4, 3];
+            const initialValues = [2, 1, 7, 4, 3, 5, 
+                                    1, 4, 5, 5, 4, 3];
             const types = [4, 8, 8, 8, 8, 8, 
                             4, 8, 8, 8, 8, 8];
             let callbacks = [
@@ -118,7 +117,7 @@ class Controller extends PIXI.Sprite {
         }
         function setupSliders(base) {
             const x = [110, 118, 126, 134, 142, 150, 158, 166];
-            const initialValues = [9, 1, 5, 9, 8, 4, 7, 3];
+            const initialValues = [9, 1, 5, 9, 0, 4, 7, 3];
             const tooltips = [ "A>LFO freq.", "A>LFO gain", "A>filter", "B>filter",
                              "B>shift", "delay time", "delay feedback", "slide speed"];
             const neutralValues = [0, 0, 7, 7, 5, 5, 5, 5];
@@ -127,7 +126,7 @@ class Controller extends PIXI.Sprite {
                 function (v) {audioEngine.lfo.gain = v / 10},
                 function (v) {audioEngine.filterA.frequency = v},
                 function (v) {audioEngine.filterB.frequency = v},
-                function (v) {audioEngine.oscillatorB.detune = v},
+                function (v) {audioEngine.oscillatorB.shift = v},
                 function (v) {audioEngine.delay.time = v/20},
                 function (v) {audioEngine.delay.feedback = v/20},
                 function (v) {audioEngine.slideSpeed = v / 50;},
@@ -206,9 +205,34 @@ class Controller extends PIXI.Sprite {
                 this.other.updateTexture();
             }
         }
+        function setupWheels(base){
+            var modWheel = new Wheel(
+                -base.width / 2 + 5,
+                -base.height / 2 + 55,
+                "modwheel",
+                base.tooltipSet.create("modulation"),
+                function (value) {audioEngine.mod.pan(1-value)});
+                
+            var pitchWheel = new Wheel(
+                -base.width / 2 + 17,
+                -base.height / 2 + 55,
+                "pitchwheel",
+                base.tooltipSet.create("pitch"),
+                function (value) { console.log("pitch: " + (-value+1));
+                    audioEngine.oscillatorA.detune = (1-value) * 200; 
+                    audioEngine.oscillatorB.detune = (1-value) * 200; });
+
+            base.addChild(modWheel);
+            base.addChild(pitchWheel);
+
+            base.components.dictionary[modWheel.name] = modWheel;
+            base.components.dictionary[pitchWheel.name] = pitchWheel;
+
+            return [modWheel, pitchWheel];
+        }
     }
     
-    noteOn(note) {
+    press(note) {
         // Add this pressed note to the list
         if((this.#noteStack.length > 0 && this.#noteStack.last().pitch != note.pitch) || this.#noteStack.length == 0){
             this.#noteStack.push(note);
@@ -224,7 +248,7 @@ class Controller extends PIXI.Sprite {
             this.components.keys[key].texture = this.spritesheet.textures[Key.keyTypes[key] + "-on.png"]; // on texture
         }
     }
-    noteOff(pitch) {
+    release(pitch) {
         // Remove this note from the list
         {
             let p = -1;
@@ -245,7 +269,7 @@ class Controller extends PIXI.Sprite {
             audioEngine.stop();
         }// Else play the last key that was pressed
         else{
-            this.noteOn(this.#noteStack.last());
+            this.press(this.#noteStack.last());
         }
     
         // If note is outside range, don't light up key
@@ -279,15 +303,15 @@ class Controller extends PIXI.Sprite {
             // Key pressed
             case 144:
                 if (velocity > 0) {
-                    this.noteOn({pitch, velocity});
+                    this.press({pitch, velocity});
                 }
                 else {
-                    this.noteOff(pitch);
+                    this.release(pitch);
                 }
                 break;
             // Key lifted
             case 128:
-                this.noteOff(pitch);
+                this.release(pitch);
                 break;
         }
     }
@@ -333,7 +357,7 @@ class Component extends PIXI.Sprite {
 
     /** @param {number} value */
     set value(value){
-        console
+        this._value = value;
         this.callbackFunc(value);
     }
     
@@ -580,12 +604,12 @@ class Key extends Component {
             let velocity = remap(y, [0, this.height], [0, 127])
             velocity = Math.floor(velocity);
             let pitch = this.keyId + noteRange[0];
-            this.parent.noteOn({pitch, velocity});
+            this.parent.press({pitch, velocity});
         }
         function onUp(event) {
             this.parent.mouseDown = false;
             let pitch = this.keyId + noteRange[0];
-            this.parent.noteOff(pitch);
+            this.parent.release(pitch);
         }
         function onEnter(event) {
             if (this.parent.mouseDown){
@@ -594,26 +618,26 @@ class Key extends Component {
                 let velocity = remap(y, [0, this.height], [0, 127])
                 velocity = Math.floor(velocity);
                 let pitch = this.keyId + noteRange[0];
-                this.parent.noteOn({pitch, velocity});
+                this.parent.press({pitch, velocity});
             }
         }
         function onExit(event) {
             if (this.parent.mouseDown){
                 let pitch = this.keyId + noteRange[0];
-                this.parent.noteOff(pitch);
+                this.parent.release(pitch);
             }
         }
     }
 
     onKeyboardUp(){
         let pitch = this.keyId + noteRange[0];
-        this.parent.noteOff(pitch);
+        this.parent.release(pitch);
     }
 
     onKeyboardDown(){
         let pitch = this.keyId + noteRange[0];
         let velocity = 63;
-        this.parent.noteOn({pitch, velocity});
+        this.parent.press({pitch, velocity});
     }
 
 
@@ -630,4 +654,53 @@ class Key extends Component {
         "leftkey", "blackkey", "midkey", "blackkey", "rightkey",
         "leftkey", "blackkey", "midkey", "blackkey", "midkey", "blackkey", "rightkey-logo", "lastkey"
     ];
+}
+class Wheel extends Component {
+    constructor(x, y, name, tooltip, callbackFunc){
+        var texture = PIXI.Loader.shared.resources.common.spritesheet.textures["touch-wheel.png"];
+        super(texture, x, y, 0, 0, name, 2, 1, tooltip, callbackFunc);
+
+        // Define effective y range (to improve usability and accuracy)
+        this.yRange = [2, 36];
+
+        // Bind interactions
+        this.on('mousedown', onDragStart).on('touchstart', onDragStart)
+            .on('mouseup', onDragEnd).on('mouseupoutside', onDragEnd)
+            .on('touchend', onDragEnd).on('touchendoutside', onDragEnd)
+            .on('mousemove', onDragMove).on('touchmove', onDragMove);
+        this.buttonMode = true;
+        this.interactive = true;
+
+        function onDragStart(event) {
+            this.eventData = event.data;
+            this.dragging = true;
+            this.value = this.valueFrom(this.eventData.getLocalPosition(this));
+            
+        }
+        function onDragEnd(event) {
+            this.eventData = undefined;
+            this.dragging = false;
+            // Reset value
+            this.value = 1;
+        }
+        function onDragMove(event) {
+            if (this.dragging) {
+                let pos = this.eventData.getLocalPosition(this);
+                this.value = this.valueFrom(pos);
+            }
+        }
+    }
+    
+    valueFrom(position) {
+        let value = Math.floor(position.y);
+        
+        // Clamp to set values
+        if(value < this.yRange[0])
+            value = this.yRange[0];
+        else if(value > this.yRange[1])
+            value = this.yRange[1];
+        
+        // Remap to value interval
+        return remap(value, this.yRange, [0,2]);
+    }
 }
