@@ -163,13 +163,13 @@
             <key>scaleMode</key>
             <enum type="ScaleMode">Smooth</enum>
             <key>extrude</key>
-            <uint>1</uint>
+            <uint>0</uint>
             <key>trimThreshold</key>
             <uint>1</uint>
             <key>trimMargin</key>
             <uint>1</uint>
             <key>trimMode</key>
-            <enum type="SpriteSettings::TrimMode">Trim</enum>
+            <enum type="SpriteSettings::TrimMode">None</enum>
             <key>tracerTolerance</key>
             <int>200</int>
             <key>heuristicMask</key>
@@ -181,28 +181,6 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
-            <key type="filename">bottom-left.png</key>
-            <key type="filename">bottom-right.png</key>
-            <key type="filename">bottom.png</key>
-            <key type="filename">left.png</key>
-            <key type="filename">right.png</key>
-            <key type="filename">top-left.png</key>
-            <key type="filename">top-right.png</key>
-            <key type="filename">top.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0,0</point_f>
-                <key>spriteScale</key>
-                <double>1</double>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>1,1,3,3</rect>
-                <key>scale9Paddings</key>
-                <rect>1,1,3,3</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
             <key type="filename">button-down-blue.png</key>
             <key type="filename">button-down-green.png</key>
             <key type="filename">button-down-yellow.png</key>
@@ -222,6 +200,37 @@
                 <rect>2,2,5,3</rect>
                 <key>scale9Paddings</key>
                 <rect>2,2,5,3</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">diagonal-knob.png</key>
+            <key type="filename">straight-knob.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>2,2,5,5</rect>
+                <key>scale9Paddings</key>
+                <rect>2,2,5,5</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">question.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>1,2,2,3</rect>
+                <key>scale9Paddings</key>
+                <rect>1,2,2,3</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -255,6 +264,21 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">tooltip.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,3,7,7</rect>
+                <key>scale9Paddings</key>
+                <rect>4,3,7,7</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">touch-wheel.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -273,16 +297,8 @@
         </map>
         <key>fileList</key>
         <array>
-            <filename>bottom-left.png</filename>
-            <filename>bottom-right.png</filename>
-            <filename>bottom.png</filename>
-            <filename>left.png</filename>
-            <filename>right.png</filename>
             <filename>slider.png</filename>
-            <filename>top-left.png</filename>
-            <filename>top-right.png</filename>
             <filename>red-mark.png</filename>
-            <filename>top.png</filename>
             <filename>button-down-blue.png</filename>
             <filename>button-down-green.png</filename>
             <filename>button-down-yellow.png</filename>
@@ -292,6 +308,10 @@
             <filename>button-up-yellow.png</filename>
             <filename>button-up.png</filename>
             <filename>touch-wheel.png</filename>
+            <filename>question.png</filename>
+            <filename>tooltip.png</filename>
+            <filename>diagonal-knob.png</filename>
+            <filename>straight-knob.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

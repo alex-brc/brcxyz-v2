@@ -1,8 +1,6 @@
 // Globals
-var audioEngine = new AudioEngine();
-
-// Pixi Settings
-PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
+var audioEngine;
+var controller;
 
 // Start program
 main();
@@ -17,8 +15,10 @@ function main(){
         resolution: devicePixelRatio,
         autoDensity: true,
         antialias: false
-
     }); 
+
+    PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
+    
     window.addEventListener('rezize', resizeEventListener);
     function resizeEventListener(){
         renderer.resize(window.innerWidth, window.innerHeight);
@@ -28,39 +28,64 @@ function main(){
     const ticker = PIXI.Ticker.shared;
     const loader = PIXI.Loader.shared;
 
-    // Load all sprites
-    loader
-    .add("controller", "../sprite/controller.json")
-    .add("common", "../sprite/common.json")
-    .add("tooltipFont", "../sprite/pixelmix.fnt")
-    .add("tooltip", "../sprite/tooltip.png")
-    .load(setup);
+    
+    loader.onProgress.add(loadHandler);
 
+    loader
+    .add("tooltipFont", "../sprite/pixelmix.fnt")
+    .add("common", "../sprite/common.json")
+    .add("controller", "../sprite/controller.json")
+    .load(afterLoading);
     // Create the components
-    var controller;
-        
-    function setup() {
-        // Build the components
-        controller = new Controller(renderer.screen.width / 2, renderer.screen.height / 2, 0.5, 0.5, 4);
+
+    function loadHandler(loader, resource) {
+        //Display the file `url` currently being loaded
+        console.log("loading: " + resource.name + " from " + resource.url); 
+
+        //Display the percentage of files currently loaded
+        console.log("progress: " + loader.progress + "%");
+    }
+
+    function afterLoading() {
+        buildEnvironment();
+        buildComponents();
+    }
+
+    function buildEnvironment() {
+        ticker.add(() => { renderer.render(stage); });
+        ticker.start();
 
         // Set up MIDI here
-        navigator.requestMIDIAccess()
-            .then(onMIDISuccess, onMIDIFailure);
+        const requestMIDIAccess = navigator['requestMIDIAccess'];
+        if (requestMIDIAccess) {
+            requestMIDIAccess().then(onMIDISuccess, onMIDIFailure);
+        } 
+        else { /* MIDI not supported */ }
+
+        function onMIDIFailure() {/* TODO: Tell there's no midi, ask to refresh page */ }
         function onMIDISuccess(midiAccess) {
             // Add listeners to all midi inputs
             for (var input of midiAccess.inputs.values())
-                input.onmidimessage = controller.processMIDIMessage;
-        }
-        function onMIDIFailure() {/* TODO: Tell there's no midi, ask to refresh page */ }
-            
-        // Add the controller to the stagex
-        stage.addChild(controller);
-        
-        function loop(){
-            renderer.render(stage);
+                input.onmidimessage = Controller.processMIDIMessage;
         }
 
-        ticker.add(loop)
-        ticker.start();
+        
+        // Tooltip button 
+        var tooltips
+    }
+        
+    function buildComponents() {
+        audioEngine = new AudioEngine();
+        controller = new Controller(renderer.screen.width / 2, renderer.screen.height / 2, 0.5, 0.5, 4);
+        
+        // Tooltip toggle
+        var toggle = TooltipSet.createToggle(controller.tooltipSet);
+        toggle.x = renderer.screen.width;
+        toggle.y = 0;
+        toggle.scale.set(4);
+
+        // Add the controller to the stagex
+        stage.addChild(controller);
+        stage.addChild(toggle);
     }
 }

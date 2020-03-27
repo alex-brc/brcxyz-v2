@@ -1,6 +1,48 @@
 class TooltipSet extends PIXI.Container {
+    static createToggle(tooltipSet, align, anchor) {
+        align = align || 'right';
+        anchor = anchor || {x: 1, y: 0};
+
+        var button = new PIXI.Container();
+        var q = new PIXI.BitmapText('?', {
+            font: '8px pixelmix',
+            align: align,});
+            
+        
+        var bg = new PIXI.NineSlicePlane(
+            PIXI.Loader.shared.resources.common.spritesheet.textures["tooltip.png"],
+            4, 4, 4, 4);
+        bg.height = 13;
+        bg.width = q.width + 8;
+
+        button.bg = bg;
+        button.set = tooltipSet;
+        button.addChild(bg);
+        button.addChild(q);
+        
+        q.x += 4;
+        q.y += 2;
+
+        button.pivot.x = button.width * anchor.x;
+        button.pivot.y = button.height * anchor.y;
+
+        button.interactive = true;
+        button.buttonMode = true;
+        button
+            .on('click', onClick)
+            .on('tap', onClick);
+
+        return button;
+        
+        function onClick() {
+            this.bg.visible = !this.bg.visible;
+            this.set.visible = !this.set.visible;
+        }
+    }
+
     constructor(){
         super();
+        this.showTooltips = true;
     }
 
     create(text, align){
@@ -18,16 +60,16 @@ class TooltipSet extends PIXI.Container {
 
         // Create the container
         var tooltip = new PIXI.Container();
+        tooltip.text = text;
         // Create text object
         var text = new PIXI.BitmapText(text, {
             font: '8px pixelmix',
             align: align,
         });
-        tooltip.text = text;
         
         // Create background object
         let bg = new PIXI.NineSlicePlane(
-            PIXI.Loader.shared.resources.tooltip.texture,
+            PIXI.Loader.shared.resources.common.spritesheet.textures["tooltip.png"],
             4, 4, 4, 4);
         bg.height = 13;
         bg.width = text.width + 8;
@@ -37,6 +79,7 @@ class TooltipSet extends PIXI.Container {
         text.y += 2;
         
         // Assemble and position
+        tooltip.set = this;
         tooltip.addChild(bg);
         tooltip.addChild(text);
         tooltip.pivot.x = tooltip.width * anchor.x;
@@ -58,7 +101,6 @@ class TooltipSet extends PIXI.Container {
     }
     static hideTooltip(event) {
         this.tooltip.visible = false;
-        this.tooltip.position = this.position;
     }
 }
 
@@ -136,6 +178,27 @@ function decNote(note){
     };
 }
 
+const KEY_BINDINGS = [
+    "a", "w", "s", "e", "d", 
+    "f", "t", "g", "y", "h", "u", "j", 
+    "A", "W", "S", "E", "D", 
+    "F", "T", "G", "Y", "H", "U", "J", "K"];
+const SECONDARY_BINDS = [
+    "", "", "", "", "", 
+    "", "", "", "", "", "", "", 
+    "k", "o", "l", "p", ";", 
+    "", "", "", "", "", "", "", ""];
+const KEY_TYPES = [
+    "leftkey", "blackkey", "midkey", "blackkey", "rightkey",
+    "leftkey", "blackkey", "midkey", "blackkey", "midkey", "blackkey", "rightkey",
+    "leftkey", "blackkey", "midkey", "blackkey", "rightkey",
+    "leftkey", "blackkey", "midkey", "blackkey", "midkey", "blackkey", "rightkey-logo", "lastkey"];
+const KNOB_TEXTURES = ["bottom.png", "bottom-left.png", "left.png", 
+"top-left.png", "top.png", "top-right.png", "right.png", "bottom-right.png"];
+const BUTTON_TYPE = [
+    "button-up.png","button-up-green.png","button-up-yellow.png","button-up-blue.png", 
+    "button-down.png","button-down-green.png","button-down-yellow.png","button-down-blue.png"];
+
 const NUMBER_TO_NAME = 
     {0:  'C',  1:  'C#', 2:  'D',
     3:  'Eb', 4:  'E',  5:  'F',
@@ -156,8 +219,12 @@ const NAME_TO_NUMBER =
     'A#': 10,'Bb': 10,
     'B':  11,'Cb': 11 }
 
+
+function frequency(note){
+    return NOTE_TO_FREQ[note];
+}
 // Index = note number. All midi notes from 0 - 127
-const NOTE_TO_FREQ =[   
+const NOTE_TO_FREQ = new Float32Array([
     8.1757989156,
     8.6619572180,
     9.1770239974,
@@ -285,5 +352,5 @@ const NOTE_TO_FREQ =[
     10548.081821211,
     11175.303405856,
     11839.821526772,
-    12543.853951416];
+    12543.853951416]);
 

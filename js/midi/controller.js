@@ -2,7 +2,7 @@ var noteRange = [48, 72];
 var currentOctave = 4;
 
 class Controller extends PIXI.Sprite {
-    #noteStack; _mouseDown;
+    _noteStack; mouseDown;
     constructor(x, y, anchorX, anchorY, scale) {
         // Alias resources
         var spritesheet = PIXI.Loader.shared.resources.controller.spritesheet;
@@ -13,9 +13,8 @@ class Controller extends PIXI.Sprite {
         this.spritesheet = spritesheet;
         this.buttonsheet = buttonsheet;
         
-        this.#noteStack = [];
+        this._noteStack = [];
         this.tooltipSet = new TooltipSet();
-
 
         // Setup all the components of the keyboard
         this.components = {};
@@ -48,15 +47,16 @@ class Controller extends PIXI.Sprite {
             // Draw black keys last, for raycast priority
             const drawingOrder = [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24,
                 1, 3, 6, 8, 10, 13, 15, 18, 20, 22];
-            const tooltips = ["a", "w", "s", "e", "d", "f", "t", "g", "y", "h", "u", "j", 
-                "k/A", "o/W", "l/S", "p/E", ";/D", "F", "T", "G", "Y", "H", "U", "J", "K"];
             let keys = [];
             for(var i of drawingOrder) {
+                var tooltip = KEY_BINDINGS[i];
+                if(SECONDARY_BINDS[i] != "")
+                    tooltip += "/" + SECONDARY_BINDS[i];
                 keys[i] = new Key(
                     -base.width / 2 + x[i], 
                     -base.height / 2 + y,
                     i,
-                    base.tooltipSet.create("[" + tooltips[i] + "]", 'left'));
+                    base.tooltipSet.create("[" + tooltip + "]", 'left'));
 
                 base.addChild(keys[i]); 
             }
@@ -77,13 +77,27 @@ class Controller extends PIXI.Sprite {
             return sineAnimation;
         }
         function setupKnobs(base) {
+            // First, prepare the textures for them
+            var textureSet = [];
+            var sTex = buttonsheet.textures["straight-knob.png"];
+            var dTex = buttonsheet.textures["diagonal-knob.png"];
+            textureSet.push(sTex);
+            textureSet.push(dTex);
+            for(var rotate = 6; rotate > 0; rotate -= 2){
+                // Create a texture rotated from the originals
+                let t1 = new PIXI.Texture(sTex, sTex.frame, sTex.orig, sTex.trim, rotate);
+                let t2 = new PIXI.Texture(dTex, dTex.frame, dTex.orig, dTex.trim, rotate);
+                textureSet.push(t1);
+                textureSet.push(t2);
+            }
+
             // Set knob positionings
             const x = [12, 27, 42, 57, 72, 87, 17, 32, 47, 62, 77, 92];
             const y = [27, 27, 27, 27, 27, 27, 40, 40, 40, 40, 40, 40];
             const tooltips = ["A>shape", "A>attack", "A>sustain", "A>decay", "A>release", "A>gain", 
                                 "B>shape", "B>attack", "B>sustain", "B>decay", "B>release", "B>gain"];
-            const initialValues = [2, 1, 7, 4, 3, 5, 
-                                    1, 4, 5, 5, 4, 3];
+            const initialValues = [0, 1, 7, 4, 3, 7, 
+                                    1, 4, 1, 5, 4, 2];
             const types = [4, 8, 8, 8, 8, 8, 
                             4, 8, 8, 8, 8, 8];
             let callbacks = [
@@ -102,6 +116,7 @@ class Controller extends PIXI.Sprite {
             let knobs = [];
             for (let i = 0; i < 12; i++) {
                 knobs[i] = new Knob(
+                    textureSet,
                     -base.width / 2 + x[i], -base.height / 2 + y[i],
                     tooltips[i],
                     base.tooltipSet.create(tooltips[i], 'left'),
@@ -117,7 +132,7 @@ class Controller extends PIXI.Sprite {
         }
         function setupSliders(base) {
             const x = [110, 118, 126, 134, 142, 150, 158, 166];
-            const initialValues = [9, 1, 5, 9, 0, 4, 7, 3];
+            const initialValues = [9, 1, 5, 9, 0, 4, 3, 5];
             const tooltips = [ "A>LFO freq.", "A>LFO gain", "A>filter", "B>filter",
                              "B>shift", "delay time", "delay feedback", "slide speed"];
             const neutralValues = [0, 0, 7, 7, 5, 5, 5, 5];
@@ -218,7 +233,7 @@ class Controller extends PIXI.Sprite {
                 -base.height / 2 + 55,
                 "pitchwheel",
                 base.tooltipSet.create("pitch"),
-                function (value) { console.log("pitch: " + (-value+1));
+                function (value) {
                     audioEngine.oscillatorA.detune = (1-value) * 200; 
                     audioEngine.oscillatorB.detune = (1-value) * 200; });
 
@@ -234,8 +249,8 @@ class Controller extends PIXI.Sprite {
     
     press(note) {
         // Add this pressed note to the list
-        if((this.#noteStack.length > 0 && this.#noteStack.last().pitch != note.pitch) || this.#noteStack.length == 0){
-            this.#noteStack.push(note);
+        if((this._noteStack.length > 0 && this._noteStack.last().pitch != note.pitch) || this._noteStack.length == 0){
+            this._noteStack.push(note);
         }
         
         // Play note
@@ -245,7 +260,7 @@ class Controller extends PIXI.Sprite {
             // Find the key corresponding to the note
             let key = note.pitch - noteRange[0];
             // Retexture the pressed key
-            this.components.keys[key].texture = this.spritesheet.textures[Key.keyTypes[key] + "-on.png"]; // on texture
+            this.components.keys[key].texture = this.spritesheet.textures[KEY_TYPES[key] + "-on.png"]; // on texture
         }
     }
     release(pitch) {
@@ -253,23 +268,23 @@ class Controller extends PIXI.Sprite {
         {
             let p = -1;
             // Find its index
-            for(let i = 0; i < this.#noteStack.length; i++){
-                if(this.#noteStack[i].pitch == pitch){
+            for(let i = 0; i < this._noteStack.length; i++){
+                if(this._noteStack[i].pitch == pitch){
                     p = i;
                     break;
                 }
             }
             // Remove it
             if(p != -1){
-                this.#noteStack.splice(p, 1);
+                this._noteStack.splice(p, 1);
             }
         }
         // If the last active key is depressed, stop
-        if(this.#noteStack.length == 0){
+        if(this._noteStack.length == 0){
             audioEngine.stop();
         }// Else play the last key that was pressed
         else{
-            this.press(this.#noteStack.last());
+            this.press(this._noteStack.last());
         }
     
         // If note is outside range, don't light up key
@@ -277,25 +292,33 @@ class Controller extends PIXI.Sprite {
             // Find the key corresponding to the note
             let key = pitch - noteRange[0];
             // Retexture the depressed key
-            this.components.keys[key].texture = this.spritesheet.textures[Key.keyTypes[key] + ".png"]; // off texture
+            this.components.keys[key].texture = this.spritesheet.textures[KEY_TYPES[key] + ".png"]; // off texture
         }
     }
 
-    octaveChange(shiftAmount) {
-        if(this.#noteStack.length == 0)
-            return;
+    shiftStack(shiftAmount) {
+        if(this._noteStack.length == 0)
+            return true;
+
+        // Check this can be done first
+        for(var e of this._noteStack){
+            let t = e.pitch + 12 * shiftAmount;
+            if(t < 0 || t > 127)
+                return false;
+        } 
 
         // Shift all the notes in the stack
-        for(var e of this.#noteStack){
+        for(var e of this._noteStack){
             e.pitch += 12 * shiftAmount;
         }
 
-        // Play the note highest in the stack
-        let note = this.#noteStack.last();
+        // Continue playing the note highest in the stack
+        let note = this._noteStack.last();
         audioEngine.play(note);
+        return true;
     }
 
-    processMIDIMessage(message) {
+    static processMIDIMessage(message) {
         var command = message.data[0];
         var pitch = message.data[1];
         var velocity = (message.data.length > 2) ? message.data[2] : 0; 
@@ -303,15 +326,15 @@ class Controller extends PIXI.Sprite {
             // Key pressed
             case 144:
                 if (velocity > 0) {
-                    this.press({pitch, velocity});
+                    controller.press({pitch, velocity});
                 }
                 else {
-                    this.release(pitch);
+                    controller.release(pitch);
                 }
                 break;
             // Key lifted
             case 128:
-                this.release(pitch);
+                controller.release(pitch);
                 break;
         }
     }
@@ -397,8 +420,14 @@ class OctaveButton extends Component {
             // Max 3 octaves up and down
             if(currentOctave == 7)
                 return;
+            
+            // Stack might contain notes too close to octave limits
+            let ok = this.parent.shiftStack(+1);
+            if(!ok)
+                return;
+
             currentOctave++;
-            this.parent.octaveChange(+1);
+
             // Move note range up one octave
             noteRange[0] += 12;
             noteRange[1] += 12;
@@ -411,8 +440,14 @@ class OctaveButton extends Component {
             // Max 3 octaves up and down
             if(currentOctave == 1)
                 return;
+
+            // Stack might contain notes too close to octave limits
+            let ok = this.parent.shiftStack(-1);
+            if(!ok)
+                return;
+
             currentOctave--;
-            this.parent.octaveChange(-1);
+
             // Move note range up one octave
             noteRange[0] -= 12;
             noteRange[1] -= 12;
@@ -434,13 +469,8 @@ class OctaveButton extends Component {
             t = currentOctave - 4;
         
         if(t >= 0)
-            this.texture = this.textures[OctaveButton.buttonTypes[t + shift]];
+            this.texture = this.textures[BUTTON_TYPE[t + shift]];
     }
-
-    static buttonTypes = [
-        "button-up.png","button-up-green.png","button-up-yellow.png","button-up-blue.png", 
-        "button-down.png","button-down-green.png","button-down-yellow.png","button-down-blue.png", 
-        ]
 }
 class Slider extends Component {
     /**
@@ -453,7 +483,7 @@ class Slider extends Component {
      */
     constructor(x, initialValue, neutralValue, name, tooltip, callbackFunc){
         super(PIXI.Loader.shared.resources.common.spritesheet.textures["slider.png"],
-        x, -initialValue*2-12, 3, 1, name, 10, initialValue, tooltip, callbackFunc);
+        x, -initialValue*2-12, 3, 2, name, 10, initialValue, tooltip, callbackFunc);
 
         /* 
         this.marker = new PIXI.Sprite(PIXI.Loader.shared.resources.common.spritesheet.textures["red-mark.png"]);
@@ -507,14 +537,21 @@ class Slider extends Component {
 
 }
 class Knob extends Component {
-    constructor(x, y, name, tooltip, initialValue, type, callbackFunc){
+    constructor(textures, x, y, name, tooltip, initialValue, type, callbackFunc){
         if(type != 4 && type != 8)
             return undefined;
+        
+        let tex;
+        if(type == 4)
+            tex = textures[2 * initialValue];
+        else 
+            tex = textures[initialValue];
+
         // Find corresponding initial texture
-        var tex = Knob.matchTexture(initialValue, type);
-        super(tex, x, y, 2, 2, name, type - 1, initialValue, tooltip, callbackFunc);
+        super(tex, x, y, 4, 4, name, type - 1, initialValue, tooltip, callbackFunc);
 
         this._type = type;
+        this.textures = textures;
         this.value = initialValue;
         // Bind interactions
         this.on('click', onDown)
@@ -532,9 +569,8 @@ class Knob extends Component {
      */
     set value(value){
         value = value % (this.maxValue + 1);
-        // Clamp to [0, maxValue]
         this._value = value;
-        this.texture = Knob.matchTexture(value, this._type);
+        this.texture = Knob.matchTexture(value, this._type, this.textures);
         this.callbackFunc(this._value);
     }
 
@@ -543,44 +579,35 @@ class Knob extends Component {
     }
 
 
-    static matchTexture(value, type){
-        // Alias resources
-        let textures = PIXI.Loader.shared.resources.common.spritesheet.textures;
+    static matchTexture(value, type, textures){
+        // I know, but it's complicated
+        if(textures == undefined)
+            return;
+
         // Shift value for 
         if(type == 4)
-            value = value * 2
-        
-        switch(value){
-            case 0: return textures["bottom.png"];
-            case 1: return textures["bottom-left.png"];
-            case 2: return textures["left.png"];
-            case 3: return textures["top-left.png"];
-            case 4: return textures["top.png"];
-            case 5: return textures["top-right.png"];
-            case 6: return textures["right.png"];
-            case 7: return textures["bottom-right.png"];
-            default: return undefined;
-        }
+            value = value * 2;
+
+        return textures[value];
     }
 }
 class Key extends Component {
-    static secondaryBinds = ["k", "o", "l", "p", ";"];
     constructor(x, y, keyId, tooltip){
         var name = "key" + keyId;
         var tex = PIXI.Loader.shared.resources.controller.spritesheet.
-            textures[Key.keyTypes[keyId] + ".png"];
+            textures[KEY_TYPES[keyId] + ".png"];
         super(tex, x, y, 0, 0, name, 0, 0, tooltip, () => {});
 
         this.keyId = keyId;
 
         // Bind keyboard
-        this.keyButton = keyboard(Key.keyButton[keyId]);
+        this.keyButton = keyboard(KEY_BINDINGS[keyId]);
         this.keyButton.press = () =>  { this.onKeyboardDown(); };
         this.keyButton.release = () => { this.onKeyboardUp(); };
 
         // Hack but whatever at this point
-        if(keyId >= 12 && keyId <= 16){
-            this.keyButton2 = keyboard(Key.secondaryBinds[keyId - 12]);
+        if(SECONDARY_BINDS[keyId] != ""){
+            this.keyButton2 = keyboard(SECONDARY_BINDS[keyId]);
             this.keyButton2.press = () =>  { this.onKeyboardDown(); };
             this.keyButton2.release = () => { this.onKeyboardUp(); };
         }
@@ -639,21 +666,7 @@ class Key extends Component {
         let velocity = 63;
         this.parent.press({pitch, velocity});
     }
-
-
-
-    static keyButton = [
-        "a", "w", "s", "e", "d", 
-        "f", "t", "g", "y", "h", "u", "j", 
-        "A", "W", "S", "E", "D", 
-        "F", "T", "G", "Y", "H", "U", "J", "K"];
-
-    static keyTypes = [
-        "leftkey", "blackkey", "midkey", "blackkey", "rightkey",
-        "leftkey", "blackkey", "midkey", "blackkey", "midkey", "blackkey", "rightkey",
-        "leftkey", "blackkey", "midkey", "blackkey", "rightkey",
-        "leftkey", "blackkey", "midkey", "blackkey", "midkey", "blackkey", "rightkey-logo", "lastkey"
-    ];
+    
 }
 class Wheel extends Component {
     constructor(x, y, name, tooltip, callbackFunc){

@@ -42,9 +42,9 @@ fourChnlPacked=0
 textureFormat=png
 textureCompression=0
 alphaChnl=0
-redChnl=0
-greenChnl=0
-blueChnl=0
+redChnl=4
+greenChnl=4
+blueChnl=4
 invA=0
 invR=0
 invG=0
@@ -54,6 +54,6 @@ invB=0
 outlineThickness=0
 
 # selected chars
-chars=32-126,166,169,171,176-177,187,215
+chars=0-0,32-126,166,169,171,176-177,187,215
 
 # imported icon images
