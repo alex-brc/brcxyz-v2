@@ -50,7 +50,7 @@ class Controller extends PIXI.Sprite {
             const drawingOrder = [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24,
                 1, 3, 6, 8, 10, 13, 15, 18, 20, 22];
             const tooltips = ["a", "w", "s", "e", "d", "f", "t", "g", "y", "h", "u", "j", 
-                "k/A", "W", "l/S", "E", "D", "F", "T", "G", "Y", "H", "U", "J", "K"];
+                "k/A", "o/W", "l/S", "p/E", ";/D", "F", "T", "G", "Y", "H", "U", "J", "K"];
             let keys = [];
             for(var i of drawingOrder) {
                 keys[i] = new Key(
@@ -118,9 +118,9 @@ class Controller extends PIXI.Sprite {
         }
         function setupSliders(base) {
             const x = [110, 118, 126, 134, 142, 150, 158, 166];
-            const initialValues = [9, 1, 5, 9, 8, 5, 5, 3];
+            const initialValues = [9, 1, 5, 9, 8, 4, 7, 3];
             const tooltips = [ "A>LFO freq.", "A>LFO gain", "A>filter", "B>filter",
-                             "B>shift", "", "", "slide speed"];
+                             "B>shift", "delay time", "delay feedback", "slide speed"];
             const neutralValues = [0, 0, 7, 7, 5, 5, 5, 5];
             let callbacks = [
                 function (v) {audioEngine.lfo.frequency = v},
@@ -128,8 +128,8 @@ class Controller extends PIXI.Sprite {
                 function (v) {audioEngine.filterA.frequency = v},
                 function (v) {audioEngine.filterB.frequency = v},
                 function (v) {audioEngine.oscillatorB.detune = v},
-                function (v) {},
-                function (v) {},
+                function (v) {audioEngine.delay.time = v/20},
+                function (v) {audioEngine.delay.feedback = v/20},
                 function (v) {audioEngine.slideSpeed = v / 50;},
             ];
             let sliders = [];
@@ -540,6 +540,7 @@ class Knob extends Component {
     }
 }
 class Key extends Component {
+    static secondaryBinds = ["k", "o", "l", "p", ";"];
     constructor(x, y, keyId, tooltip){
         var name = "key" + keyId;
         var tex = PIXI.Loader.shared.resources.controller.spritesheet.
@@ -554,13 +555,8 @@ class Key extends Component {
         this.keyButton.release = () => { this.onKeyboardUp(); };
 
         // Hack but whatever at this point
-        if(keyId == 12){
-            this.keyButton2 = keyboard("k");
-            this.keyButton2.press = () =>  { this.onKeyboardDown(); };
-            this.keyButton2.release = () => { this.onKeyboardUp(); };
-        }
-        if(keyId == 14){
-            this.keyButton2 = keyboard("l");
+        if(keyId >= 12 && keyId <= 16){
+            this.keyButton2 = keyboard(Key.secondaryBinds[keyId - 12]);
             this.keyButton2.press = () =>  { this.onKeyboardDown(); };
             this.keyButton2.release = () => { this.onKeyboardUp(); };
         }

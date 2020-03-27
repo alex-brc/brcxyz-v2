@@ -22,6 +22,7 @@ class AudioEngine {
         this.envelopeA = new Envelope(this.audioContext);
         this.envelopeB = new Envelope(this.audioContext);
         this.lfo = new LFO(this.audioContext);
+        this.delay = new Delay(this.audioContext);
         
         // Connect everything -- Reference the map
         // Path A
@@ -35,7 +36,8 @@ class AudioEngine {
         this.filterB.node.connect(this.envelopeB.node);
         this.envelopeB.node.connect(this.#gainM);
 
-        this.#gainM.connect(this.audioContext.destination);
+        this.#gainM.connect(this.delay.input);
+        this.delay.output.connect(this.audioContext.destination);
 
         // Start everything
         this.#gainM.gain.value = 1;
@@ -93,7 +95,7 @@ class AudioEngine {
 
 class Oscillator {
     /** Detune in fixed intervals:-8ve, -M7, -p5, -M3, -m3, 0, +m3, +M3, +p5, +M7, 8ve*/
-    static detuneCurve = [-1200, -1100, -700, -400, -300, 0, +300, +400, +700, +1100, +1200]
+    static detuneCurve = [-1200, -1100, -700, -400, -300, 0, +300, +400, +700, +1100, +1200];
     // Protected
     _oscillator;
 
@@ -205,7 +207,7 @@ class Filter {
  * gain nodes. */
 class Envelope {
     static releaseCurve = [0, 0.1, 0.2, 0.3, 0.6, 1, 1.5, 2.5];
-    static attackCurve = [0, 0.02, 0.05, 0.1, 0.3, 0.5, 0.8, 1.2]
+    static attackCurve = [0, 0.02, 0.05, 0.1, 0.3, 0.5, 0.8, 1.2];
     // Private
     #sustain; #open;
 
@@ -257,4 +259,35 @@ class Envelope {
     set release(value) {
         this.#release = Envelope.releaseCurve[value];
     }
+}
+
+class Delay {
+    #feedback; #delay;
+    constructor(audioContext){
+        this.audioContext = audioContext;
+
+        this.input = audioContext.createGain();
+        this.#delay = audioContext.createDelay();
+        this.#feedback = audioContext.createGain();
+        this.output = audioContext.createGain();
+
+        // Loopdy looooooooop looooooop loooop loop lop lp l .
+        this.input.connect(this.#feedback);
+        this.#delay.connect(this.#feedback);
+        this.#feedback.connect(this.#delay);
+
+        this.#delay.connect(this.output);
+        this.input.connect(this.output);
+    }
+
+    get time() { return this.#delay.delayTime.value; }
+    set time(value) {
+        this.#delay.delayTime.setTargetAtTime(value, this.audioContext.currentTime, 0.001);
+    }
+
+    get feedback() {return this.#feedback.gain.value; }
+    set feedback(value) {
+        this.#feedback.gain.setTargetAtTime(value, this.audioContext.currentTime, 0.001);
+    }
+
 }
