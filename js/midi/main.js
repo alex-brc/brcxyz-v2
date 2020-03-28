@@ -1,13 +1,14 @@
 // Globals
 var audioEngine;
 var controller;
+var renderer;
 
 // Start program
 main();
 
 function main(){
     // Meta settings
-    const renderer = new PIXI.Renderer({ 
+    renderer = new PIXI.Renderer({ 
         view: pixicanvas,
         backgroundColor: 0x276E7B,
         width: window.innerWidth,      
@@ -18,11 +19,6 @@ function main(){
     }); 
 
     PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
-    
-    window.addEventListener('rezize', resizeEventListener);
-    function resizeEventListener(){
-        renderer.resize(window.innerWidth, window.innerHeight);
-    }
 
     const stage = new PIXI.Container();
     const ticker = PIXI.Ticker.shared;
@@ -36,7 +32,6 @@ function main(){
     .add("common", "../sprite/common.json")
     .add("controller", "../sprite/controller.json")
     .load(afterLoading);
-    // Create the components
 
     function loadHandler(loader, resource) {
         //Display the file `url` currently being loaded
@@ -68,24 +63,59 @@ function main(){
             for (var input of midiAccess.inputs.values())
                 input.onmidimessage = Controller.processMIDIMessage;
         }
-
-        
-        // Tooltip button 
-        var tooltips
     }
         
     function buildComponents() {
         audioEngine = new AudioEngine();
-        controller = new Controller(renderer.screen.width / 2, renderer.screen.height / 2, 0.5, 0.5, 4);
+        controller = new Controller(0.5, 0.5);
         
         // Tooltip toggle
         var toggle = TooltipSet.createToggle(controller.tooltipSet);
-        toggle.x = renderer.screen.width;
-        toggle.y = 0;
-        toggle.scale.set(4);
 
-        // Add the controller to the stagex
+        // Add components to stage
         stage.addChild(controller);
         stage.addChild(toggle);
+
+        // Resize handler
+        window.addEventListener('resize', sizeRenderer);
+
+        // Arrange everything
+        sizeRenderer();
+
+        function sizeRenderer(){
+            // Resize renderer
+            renderer.resize(window.innerWidth, window.innerHeight);
+            let aspect = (window.innerWidth > window.innerHeight) ? 'landscape' : 'portrait';
+            console.log(aspect);
+
+            // Find the maximum scale we can use
+            let w,h,scale;
+            if(aspect == 'landscape'){
+                w = Math.floor(renderer.screen.width / controller.texture.width);
+                h = Math.floor(renderer.screen.height / controller.texture.height);
+            }
+            else {
+                w = Math.floor(renderer.screen.height / controller.texture.width);
+                h = Math.floor(renderer.screen.width / controller.texture.height);
+            }
+            scale = Math.min(w,h);
+            
+            console.log(scale);
+
+            // Rescale
+            for(var e of stage.children){
+                controller.scale.set(scale);
+                toggle.scale.set(scale);
+            }
+
+            // Reposition
+            controller.position.set(renderer.screen.width / 2, renderer.screen.height / 2);
+            if(aspect == 'portrait')
+                controller.angle = 90;
+            else {
+                controller.angle = 0;
+                toggle.position.set(renderer.screen.width, 0);
+            }
+        }
     }
 }

@@ -8,7 +8,6 @@ const FREQUENCY_CURVE = [0, 1/8, 1/2, 1, 2, 3, 5, 8, 12, 16, 20];
 const DEFAULT_VOLUME = 0.5;
 
 class AudioEngine {
-    
     _gainM; 
     _noteOn = false; 
     _currentNote; 
