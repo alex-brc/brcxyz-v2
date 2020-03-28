@@ -203,6 +203,21 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">button.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,3,7,7</rect>
+                <key>scale9Paddings</key>
+                <rect>4,3,7,7</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">diagonal-knob.png</key>
             <key type="filename">straight-knob.png</key>
             <struct type="IndividualSpriteSettings">
@@ -264,21 +279,6 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">tooltip.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0,0</point_f>
-                <key>spriteScale</key>
-                <double>1</double>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>4,3,7,7</rect>
-                <key>scale9Paddings</key>
-                <rect>4,3,7,7</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
             <key type="filename">touch-wheel.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -309,9 +309,9 @@
             <filename>button-up.png</filename>
             <filename>touch-wheel.png</filename>
             <filename>question.png</filename>
-            <filename>tooltip.png</filename>
             <filename>diagonal-knob.png</filename>
             <filename>straight-knob.png</filename>
+            <filename>button.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

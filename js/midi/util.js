@@ -1,3 +1,20 @@
+class Button extends PIXI.Sprite {
+    constructor(x, y, text, size, anchor){
+        anchor = anchor || {x: 1, y: 0};
+        text = text || "";
+
+        // Create text object
+        var text = new PIXI.BitmapText(text, {
+            font: '8px pixelmix',
+            align: 'center'
+        });
+
+        var bg = new PIXI.NineSlicePlane(
+            PIXI.Loader.shared.resources.common.spritesheet.textures["button.png"],
+            4, 4, 4, 4);
+    }
+}
+
 class TooltipSet extends PIXI.Container {
     static createToggle(tooltipSet, align, anchor) {
         align = align || 'right';
@@ -10,7 +27,7 @@ class TooltipSet extends PIXI.Container {
             
         
         var bg = new PIXI.NineSlicePlane(
-            PIXI.Loader.shared.resources.common.spritesheet.textures["tooltip.png"],
+            PIXI.Loader.shared.resources.common.spritesheet.textures["button.png"],
             4, 4, 4, 4);
         bg.height = 13;
         bg.width = q.width + 8;
@@ -69,7 +86,7 @@ class TooltipSet extends PIXI.Container {
         
         // Create background object
         let bg = new PIXI.NineSlicePlane(
-            PIXI.Loader.shared.resources.common.spritesheet.textures["tooltip.png"],
+            PIXI.Loader.shared.resources.common.spritesheet.textures["button.png"],
             4, 4, 4, 4);
         bg.height = 13;
         bg.width = text.width + 8;

@@ -64,6 +64,14 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":9,"h":7},
 	"sourceSize": {"w":9,"h":7}
 },
+"button.png":
+{
+	"frame": {"x":12,"y":1,"w":15,"h":13},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":15,"h":13},
+	"sourceSize": {"w":15,"h":13}
+},
 "diagonal-knob.png":
 {
 	"frame": {"x":1,"y":42,"w":9,"h":9},
@@ -104,14 +112,6 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":9,"h":9},
 	"sourceSize": {"w":9,"h":9}
 },
-"tooltip.png":
-{
-	"frame": {"x":12,"y":1,"w":15,"h":13},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":15,"h":13},
-	"sourceSize": {"w":15,"h":13}
-},
 "touch-wheel.png":
 {
 	"frame": {"x":1,"y":1,"w":9,"h":39},
@@ -127,6 +127,6 @@
 	"format": "RGBA8888",
 	"size": {"w":31,"h":62},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:6e544a52d4d030bea9a22b4e4158bb3e:e89226ecf0db2964451a05a34836719c:5f8fd6ff9a85da144f948e71be2ecc32$"
+	"smartupdate": "$TexturePacker:SmartUpdate:a22f1fddbeac72aeddf9e23ec61c7f45:ca6b78357215916d59d957e1fec7d844:5f8fd6ff9a85da144f948e71be2ecc32$"
 }
 }
