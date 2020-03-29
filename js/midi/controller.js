@@ -40,7 +40,9 @@ class Controller extends PIXI.Sprite {
                 ["f", "F"], ["t", "T"], ["g", "G"], ["y", "Y"], ["h", "H"], ["u", "U"], ["j", "J"], 
                 ["k", "K"], ["o"], ["l"], ["p"], [";"],  
                 [], [], [], [], [], [], [], []];
-            var keyboard = new Keyboard(keyBindings, controller);
+            var tooltips = ["a", "w", "s", "e", "d", "f", "t", "g", "y", "h", "u", "j",
+                "k/A", "o/W", "l/S", "p/E", ";/D", "F", "T", "G", "Y", "H", "U", "J", "K"];
+            var keyboard = new Keyboard(keyBindings, tooltips, controller);
             keyboard.position.set(34, 54);
             
             controller.keyboard = keyboard;
@@ -302,7 +304,7 @@ class Keyboard extends PIXI.Container {
      * 
      * @param {array} keyBindings Array of array of strings. i.e. [["a","b"], ["c"], ["f", "g"], ...]
      */
-    constructor(keyBindings, controller) {
+    constructor(keyBindings, tooltips, controller) {
         super();
         this.controller = controller;
         // Static offset values (relative to last key, for one octave)
@@ -313,11 +315,10 @@ class Keyboard extends PIXI.Container {
         this.buttons = {};
         var x = 0, y = 0;
         for(let i = 0; i < 25; i++){
-            var tooltip = "?";
             let key = new Key(
                 x, y,
-                i, controller,
-                controller.tooltipSet.create("[" + tooltip + "]", 'left'));
+                i,
+                controller.tooltipSet.create("[" + tooltips[i] + "]", 'left'));
 
             // Black keys above whites (raycast necessity)
             key.zIndex = zIndexs[i % 12];
@@ -376,6 +377,7 @@ class Keyboard extends PIXI.Container {
         };
 
         this.upHandler = event => {
+            // Hack-a-tron 9000
             if(event.key == ";" && event.getModifierState("CapsLock") == true){
                 event.preventDefault();
                 return;
@@ -532,7 +534,7 @@ class Component extends PIXI.Sprite {
     }
 }
 class Key extends Component {
-    constructor(x, y, keyId, controller, tooltip){
+    constructor(x, y, keyId, tooltip){
         var name = "key" + keyId;
         var tex = PIXI.Loader.shared.resources.controller.spritesheet.
             textures[KEY_TYPES[keyId] + ".png"];

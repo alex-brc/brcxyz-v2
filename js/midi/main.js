@@ -17,7 +17,6 @@ function main(){
         autoDensity: true,
         antialias: false
     }); 
-
     PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
     const stage = new PIXI.Container();
@@ -108,6 +107,7 @@ function main(){
                 h = Math.floor(renderer.screen.width / controller.texture.height);
             }
             scale = Math.min(w,h);
+            
             // Rescale
             controller.scale.set(scale, scale);
             root.scale.set(scale, scale);
