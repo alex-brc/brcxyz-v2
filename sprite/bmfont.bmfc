@@ -27,15 +27,15 @@ paddingDown=0
 paddingUp=0
 paddingRight=0
 paddingLeft=0
-spacingHoriz=0
-spacingVert=0
+spacingHoriz=1
+spacingVert=1
 useFixedHeight=0
 forceZero=0
 widthPaddingFactor=0.00
 
 # output file
-outWidth=52
-outHeight=52
+outWidth=64
+outHeight=64
 outBitDepth=8
 fontDescFormat=1
 fourChnlPacked=0

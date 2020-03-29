@@ -20,9 +20,9 @@ class Controller extends PIXI.Sprite {
         this.addChild(setupSine());
         this.addChild(setupSliders(this.tooltipSet));
         this.addChild(setupKnobs(this.tooltipSet));
-        this.addChild(setupOctaveButtons(this.tooltipSet, this));
-        this.addChild(setupKeys(this.tooltipSet, this));
+        this.addChild(setupOctaveButtons(this));
         this.addChild(setupWheels(this.tooltipSet));
+        this.addChild(setupKeys(this));
 
         // Add the tooltips above the others
         this.addChild(this.tooltipSet);
@@ -34,91 +34,17 @@ class Controller extends PIXI.Sprite {
         // Controller now ready to be staged
 
         // Setup definitions
-        function setupKeys(tooltipSet, controller) {
-            // Locations of keys on base sprite
-            // --- 34
-            const x = [34, 43, 47, 56, 60, 73, 82, 86, 95, 99, 108, 112,
-                125, 134, 138, 147, 151, 164, 173, 177, 186, 190, 199, 203, 216];
-            const y = 54;
-            // Draw black keys last, for raycast priority
-            const drawingOrder = [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19, 21, 23, 24,
-                1, 3, 6, 8, 10, 13, 15, 18, 20, 22];
-            let keyboard = new PIXI.Container();
-            keyboard.name = "Keyboard";
-            for(var i of drawingOrder) {
-                var tooltip = KEY_BINDINGS[i];
-                if(SECONDARY_BINDS[i] != "")
-                    tooltip += "/" + SECONDARY_BINDS[i];
-
-                let key = new Key(
-                    x[i], y,
-                    i, controller,
-                    tooltipSet.create("[" + tooltip + "]", 'left'));
-                
-                keyboard.addChild(key);
-            }
-
-            // Implement one interaction event for the entire keyboard
-            keyboard.interactive = true;
-            keyboard.interactiveChildren = true;
-            keyboard.buttonMode = true;
-            keyboard.dragging = false;
-            keyboard
-                .on('mousedown', onStart)
-                .on('touchstart', onStart)
-                .on('mouseup', onEnd)
-                .on('mouseupoutside', onEnd)
-                .on('touchend', onEnd)
-                .on('touchendoutside', onEnd)
-                .on('touchmove', onMove)
-                .on('mousemove', onMove);
+        function setupKeys(controller) {
+            var keyBindings = [
+                ["a", "A"], ["w", "W"], ["s", "S"], ["e", "E"], ["d", "D"], 
+                ["f", "F"], ["t", "T"], ["g", "G"], ["y", "Y"], ["h", "H"], ["u", "U"], ["j", "J"], 
+                ["k", "K"], ["o"], ["l"], ["p"], [";"],  
+                [], [], [], [], [], [], [], []];
+            var keyboard = new Keyboard(keyBindings, controller);
+            keyboard.position.set(34, 54);
             
+            controller.keyboard = keyboard;
             return keyboard;
-
-            function onStart(event){
-                this.event = event;
-                this.dragging = true;
-                
-                let key = getKey(event.data.global, this);
-                this.event.currentKey = key;
-                key.press(event.data.getLocalPosition(key).y);
-            }
-
-            function onEnd(event){
-                // If the drag has not already ended
-                if(this.dragging){
-                    this.event.currentKey.release();
-
-                    this.event = null;
-                    this.dragging = false;
-                }
-            }
-
-            function onMove(event){
-                if (!this.dragging) 
-                    return;
-                // Raycast for new key
-                let newKey = getKey(event.data.global, this);
-
-                // If we drag out of the keyboard, stop
-                if(newKey == null) {
-                    this.event.currentKey.release();
-    
-                    this.event = null;
-                    this.dragging = false;
-                }
-                // If we moved to a new key, 
-                // release the old one and press this one
-                else if(newKey.keyId != this.event.currentKey.keyId){
-                    newKey.press(event.data.getLocalPosition(newKey).y);
-                    this.event.currentKey.release();
-                    this.event.currentKey = newKey;
-                }
-            }
-
-            function getKey(position, root){
-                return renderer.plugins.interaction.hitTest(position, root);
-            }
         }       
         function setupSine() {
             // Make sine animation
@@ -225,7 +151,7 @@ class Controller extends PIXI.Sprite {
 
             return sliders;
         }
-        function setupOctaveButtons(tooltipSet, controller){
+        function setupOctaveButtons(controller){
             let octaveButtons = new PIXI.Container();
             octaveButtons.name = "Octave Buttons";
 
@@ -233,13 +159,13 @@ class Controller extends PIXI.Sprite {
                 'down', 
                 5, 95,
                 controller,
-                tooltipSet.create("[z] octave-"));
+                controller.tooltipSet.create("[z] octave-"));
 
             var octaveUp = new OctaveButton(
                 'up', 
                 17, 95,
                 controller,
-                tooltipSet.create("[x] octave+"));
+                controller.tooltipSet.create("[x] octave+"));
             
             // Cross link them
             octaveUp.other = octaveDown;
@@ -249,33 +175,6 @@ class Controller extends PIXI.Sprite {
             octaveButtons.addChild(octaveDown);
 
             return octaveButtons;
-
-            function up () {
-                // Max 3 octaves up and down
-                if(currentOctave == 7)
-                    return;
-                currentOctave++;
-                // Move note range up one octave
-                noteRange[0] += 12;
-                noteRange[1] += 12;
-
-                // Alter sprite
-                this.updateTexture();
-                this.other.updateTexture();
-            }
-            function down () {
-                // Max 3 octaves up and down
-                if(currentOctave == 1)
-                    return;
-                currentOctave--;
-                // Move note range up one octave
-                noteRange[0] -= 12;
-                noteRange[1] -= 12;
-
-                // Alter sprite
-                this.updateTexture();
-                this.other.updateTexture();
-            }
         }
         function setupWheels(tooltipSet){
             let wheels = new PIXI.Container("wheels");
@@ -315,9 +214,7 @@ class Controller extends PIXI.Sprite {
             // Find the key corresponding to the note
             let keyId = note.pitch - noteRange[0];
             // Retexture the pressed key
-            this.getChildByName('Keyboard')
-            .getChildByName('key' + keyId)
-            .texture = this.spritesheet.textures[KEY_TYPES[keyId] + "-on.png"]; // on texture
+            this.keyboard.keyActive(keyId, true);
         }
     }
     release(note) {
@@ -349,31 +246,33 @@ class Controller extends PIXI.Sprite {
             // Find the key corresponding to the note
             let keyId = note.pitch - noteRange[0];
             // Retexture the depressed key
-            this.getChildByName('Keyboard')
-            .getChildByName('key' + keyId)
-            .texture = this.spritesheet.textures[KEY_TYPES[keyId] + ".png"]; // off texture
+            this.keyboard.keyActive(keyId, false);
         }
     }
+
     shiftStack(shiftAmount) {
         if(this._noteStack.length == 0)
-            return true;
+            return;
 
-        // Check this can be done first
+        // Shift all the notes in the stack except for midi inputs
         for(var e of this._noteStack){
-            let t = e.pitch + 12 * shiftAmount;
-            if(t < 0 || t > 127)
-                return false;
-        } 
+            if(e.midi || false)
+                continue;   
 
-        // Shift all the notes in the stack
-        for(var e of this._noteStack){
+            // Turn off previous note
+            let keyId = e.pitch - noteRange[0];
+            this.keyboard.keyActive(keyId, false);
+            
             e.pitch += 12 * shiftAmount;
+            keyId = e.pitch - noteRange[0];
+            
+            // Turn on new one
+            this.keyboard.keyActive(keyId, true);
         }
 
         // Continue playing the note highest in the stack
         let note = this._noteStack.last();
         audioEngine.play(note);
-        return true;
     }
 
     static processMIDIMessage(message) {
@@ -398,6 +297,195 @@ class Controller extends PIXI.Sprite {
     }
 }
 
+class Keyboard extends PIXI.Container {
+    /**
+     * 
+     * @param {array} keyBindings Array of array of strings. i.e. [["a","b"], ["c"], ["f", "g"], ...]
+     */
+    constructor(keyBindings, controller) {
+        super();
+        this.controller = controller;
+        // Static offset values (relative to last key, for one octave)
+        var xOffset = [9, 4, 9, 4, 13, 9, 4, 9, 4, 9, 4, 13];
+        var zIndexs = [0, 1, 0, 1, 0, 0, 1 ,0, 1, 0, 1, 0];
+        this.keys = [];
+        this.map = {};
+        this.buttons = {};
+        var x = 0, y = 0;
+        for(let i = 0; i < 25; i++){
+            var tooltip = "?";
+            let key = new Key(
+                x, y,
+                i, controller,
+                controller.tooltipSet.create("[" + tooltip + "]", 'left'));
+
+            // Black keys above whites (raycast necessity)
+            key.zIndex = zIndexs[i % 12];
+
+            // The bind for this key; all buttons link to the same bind
+            let bind = { pressed: false }
+            // Map buttons to keys
+            for(let j = 0; j < keyBindings[i].length; j++){
+                this.buttons[keyBindings[i][j]] = bind;
+                this.map[keyBindings[i][j]] = key;
+            }
+
+            this.keys.push(key);
+            this.addChild(key);
+
+            // Compute next position
+            x += xOffset[i % 12];
+        }
+
+        // Sort children by zIndex to put black keys forwards
+        this.sortChildren();
+
+        // Implement one interaction event for the entire keyboard
+        this.interactive = true;
+        this.interactiveChildren = true;
+        this.buttonMode = true;
+        this.dragging = false;
+        this
+            .on('mousedown', onStart)
+            .on('touchstart', onStart)
+            .on('mouseup', onEnd)
+            .on('mouseupoutside', onEnd)
+            .on('touchend', onEnd)
+            .on('touchendoutside', onEnd)
+            .on('touchmove', onMove)
+            .on('mousemove', onMove);
+
+        // Keyboard input system (barebones version of keybind() in util)
+        this.downHandler = event => {
+            // Hack-a-tron 9000
+            if(event.key == ";" && event.getModifierState("CapsLock") == true){
+                event.preventDefault();
+                return;
+            }
+
+            // Button event.key was pressed
+            if (event.key in this.buttons && // If button is bound to something
+                !this.buttons[event.key].pressed) { // If button is up
+                // Pressed button event.key
+                let k = this.map[event.key].keyId;
+                this.press(k);
+
+                this.buttons[event.key].pressed = true; // Button is down
+            }
+            event.preventDefault();
+        };
+
+        this.upHandler = event => {
+            if(event.key == ";" && event.getModifierState("CapsLock") == true){
+                event.preventDefault();
+                return;
+            }
+            // Button event.key was pressed
+            if (event.key in this.buttons && // If button is bound to something
+                this.buttons[event.key].pressed) { // If button is down
+                // Released button event.key
+                let k = this.map[event.key].keyId;
+                this.release(k);
+
+                this.buttons[event.key].pressed = false; // Buttons is up
+            }
+            event.preventDefault();
+        };
+
+        // Bind event listeners
+        const downListener = this.downHandler.bind(this);
+        const upListener = this.upHandler.bind(this);
+
+        window.addEventListener(
+            "keydown", downListener, false
+        );
+        window.addEventListener(
+            "keyup", upListener, false
+        );
+
+        // Deal with shift and caps lock, these nasty, nasty boyz 
+        this.caps = keybind("CapsLock");
+        this.caps.isOn = false; // Assume this, if it turns out to be a problem... meh
+        this.caps.press = () => {
+            this.caps.isOn = !this.caps.isOn;
+            let shift = (this.caps.isOn) ? +1 : -1;
+            if(!this.shift.isDown) controller.shiftStack(shift);
+        }
+
+        this.shift = keybind("Shift");
+        this.shift.press = () => { if (!this.caps.isOn) controller.shiftStack(+1); }
+        this.shift.release = () => { if (!this.caps.isOn) controller.shiftStack(-1); }
+
+        function onStart(event){
+            this.event = event;
+            this.dragging = true;
+            
+            let key = getKey(event.data.global, this);
+            this.event.currentKey = key;
+            this.press(this.event.currentKey.keyId, event.data.getLocalPosition(key).y);
+        }
+        function onEnd(event){
+            // If the drag has not already ended
+            if(this.dragging){
+                this.release(event.currentKey.keyId);
+
+                this.event = null;
+                this.dragging = false;
+            }
+        }
+        function onMove(event){
+            if (!this.dragging) 
+                return;
+            // Raycast for new key
+            let newKey = getKey(event.data.global, this);
+
+            // If we drag out of the keyboard, stop
+            if(newKey == null) {
+                this.release(event.currentKey.keyId);
+
+                this.event = null;
+                this.dragging = false;
+            }
+            // If we moved to a new key, 
+            // release the old one and press this one
+            else if(newKey.keyId != this.event.currentKey.keyId){
+                this.press(newKey.keyId, event.data.getLocalPosition(newKey).y);
+                this.release(event.currentKey.keyId);
+                this.event.currentKey = newKey;
+            }
+        }
+        function getKey(position, root){
+            return renderer.plugins.interaction.hitTest(position, root);
+        }
+    }
+
+    release(keyId){
+        let pitch = keyId + noteRange[0];
+        if(this.shift.isDown || this.caps.isOn)
+            pitch += 12;
+            
+        this.controller.release({pitch});
+    }
+
+    press(keyId, y){
+        var key = this.keys[keyId];
+        y = y || key.height / 2;
+        let pitch = key.keyId + noteRange[0];
+        if(this.shift.isDown || this.caps.isOn)
+            pitch += 12;
+
+        let velocity = Math.floor(remap(y, [0, key.height], [0, 127]));
+        this.controller.press({pitch, velocity});
+    }
+
+    /** Swap key sprites for on/off */
+    keyActive (keyId, active) {
+        let keySprite = this.keys[keyId];
+        let str = (active) ? "-on.png" : ".png";
+        if (keySprite != null)
+            keySprite.texture = controller.spritesheet.textures[KEY_TYPES[keyId] + str]; // on texture
+    }
+}
 /** 
  * Basic component class for the synth controls. Does not
  * define any interactivity and should be extended
@@ -443,6 +531,18 @@ class Component extends PIXI.Sprite {
         return this._value;
     }
 }
+class Key extends Component {
+    constructor(x, y, keyId, controller, tooltip){
+        var name = "key" + keyId;
+        var tex = PIXI.Loader.shared.resources.controller.spritesheet.
+            textures[KEY_TYPES[keyId] + ".png"];
+        super(tex, x, y, 0, 0, name, 0, 0, tooltip, () => {});
+
+        this.keyId = keyId;
+
+        this.interactive = true;
+    }
+}
 class OctaveButton extends Component {
     constructor(type, x, y, controller, tooltip){
         var textures = PIXI.Loader.shared.resources.common.spritesheet.textures;
@@ -463,11 +563,11 @@ class OctaveButton extends Component {
         // Bind keyboard buttons
         let key = (type == 'up') ? 'x' : 'z';
         // Lowercase and uppercase
-        this.keyButtonL = keyboard(key);
+        this.keyButtonL = keybind(key);
         this.keyButtonL.press = () => {
             this.callbackFunc();
         };
-        this.keyButtonU = keyboard(key.toUpperCase());
+        this.keyButtonU = keybind(key.toUpperCase());
         this.keyButtonU.press = () => {
             this.callbackFunc();
         };
@@ -477,16 +577,13 @@ class OctaveButton extends Component {
             if(currentOctave == 7)
                 return;
             
-            // Stack might contain notes too close to octave limits
-            let ok = this.controller.shiftStack(+1);
-            if(!ok)
-                return;
-
             currentOctave++;
 
             // Move note range up one octave
             noteRange[0] += 12;
             noteRange[1] += 12;
+            
+            this.controller.shiftStack(+1);
 
             // Alter sprite
             this.updateTexture();
@@ -497,16 +594,13 @@ class OctaveButton extends Component {
             if(currentOctave == 1)
                 return;
 
-            // Stack might contain notes too close to octave limits
-            let ok = this.controller.shiftStack(-1);
-            if(!ok)
-                return;
-
             currentOctave--;
 
             // Move note range up one octave
             noteRange[0] -= 12;
             noteRange[1] -= 12;
+
+            this.controller.shiftStack(-1);
 
             // Alter sprite
             this.updateTexture();
@@ -528,7 +622,7 @@ class OctaveButton extends Component {
             this.texture = this.textures[BUTTON_TYPE[t + shift]];
     }
 }
-const SLIDER_RANGE = [21, 41];
+
 class Slider extends Component {
     /**
      * @param {number} x Position x
@@ -648,43 +742,6 @@ class Knob extends Component {
 
         return textures[value];
     }
-}
-class Key extends Component {
-    constructor(x, y, keyId, controller, tooltip){
-        var name = "key" + keyId;
-        var tex = PIXI.Loader.shared.resources.controller.spritesheet.
-            textures[KEY_TYPES[keyId] + ".png"];
-        super(tex, x, y, 0, 0, name, 0, 0, tooltip, () => {});
-
-        this.keyId = keyId;
-        this.controller = controller;
-
-        // Bind keyboard
-        this.keyButton = keyboard(KEY_BINDINGS[keyId]);
-        this.keyButton.press = () =>  { this.press(); };
-        this.keyButton.release = () => { this.release(); };
-
-        if(SECONDARY_BINDS[keyId] != ""){
-            this.keyButton2 = keyboard(SECONDARY_BINDS[keyId]);
-            this.keyButton2.press = () =>  { this.press(); };
-            this.keyButton2.release = () => { this.release(); };
-        }
-
-        this.interactive = true;
-    }
-
-    release(){
-        let pitch = this.keyId + noteRange[0];
-        this.controller.release({pitch});
-    }
-
-    press(y){
-        y = y || this.height / 2;
-        let pitch = this.keyId + noteRange[0];
-        let velocity = Math.floor(remap(y, [0, this.height], [0, 127]));
-        this.controller.press({pitch, velocity});
-    }
-    
 }
 class Wheel extends Component {
     constructor(x, y, name, tooltip, callbackFunc){

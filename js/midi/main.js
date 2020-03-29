@@ -51,13 +51,10 @@ function main(){
         ticker.start();
 
         // Set up MIDI here
-        const requestMIDIAccess = navigator['requestMIDIAccess'];
-        if (requestMIDIAccess) {
-            requestMIDIAccess().then(onMIDISuccess, onMIDIFailure);
-        } 
-        else { /* MIDI not supported */ }
+        navigator.requestMIDIAccess()
+        .then(onMIDISuccess, onMIDIFailure);
 
-        function onMIDIFailure() {/* TODO: Tell there's no midi, ask to refresh page */ }
+        function onMIDIFailure() {console.log("No midi")};
         function onMIDISuccess(midiAccess) {
             // Add listeners to all midi inputs
             for (var input of midiAccess.inputs.values())
@@ -68,20 +65,32 @@ function main(){
     function buildComponents() {
         audioEngine = new AudioEngine();
         controller = new Controller(0.5, 0.5);
-        
+        controller.tooltipSet.visible = false;
+
+        var root = new PIXI.Container();
+        root.tooltipSet = new TooltipSet();
+        root.addChild(root.tooltipSet);
+        root.tooltipSet.visible = true;
+
         // Tooltip toggle
-        var toggle = TooltipSet.createToggle(controller.tooltipSet);
+        var dummyTex = new PIXI.NineSlicePlane(loader.resources.common.textures["dummy-texture.png"], 0, 0, 0, 0);
+        root.toggle = new Button("?", undefined, {x: 1, y: 0}, 
+            root.tooltipSet.create("show tooltips", 'right', {x: 1.05, y: -1}),
+            dummyTex, dummyTex);
+        root.addChild(root.toggle);
+        root.toggle.isToggle = true;
+        root.toggle.onOff = false
+        root.toggle.onToggle = (onOff) => { controller.tooltipSet.visible = onOff; };
 
         // Resize handler
         window.addEventListener('resize', sizeRenderer);
 
         // Arrange everything
         sizeRenderer();
-        sizeRenderer();
 
         // Add components to stage
         stage.addChild(controller);
-        stage.addChild(toggle);
+        stage.addChild(root);
 
         function sizeRenderer(){
             // Resize renderer
@@ -99,26 +108,22 @@ function main(){
                 h = Math.floor(renderer.screen.width / controller.texture.height);
             }
             scale = Math.min(w,h);
-            console.log(aspect, scale);
-            console.log(renderer.screen.width, renderer.screen.height);
-            console.log(controller.texture.width, controller.texture.height);
+            // Rescale
+            controller.scale.set(scale, scale);
+            root.scale.set(scale, scale);
 
             // Reposition
             controller.position.set(renderer.screen.width / 2, renderer.screen.height / 2);
             if(aspect == 'portrait'){
                 controller.angle = 90;
-                toggle.angle = 90;
-                toggle.position.set(renderer.screen.width, renderer.screen.height);
+                root.angle = 90;
+                root.position.set(renderer.screen.width, renderer.screen.height);
             }
             else {
                 controller.angle = 0;
-                toggle.position.set(renderer.screen.width, 0);
+                root.angle = 0;
+                root.position.set(renderer.screen.width, 0);
             }
-
-            // Rescale
-            controller.scale.set(scale, scale);
-            toggle.scale.set(scale, scale);
-
 
         }
     }

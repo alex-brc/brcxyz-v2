@@ -234,6 +234,21 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">dummy-texture.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>1,1,1,1</rect>
+                <key>scale9Paddings</key>
+                <rect>1,1,1,1</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">question.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -279,6 +294,21 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
+            <key type="filename">tooltip.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0,0</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>3,3,6,5</rect>
+                <key>scale9Paddings</key>
+                <rect>3,3,6,5</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">touch-wheel.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -312,6 +342,8 @@
             <filename>diagonal-knob.png</filename>
             <filename>straight-knob.png</filename>
             <filename>button.png</filename>
+            <filename>tooltip.png</filename>
+            <filename>dummy-texture.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>
