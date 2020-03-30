@@ -21,7 +21,7 @@ class Controller extends PIXI.Sprite {
         this.addChild(setupSliders(this.tooltipSet));
         this.addChild(setupKnobs(this.tooltipSet));
         this.addChild(setupOctaveButtons(this));
-        this.addChild(setupWheels(this.tooltipSet));
+        this.addChild(setupWheels(this));
         this.addChild(setupKeys(this));
 
         // Add the tooltips above the others
@@ -40,9 +40,7 @@ class Controller extends PIXI.Sprite {
                 ["f", "F"], ["t", "T"], ["g", "G"], ["y", "Y"], ["h", "H"], ["u", "U"], ["j", "J"], 
                 ["k", "K"], ["o"], ["l"], ["p"], [";"],  
                 [], [], [], [], [], [], [], []];
-            var tooltips = ["a", "w", "s", "e", "d", "f", "t", "g", "y", "h", "u", "j",
-                "k/A", "o/W", "l/S", "p/E", ";/D", "F", "T", "G", "Y", "H", "U", "J", "K"];
-            var keyboard = new Keyboard(keyBindings, tooltips, controller);
+            var keyboard = new Keyboard(keyBindings, controller);
             keyboard.position.set(34, 54);
             
             controller.keyboard = keyboard;
@@ -178,27 +176,30 @@ class Controller extends PIXI.Sprite {
 
             return octaveButtons;
         }
-        function setupWheels(tooltipSet){
+        function setupWheels(controller){
             let wheels = new PIXI.Container("wheels");
             wheels.name = "Wheels";
 
             var modWheel = new Wheel(
                 5, 55,
                 "modwheel",
-                tooltipSet.create("modulation"),
+                controller.tooltipSet.create("modulation"),
                 function (value) {audioEngine.mod.pan(1-value)});
                 
             var pitchWheel = new Wheel(
                 17, 55,
                 "pitchwheel",
-                tooltipSet.create("pitch"),
+                controller.tooltipSet.create("pitch"),
                 function (value) {
                     audioEngine.oscillatorA.detune = (1-value) * 200; 
                     audioEngine.oscillatorB.detune = (1-value) * 200; });
 
             wheels.addChild(modWheel);
+            wheels.mod = modWheel;
             wheels.addChild(pitchWheel);
+            wheels.pitch = pitchWheel;
 
+            controller.wheels = wheels;
             return wheels;
         }
     }
@@ -295,6 +296,16 @@ class Controller extends PIXI.Sprite {
             case 128:
                 controller.release({pitch});
                 break;
+            // Mod wheel
+            case 176: 
+                console.log(message.data);
+                controller.wheels.pitch.value = (1 - message.data[2]) / 64;
+                break;
+            // Pitch bend
+            case 224:
+                console.log(message.data);
+                controller.wheels.pitch.value = (1 - message.data[2]) / 64;
+                break;
         }
     }
 }
@@ -304,7 +315,7 @@ class Keyboard extends PIXI.Container {
      * 
      * @param {array} keyBindings Array of array of strings. i.e. [["a","b"], ["c"], ["f", "g"], ...]
      */
-    constructor(keyBindings, tooltips, controller) {
+    constructor(keyBindings, controller) {
         super();
         this.controller = controller;
         // Static offset values (relative to last key, for one octave)
@@ -315,10 +326,7 @@ class Keyboard extends PIXI.Container {
         this.buttons = {};
         var x = 0, y = 0;
         for(let i = 0; i < 25; i++){
-            let key = new Key(
-                x, y,
-                i,
-                controller.tooltipSet.create("[" + tooltips[i] + "]", 'left'));
+            let key = new Key(x, y, i);
 
             // Black keys above whites (raycast necessity)
             key.zIndex = zIndexs[i % 12];
@@ -518,9 +526,11 @@ class Component extends PIXI.Sprite {
         this.name = name;
         this.maxValue = maxValue;
         this.value = initialValue;
-        this.tooltip = tooltip;
-        this.on('mouseover', TooltipSet.showTooltip)
-            .on('mouseout', TooltipSet.hideTooltip);
+        if(tooltip){
+            this.tooltip = tooltip;
+            this.on('mouseover', TooltipSet.showTooltip)
+                .on('mouseout', TooltipSet.hideTooltip);
+        }
     }
 
     /** @param {number} value */
@@ -538,7 +548,7 @@ class Key extends Component {
         var name = "key" + keyId;
         var tex = PIXI.Loader.shared.resources.controller.spritesheet.
             textures[KEY_TYPES[keyId] + ".png"];
-        super(tex, x, y, 0, 0, name, 0, 0, tooltip, () => {});
+        super(tex, x, y, 0, 0, name, 0, 0, undefined, () => {});
 
         this.keyId = keyId;
 

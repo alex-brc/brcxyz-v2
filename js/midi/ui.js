@@ -126,7 +126,6 @@ class Button extends PIXI.Container {
         }
 
         function cancel(){
-            console.log("here");
             // Set normal sprite
             this.background.visible = false;
             this.clicked.visible = true;
