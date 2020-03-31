@@ -8,16 +8,12 @@ main();
 
 function main(){
     // Meta settings
+    PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
+    PIXI.settings.ROUND_PIXELS = true;
     renderer = new PIXI.Renderer({ 
         view: pixicanvas,
         backgroundColor: 0x276E7B,
-        width: window.innerWidth,      
-        height: window.innerHeight,
-        resolution: devicePixelRatio,
-        autoDensity: true,
-        antialias: false
     }); 
-    PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
     const stage = new PIXI.Container();
     const ticker = PIXI.Ticker.shared;
@@ -28,7 +24,7 @@ function main(){
 
     loader
     .add("tooltipFont", "../sprite/pixelmix.fnt")
-    .add("common", "../sprite/common.json")
+    .add("ui", "../sprite/ui.json")
     .add("controller", "../sprite/controller.json")
     .load(afterLoading);
 
@@ -69,10 +65,10 @@ function main(){
         var root = new PIXI.Container();
         root.tooltipSet = new TooltipSet();
         root.addChild(root.tooltipSet);
-        root.tooltipSet.visible = true;
+        root.tooltipSet.visible = true; 
 
         // Tooltip toggle
-        var dummyTex = new PIXI.NineSlicePlane(loader.resources.common.textures["dummy-texture.png"], 0, 0, 0, 0);
+        var dummyTex = new PIXI.NineSlicePlane(loader.resources.ui.textures["dummy-texture.png"], 0, 0, 0, 0);
         root.toggle = new Button("?", undefined, {x: 1, y: 0}, 
             root.tooltipSet.create("show tooltips", 'right', {x: 1.05, y: -1}),
             dummyTex, dummyTex);
@@ -88,12 +84,24 @@ function main(){
         sizeRenderer();
 
         // Add components to stage
-        stage.addChild(controller);
+        stage.addChild(controller); 
         stage.addChild(root);
 
         function sizeRenderer(){
+            pixicanvas.width = window.innerWidth * renderer.resolution; 
+            pixicanvas.height = window.innerHeight * renderer.resolution;
+
             // Resize renderer
-            renderer.resize(window.innerWidth, window.innerHeight);
+            renderer.resize(pixicanvas.width, pixicanvas.height);
+
+            // Scale the canvas down with CSS        
+            pixicanvas.style.width = window.innerWidth + 'px';
+            pixicanvas.style.height = window.innerHeight + 'px';
+            
+            // renderer.resize(window.innerWidth, window.innerHeight);
+
+
+
             let aspect = (window.innerWidth > window.innerHeight) ? 'landscape' : 'portrait';
 
             // Find the maximum scale we can use
@@ -107,8 +115,10 @@ function main(){
                 h = Math.floor(renderer.screen.width / controller.texture.height);
             }
             scale = Math.min(w,h);
+            scale = Math.min(scale, 6);
             
             // Rescale
+            // renderer.resolution = 1 / 4;
             controller.scale.set(scale, scale);
             root.scale.set(scale, scale);
 
@@ -124,7 +134,6 @@ function main(){
                 root.angle = 0;
                 root.position.set(renderer.screen.width, 0);
             }
-
         }
     }
 }

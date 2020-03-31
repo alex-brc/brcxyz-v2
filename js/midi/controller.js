@@ -6,7 +6,7 @@ class Controller extends PIXI.Sprite {
     constructor(anchorX, anchorY) {
         // Alias resources
         var spritesheet = PIXI.Loader.shared.resources.controller.spritesheet;
-        var buttonsheet = PIXI.Loader.shared.resources.common.spritesheet;
+        var buttonsheet = PIXI.Loader.shared.resources.controller.spritesheet;
 
         // Make this
         super(spritesheet.textures["base.png"]);
@@ -17,7 +17,7 @@ class Controller extends PIXI.Sprite {
         this.tooltipSet = new TooltipSet();
 
         // Setup all the components of the keyboard
-        this.addChild(setupSine());
+        this.addChild(setupSine(this));
         this.addChild(setupSliders(this.tooltipSet));
         this.addChild(setupKnobs(this.tooltipSet));
         this.addChild(setupOctaveButtons(this));
@@ -28,8 +28,8 @@ class Controller extends PIXI.Sprite {
         this.addChild(this.tooltipSet);
         
         // Setup the base object
-        this.pivot.x = anchorX * this.width;
-        this.pivot.y = anchorY * this.height;
+        this.pivot.x = Math.floor(anchorX * this.width);
+        this.pivot.y = Math.floor(anchorY * this.height);
 
         // Controller now ready to be staged
 
@@ -46,9 +46,17 @@ class Controller extends PIXI.Sprite {
             controller.keyboard = keyboard;
             return keyboard;
         }       
-        function setupSine() {
+        function setupSine(controller) {
+            // Grab animation frames
+            let frames = [], str = "";
+            for(let i = 0; i < 30; i++){
+                str = i;
+                if(i < 10)
+                    str = "0" + str;
+                frames.push(controller.buttonsheet.textures[str + ".png"]);
+            }
             // Make sine animation
-            let sineAnimation = new PIXI.AnimatedSprite(spritesheet.animations["sine"]);
+            let sineAnimation = new PIXI.AnimatedSprite(frames);
             sineAnimation.animationSpeed = 0.3;
             // Position it correctly
             sineAnimation.x = 176;
@@ -75,8 +83,9 @@ class Controller extends PIXI.Sprite {
             }
 
             // Set knob positionings
-            const x = [12, 27, 42, 57, 72, 87, 17, 32, 47, 62, 77, 92];
-            const y = [27, 27, 27, 27, 27, 27, 40, 40, 40, 40, 40, 40];
+            // - 12x, - 27y
+            const x = [0, 15, 30, 45, 60, 75, 5, 20, 35, 50, 65, 80]
+            const y = [0, 0, 0, 0, 0, 0, 13, 13, 13, 13, 13, 13];
             const tooltips = ["A>shape", "A>attack", "A>sustain", "A>decay", "A>release", "A>gain", 
                                 "B>shape", "B>attack", "B>sustain", "B>decay", "B>release", "B>gain"];
             const initialValues = [0, 1, 7, 4, 3, 7, 
@@ -110,6 +119,8 @@ class Controller extends PIXI.Sprite {
                 
                 knobs.addChild(knob);
             }   
+
+            knobs.position.set(12, 27);
             
             return knobs;
         }
@@ -557,7 +568,7 @@ class Key extends Component {
 }
 class OctaveButton extends Component {
     constructor(type, x, y, controller, tooltip){
-        var textures = PIXI.Loader.shared.resources.common.spritesheet.textures;
+        var textures = PIXI.Loader.shared.resources.controller.spritesheet.textures;
         var texture = textures["button-" + type + ".png"];
         super(texture, x, y, 0, 0, "octave"+type, 0, 0, tooltip, () => {})
 
@@ -646,10 +657,10 @@ class Slider extends Component {
      */
     constructor(x, initialValue, neutralValue, name, tooltip, callbackFunc){
         let y = SLIDER_RANGE[1] - initialValue * 2; // y in 21,41
-        super(PIXI.Loader.shared.resources.common.spritesheet.textures["slider.png"],
+        super(PIXI.Loader.shared.resources.controller.spritesheet.textures["slider.png"],
         x, y, 3, 3, name, 10, initialValue, tooltip, callbackFunc);
         /* 
-        this.marker = new PIXI.Sprite(PIXI.Loader.shared.resources.common.spritesheet.textures["red-mark.png"]);
+        this.marker = new PIXI.Sprite(PIXI.Loader.shared.resources.controller.spritesheet.textures["red-mark.png"]);
         this.marker.y = -neutralValue*2-12;
         this.marker.x = x;
         */
@@ -757,7 +768,7 @@ class Knob extends Component {
 }
 class Wheel extends Component {
     constructor(x, y, name, tooltip, callbackFunc){
-        var texture = PIXI.Loader.shared.resources.common.spritesheet.textures["touch-wheel.png"];
+        var texture = PIXI.Loader.shared.resources.controller.spritesheet.textures["touch-wheel.png"];
         super(texture, x, y, 0, 0, name, 2, 1, tooltip, callbackFunc);
 
         // Define effective y range (to improve usability and accuracy)

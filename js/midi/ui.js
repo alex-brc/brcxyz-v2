@@ -1,11 +1,13 @@
 
 class Window extends PIXI.Container{
     constructor(size){
+        size = size || {x: 17, y: 22};
         super();
         // Create button background
+        console.log(PIXI.Loader.shared.resources.ui.spritesheet.textures);
         var nsp = new PIXI.NineSlicePlane(
-            PIXI.Loader.shared.resources.common.spritesheet.textures["tooltip.png"],
-            4, 4, 4, 4);
+            PIXI.Loader.shared.resources.ui.spritesheet.textures["window.png"],
+            7, 7, 7, 7);
         // And set it up
         nsp.width = size.x;
         nsp.height = size.y;
@@ -20,6 +22,13 @@ class Window extends PIXI.Container{
         this.background.height = value.y;
     }
 }
+
+class HelloWindow extends Window{
+    constructor() {
+        super();
+    }
+}
+
 
 class Settings extends Window {
     constructor(size){
@@ -163,7 +172,7 @@ class TooltipSet extends PIXI.Container {
         
         // Create background object
         let bg = new PIXI.NineSlicePlane(
-            PIXI.Loader.shared.resources.common.spritesheet.textures["tooltip.png"],
+            PIXI.Loader.shared.resources.ui.spritesheet.textures["tooltip.png"],
             4, 4, 4, 4);
         bg.height = 13;
         bg.width = text.width + 8;
