@@ -15,6 +15,26 @@ class Controller extends PIXI.Sprite {
         
         this._noteStack = [];
         this.tooltipSet = new TooltipSet();
+        this.tooltipSet.visible = false;
+
+        // Set up MIDI here
+        this.midiAccess = null;
+        navigator.requestMIDIAccess()
+        .then(onMIDISuccess, onMIDIFailure);
+
+        function onMIDIFailure() {console.log("No midi")};
+        function onMIDISuccess(midiAccess) {
+            controller.midiAccess = midiAccess;
+            // Add listeners to all midi inputs
+            for (var input of midiAccess.inputs.values()){
+                input.onmidimessage = Controller.processMIDIMessage;
+            }
+
+            // If a new device is input, listen to it
+            midiAccess.onstatechange = (e) => {
+                e.port.onmidimessage = Controller.processMIDIMessage;
+            }
+        }
 
         // Setup all the components of the keyboard
         this.addChild(setupSine(this));
@@ -110,7 +130,7 @@ class Controller extends PIXI.Sprite {
             for (let i = 0; i < 12; i++) {
                 let knob = new Knob(
                     textureSet,
-                    x[i], y[i],
+                    x[i] + 12, y[i] + 27,
                     tooltips[i],
                     tooltipSet.create(tooltips[i], 'left'),
                     initialValues[i],
@@ -119,8 +139,6 @@ class Controller extends PIXI.Sprite {
                 
                 knobs.addChild(knob);
             }   
-
-            knobs.position.set(12, 27);
             
             return knobs;
         }
@@ -540,7 +558,7 @@ class Component extends PIXI.Sprite {
         if(tooltip){
             this.tooltip = tooltip;
             this.on('mouseover', TooltipSet.showTooltip)
-                .on('mouseout', TooltipSet.hideTooltip);
+                .on('mouseout', TooltipSet.hideTooltip)
         }
     }
 

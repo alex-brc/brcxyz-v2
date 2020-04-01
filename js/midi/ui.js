@@ -3,16 +3,25 @@ class Window extends PIXI.Container{
     constructor(size){
         size = size || {x: 17, y: 22};
         super();
+
         // Create button background
-        console.log(PIXI.Loader.shared.resources.ui.spritesheet.textures);
-        var nsp = new PIXI.NineSlicePlane(
+        this.background = new PIXI.NineSlicePlane(
             PIXI.Loader.shared.resources.ui.spritesheet.textures["window.png"],
             7, 7, 7, 7);
         // And set it up
-        nsp.width = size.x;
-        nsp.height = size.y;
-        this.background = nsp;
-        this.addChild(nsp);
+        this.background.width = size.x;
+        this.background.height = size.y;
+        this.addChild(this.background);
+
+        // Put an X button in the corner
+        var dummyTex = new PIXI.NineSlicePlane(PIXI.Loader.shared.resources.ui.textures["dummy-texture.png"], 0, 0, 0, 0);
+        this.xButton = new Button("x", undefined, {x: 1, y: 0}, undefined, dummyTex, dummyTex);
+        this.xButton.position.set(size.x - 2, 0);
+        this.xButton.onClick = () => { this.visible = false; }
+        this.addChild(this.xButton);
+
+        // Block raycasts
+        this.interactive = true;
     }
 
     // Awkward name cause it hid something from PIXI.Container
@@ -22,21 +31,6 @@ class Window extends PIXI.Container{
         this.background.height = value.y;
     }
 }
-
-class HelloWindow extends Window{
-    constructor() {
-        super();
-    }
-}
-
-
-class Settings extends Window {
-    constructor(size){
-        super(size);
-
-    }
-}
-
 
 class Button extends PIXI.Container {
     constructor(text, size, anchor, tooltip, upTexture, downTexture){
@@ -74,9 +68,9 @@ class Button extends PIXI.Container {
         this.clicked = clicked;
 
         // Assemble
-        this.addChild(nsp);
-        this.addChild(clicked);
-        this.addChild(textBmp);
+        this.addChild(this.background);
+        this.addChild(this.clicked);
+        this.addChild(this.foreground);
 
         // Set pivot 
         this.pivot.x = nsp.width * anchor.x;
@@ -94,9 +88,11 @@ class Button extends PIXI.Container {
             .on('touchend', onUp)
             .on('touchendoutside', cancel);
 
-        this.tooltip = tooltip;
-        this.on('mouseover', TooltipSet.showTooltip)
-            .on('mouseout', TooltipSet.hideTooltip);
+        if(tooltip != undefined){
+            this.tooltip = tooltip;
+            this.on('mouseover', TooltipSet.showTooltip)
+                .on('mouseout', TooltipSet.hideTooltip);
+        }
 
         this.isToggle = false;
         this.onOff = false;
@@ -141,6 +137,13 @@ class Button extends PIXI.Container {
             this.foreground.x += 1;
             this.foreground.y -= 1;
         }
+    }
+
+    set face(sprite){
+        // Remove former foreground
+        this.removeChild(this.foreground);
+        this.addChild(sprite);
+        this.foreground = sprite;
     }
 }
 
@@ -205,4 +208,54 @@ class TooltipSet extends PIXI.Container {
     static hideTooltip(event) {
         this.tooltip.visible = false;
     }
+}
+
+function createOverlay(){
+    var root = new PIXI.Container();
+    root.buttons = new PIXI.Container();
+    root.buttons.name = "Buttons";
+    var dummyTex = new PIXI.NineSlicePlane(PIXI.Loader.shared.resources.ui.textures["dummy-texture.png"], 0, 0, 0, 0);
+
+    // Create tooltips for buttons
+    /*
+    root.tooltipSet = new TooltipSet();
+    root.addChild(root.tooltipSet);
+    root.tooltipSet.visible = true; 
+
+    // Tooltip toggle button
+    root.buttons.tooltips = new Button("?", undefined, {x: 1, y: 0}, 
+        root.tooltipSet.create("tooltips", 'right', {x: 1.05, y: -1}),
+        dummyTex, dummyTex);
+    root.buttons.tooltips.face = new PIXI.Sprite(PIXI.Loader.shared.resources.ui.textures["question.png"]);
+    root.buttons.tooltips.isToggle = true;
+    root.buttons.tooltips.onOff = false
+    root.buttons.tooltips.onToggle = (onOff) => { controller.tooltipSet.visible = onOff; };
+    root.buttons.addChild(root.buttons.tooltips);
+    */
+
+    // Settings window
+    root.settingsWindow = new Window({x: controller.texture.width, y: controller.texture.height + 4});
+    root.settingsWindow.name = "Settings Window";
+    root.settingsWindow.visible = false;
+    root.settingsWindow.pivot.x = root.settingsWindow.width * 0.5;
+    root.settingsWindow.pivot.y = root.settingsWindow.height * 0.5;
+    
+    // Settings button
+    root.buttons.settings = new Button("?", undefined, {x: 2, y: 0}, 
+        //root.tooltipSet.create("settings", 'right', {x: 1.05, y: -1}),
+        undefined,
+        dummyTex, dummyTex);
+    root.buttons.settings.face = new PIXI.Sprite(PIXI.Loader.shared.resources.ui.textures["settings.png"]);
+    console.log(root.buttons.settings.foreground);
+    root.buttons.settings.isToggle = true;
+    root.buttons.settings.onOff = false
+    root.buttons.settings.onToggle = (onOff) => { root.settingsWindow.visible = onOff; };
+    root.buttons.addChild(root.buttons.settings);
+
+
+    root.addChild(root.settingsWindow);
+    root.addChild(root.buttons);
+
+    return root;
+
 }
