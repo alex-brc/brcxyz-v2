@@ -208,20 +208,23 @@ class Controller extends PIXI.Sprite {
         function setupWheels(controller){
             let wheels = new PIXI.Container("wheels");
             wheels.name = "Wheels";
-
-            var modWheel = new Wheel(
-                5, 55,
-                "modwheel",
-                controller.tooltipSet.create("modulation"),
-                function (value) {audioEngine.mod.pan(1-value)});
                 
             var pitchWheel = new Wheel(
-                17, 55,
+                5, 55,
                 "pitchwheel",
                 controller.tooltipSet.create("pitch"),
                 function (value) {
-                    audioEngine.oscillatorA.detune = (1-value) * 200; 
-                    audioEngine.oscillatorB.detune = (1-value) * 200; });
+                    audioEngine.oscillatorA.detune = (1-value) * 200; // 200 cents max up and down
+                    audioEngine.oscillatorB.detune = (1-value) * 200; 
+                    console.log(1-value);    
+                });
+            pitchWheel.resetOnEnd = true;
+                    
+            var modWheel = new Wheel(
+                17, 55,
+                "modwheel",
+                controller.tooltipSet.create("modulation"),
+                function (value) {audioEngine.mod.pan(1-value)});
 
             wheels.addChild(modWheel);
             wheels.mod = modWheel;
@@ -327,12 +330,10 @@ class Controller extends PIXI.Sprite {
                 break;
             // Mod wheel
             case 176: 
-                console.log(message.data);
-                controller.wheels.pitch.value = (1 - message.data[2]) / 64;
+                controller.wheels.mod.value = message.data[2] / 64;
                 break;
             // Pitch bend
             case 224:
-                console.log(message.data);
                 controller.wheels.pitch.value = (1 - message.data[2]) / 64;
                 break;
         }
@@ -395,9 +396,8 @@ class Keyboard extends PIXI.Container {
 
         // Keyboard input system (barebones version of keybind() in util)
         this.downHandler = event => {
-            // Hack-a-tron 9000
+            // Hack-a-tron 9000 // Stop this from accessing its usual bind
             if(event.key == ";" && event.getModifierState("CapsLock") == true){
-                event.preventDefault();
                 return;
             }
 
@@ -409,14 +409,13 @@ class Keyboard extends PIXI.Container {
                 this.press(k);
 
                 this.buttons[event.key].pressed = true; // Button is down
+                event.preventDefault();
             }
-            event.preventDefault();
         };
 
         this.upHandler = event => {
-            // Hack-a-tron 9000
+            // Hack-a-tron 9000 // Stop this from accessing its usual bind
             if(event.key == ";" && event.getModifierState("CapsLock") == true){
-                event.preventDefault();
                 return;
             }
             // Button event.key was pressed
@@ -427,8 +426,8 @@ class Keyboard extends PIXI.Container {
                 this.release(k);
 
                 this.buttons[event.key].pressed = false; // Buttons is up
+                event.preventDefault();
             }
-            event.preventDefault();
         };
 
         // Bind event listeners
@@ -799,6 +798,7 @@ class Wheel extends Component {
             .on('mousemove', onDragMove).on('touchmove', onDragMove);
         this.buttonMode = true;
         this.interactive = true;
+        this.resetOnEnd = false;
 
         function onDragStart(event) {
             this.eventData = event.data;
@@ -809,8 +809,8 @@ class Wheel extends Component {
         function onDragEnd(event) {
             this.eventData = undefined;
             this.dragging = false;
-            // Reset value
-            this.value = 1;
+            if(this.resetOnEnd)
+                this.value = 1;
         }
         function onDragMove(event) {
             if (this.dragging) {

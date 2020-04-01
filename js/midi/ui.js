@@ -217,7 +217,6 @@ function createOverlay(){
     var dummyTex = new PIXI.NineSlicePlane(PIXI.Loader.shared.resources.ui.textures["dummy-texture.png"], 0, 0, 0, 0);
 
     // Create tooltips for buttons
-    /*
     root.tooltipSet = new TooltipSet();
     root.addChild(root.tooltipSet);
     root.tooltipSet.visible = true; 
@@ -231,31 +230,38 @@ function createOverlay(){
     root.buttons.tooltips.onOff = false
     root.buttons.tooltips.onToggle = (onOff) => { controller.tooltipSet.visible = onOff; };
     root.buttons.addChild(root.buttons.tooltips);
-    */
-
-    // Settings window
-    root.settingsWindow = new Window({x: controller.texture.width, y: controller.texture.height + 4});
-    root.settingsWindow.name = "Settings Window";
-    root.settingsWindow.visible = false;
-    root.settingsWindow.pivot.x = root.settingsWindow.width * 0.5;
-    root.settingsWindow.pivot.y = root.settingsWindow.height * 0.5;
     
-    // Settings button
-    root.buttons.settings = new Button("?", undefined, {x: 2, y: 0}, 
-        //root.tooltipSet.create("settings", 'right', {x: 1.05, y: -1}),
-        undefined,
-        dummyTex, dummyTex);
-    root.buttons.settings.face = new PIXI.Sprite(PIXI.Loader.shared.resources.ui.textures["settings.png"]);
-    console.log(root.buttons.settings.foreground);
-    root.buttons.settings.isToggle = true;
-    root.buttons.settings.onOff = false
-    root.buttons.settings.onToggle = (onOff) => { root.settingsWindow.visible = onOff; };
-    root.buttons.addChild(root.buttons.settings);
+    // Fullscreen request
+    var text = ""
+    if(onMobile){
+        text = "hey there you! before you go on ahead, you should " +
+        "really go into fullscreen, saves us both some trouble. " + 
+        "also, if you're confused, tap the help icon above. have fun!";
+    }
+    else {
+        text = "hi there! before you go on ahead, you should know " +
+        "you can also control this synth with a midi controller! " +
+        "i know, right? also, if you're feeling confused, tap the help " + 
+        "icon above to show tooltips on mouseover. have fun!";
+    }
 
+    root.windows = new PIXI.Container();
+    root.windows.fullscreen = new Window({x: controller.texture.width, y: controller.texture.height + 4});
+    root.windows.fullscreen.text = new PIXI.BitmapText(
+        "hi there, and welcome! ", {
+        align: 'center',
+        font: '8px pixelmix',
+    });
+    root.windows.fullscreen.name = "Fullscreen request";
+    root.windows.fullscreen.visible = false;
+    root.windows.fullscreen.pivot.x = root.windows.fullscreen.width * 0.5;
+    root.windows.fullscreen.pivot.y = root.windows.fullscreen.height * 0.5;
+    root.windows.addChild(root.windows.fullscreen);
 
-    root.addChild(root.settingsWindow);
+    root.addChild(root.windows);
     root.addChild(root.buttons);
 
     return root;
 
 }
+

@@ -1,8 +1,11 @@
 body {
     margin: 0;
+    background-color: #276E7B;
     overflow: hidden;
 }
 #pixicanvas {
+    width: 100vw;
+    height: 100vh;
     image-rendering: -moz-crisp-edges;
     image-rendering: -webkit-crisp-edges;
     image-rendering: pixelated;
