@@ -216,7 +216,6 @@ class Controller extends PIXI.Sprite {
                 function (value) {
                     audioEngine.oscillatorA.detune = (1-value) * 200; // 200 cents max up and down
                     audioEngine.oscillatorB.detune = (1-value) * 200; 
-                    console.log(1-value);    
                 });
             pitchWheel.resetOnEnd = true;
                     

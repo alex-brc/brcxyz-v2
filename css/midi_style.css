@@ -6,6 +6,7 @@ body {
 #pixicanvas {
     width: 100vw;
     height: 100vh;
+    height: calc(var(--vh, 1vh) * 100);
     image-rendering: -moz-crisp-edges;
     image-rendering: -webkit-crisp-edges;
     image-rendering: pixelated;

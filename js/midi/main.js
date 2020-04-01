@@ -1,4 +1,5 @@
 // Globals
+const DEBUG = false;
 var onMobile;
 var audioEngine;
 var controller;
@@ -28,8 +29,6 @@ function main(){
       };
 
     onMobile = isMobile();
-    console.log(onMobile);
-    
 
     loader
     .add("tooltipFont", "../sprite/pixelmix.fnt")
@@ -58,6 +57,10 @@ function main(){
         ticker.start();
 
         function sizeRenderer(){
+            // Update vertical units (thanks, Apple)
+            vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+          
             size = {
                 width: pixicanvas.clientWidth,
                 height: pixicanvas.clientHeight,
@@ -68,8 +71,6 @@ function main(){
 
             // Resize renderer
             renderer.resize(size.width, size.height);
-            
-            // renderer.resize(size.width, size.height);
 
             let aspect = (size.width > size.height) ? 'landscape' : 'portrait';
 
@@ -89,18 +90,18 @@ function main(){
             controller.scale.set(scale);
             overlay.scale.set(scale);
 
-            console.log("-------------------------------");
-            console.log("aspect: ", aspect);
-            console.log("window.innner: ", window.innerWidth, window.innerHeight);
-            console.log("pixicanvas: ", pixicanvas.width, pixicanvas.height);
-            console.log("pixicanvas.client: ", pixicanvas.clientWidth, pixicanvas.clientHeight);
-            console.log("renderer: ", renderer.screen.width, renderer.screen.height);
-            console.log("controller: ", controller.texture.width, controller.texture.height);
-            console.log("dpr, w,h,scale: ", devicePixelRatio, w, h, scale);
-            console.log("-------------------------------");
-
+            if (DEBUG) {
+                console.log("-------------------------------");
+                console.log("aspect: ", aspect);
+                console.log("window.innner: ", window.innerWidth, window.innerHeight);
+                console.log("pixicanvas: ", pixicanvas.width, pixicanvas.height);
+                console.log("pixicanvas.client: ", pixicanvas.clientWidth, pixicanvas.clientHeight);
+                console.log("renderer: ", renderer.screen.width, renderer.screen.height);
+                console.log("controller: ", controller.texture.width, controller.texture.height);
+                console.log("dpr, w,h,scale: ", devicePixelRatio, w, h, scale);
+                console.log("-------------------------------");
+            }
             
-
             // Reposition
             controller.position.set(renderer.screen.width / 2, renderer.screen.height / 2);
             overlay.position.set(renderer.screen.width / 2, renderer.screen.height / 2);

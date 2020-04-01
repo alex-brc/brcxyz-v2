@@ -1,17 +1,15 @@
 
-class Window extends PIXI.Container{
+class Window extends PIXI.NineSlicePlane{
     constructor(size){
-        size = size || {x: 17, y: 22};
-        super();
+        super(PIXI.Loader.shared.resources.ui.spritesheet.textures["window.png"],
+        7, 7, 7, 7);
 
-        // Create button background
-        this.background = new PIXI.NineSlicePlane(
-            PIXI.Loader.shared.resources.ui.spritesheet.textures["window.png"],
-            7, 7, 7, 7);
-        // And set it up
-        this.background.width = size.x;
-        this.background.height = size.y;
-        this.addChild(this.background);
+        size = size || {x: 17, y: 22};
+        this.width = size.x;
+        this.height = size.y;
+
+        this.pivot.x = this.width * 0.5;
+        this.pivot.y = this.height * 0.5;
 
         // Put an X button in the corner
         var dummyTex = new PIXI.NineSlicePlane(PIXI.Loader.shared.resources.ui.textures["dummy-texture.png"], 0, 0, 0, 0);
@@ -43,24 +41,24 @@ class Button extends PIXI.Container {
             font: '8px pixelmix',
             align: 'center'
         });
-        // Position it
-        textBmp.position = {x: 4, y: 2};
         this.text = text;
         this.foreground = textBmp;
         
         // Create button background
         var nsp = upTexture || new PIXI.NineSlicePlane(
-            PIXI.Loader.shared.resources.common.spritesheet.textures["button.png"],
+            PIXI.Loader.shared.resources.ui.spritesheet.textures["button.png"],
             3, 3, 3, 3);
         // And set it up
         size = size || {x: textBmp.width + 7, y: textBmp.height + 7};
         nsp.width = size.x;
         nsp.height = size.y;
+        this.foreground.pivot.set(textBmp.width / 2, textBmp.height / 2);
+        this.foreground.position.set(nsp.width / 2, nsp.height / 2 - 2);
         this.background = nsp;
 
         // Create mousedown background
         var clicked = downTexture || new PIXI.NineSlicePlane(
-            PIXI.Loader.shared.resources.common.spritesheet.textures["button-clicked.png"],
+            PIXI.Loader.shared.resources.ui.spritesheet.textures["button-clicked.png"],
             3, 3, 3, 3);
         clicked.width = size.x;
         clicked.height = size.y;
@@ -107,8 +105,8 @@ class Button extends PIXI.Container {
 
         function onUp(event) {
             // Set normal sprite
-            this.background.visible = false;
-            this.clicked.visible = true;
+            this.background.visible = true;
+            this.clicked.visible = false;
             this.foreground.x += 1;
             this.foreground.y -= 1;
 
@@ -132,8 +130,8 @@ class Button extends PIXI.Container {
 
         function cancel(){
             // Set normal sprite
-            this.background.visible = false;
-            this.clicked.visible = true;
+            this.background.visible = true;
+            this.clicked.visible = false;
             this.foreground.x += 1;
             this.foreground.y -= 1;
         }
@@ -234,29 +232,59 @@ function createOverlay(){
     // Fullscreen request
     var text = ""
     if(onMobile){
-        text = "hey there you! before you go on ahead, you should " +
-        "really go into fullscreen, saves us both some trouble. " + 
-        "also, if you're confused, tap the help icon above. have fun!";
+        text = "hey there you! " + "\nbefore you go on ahead, you should " +
+        "really go into fullscreen, it's just nicer don't you think? " + 
+        "also, if you're confused, tap the help icon above. \nhave fun! \n\ngo fullscreen?";
     }
     else {
-        text = "hi there! before you go on ahead, you should know " +
+        text = "hi there! " + "\nbefore you go on ahead, you should know " +
         "you can also control this synth with a midi controller! " +
         "i know, right? also, if you're feeling confused, tap the help " + 
-        "icon above to show tooltips on mouseover. have fun!";
+        "icon above to show tooltips. \n\nhave fun! ";
     }
 
     root.windows = new PIXI.Container();
-    root.windows.fullscreen = new Window({x: controller.texture.width, y: controller.texture.height + 4});
+    root.windows.fullscreen = new Window({x: controller.texture.width, y: controller.texture.height + 10});
     root.windows.fullscreen.text = new PIXI.BitmapText(
-        "hi there, and welcome! ", {
+        text, {
         align: 'center',
         font: '8px pixelmix',
     });
+    root.windows.fullscreen.pivot.set(root.windows.fullscreen.width / 2, root.windows.fullscreen.height / 2);
+    root.windows.fullscreen.text.anchor.set(0.5, 0);
+    root.windows.fullscreen.text.position.set(root.windows.fullscreen.width / 2, 10);
+    root.windows.fullscreen.text.maxWidth = 220;
+    root.windows.fullscreen.addChild(root.windows.fullscreen.text);
     root.windows.fullscreen.name = "Fullscreen request";
-    root.windows.fullscreen.visible = false;
-    root.windows.fullscreen.pivot.x = root.windows.fullscreen.width * 0.5;
-    root.windows.fullscreen.pivot.y = root.windows.fullscreen.height * 0.5;
+    root.windows.fullscreen.visible = true;
+    root.windows.fullscreen.xButton.visible = false;
     root.windows.addChild(root.windows.fullscreen);
+    // Mobile 
+    root.windows.fullscreen.buttonNah = new Button("nah...", {x: 60, y: 18}, {x: 1, y: 1});
+    root.windows.fullscreen.buttonYeah = new Button("yeah!", {x: 60, y: 18}, {x: 0, y: 1});
+    root.windows.fullscreen.buttonNah.position.set(root.windows.fullscreen.width / 2 - 3, root.windows.fullscreen.height - 6);
+    root.windows.fullscreen.buttonYeah.position.set(root.windows.fullscreen.width / 2 + 3, root.windows.fullscreen.height - 6);
+    root.windows.fullscreen.buttonNah.onClick = () => { root.windows.fullscreen.visible = false; }
+    root.windows.fullscreen.buttonYeah.onClick = () => { 
+        // Go fullscreen
+        document.getElementById('pixicanvas').requestFullscreen();
+        root.windows.fullscreen.visible = false; }
+    
+    // Desktop
+    root.windows.fullscreen.buttonLetsgo = new Button("let's go!", {x: 100, y: 18}, {x: 0.5, y: 1});
+    root.windows.fullscreen.buttonLetsgo.position.set(root.windows.fullscreen.width / 2, root.windows.fullscreen.height - 6);
+    root.windows.fullscreen.buttonLetsgo.onClick = () => { 
+        // Start AudioEngine
+        // Hide this
+        root.windows.fullscreen.visible = false;}
+
+    if(onMobile){
+        root.windows.fullscreen.addChild(root.windows.fullscreen.buttonNah);
+        root.windows.fullscreen.addChild(root.windows.fullscreen.buttonYeah);
+    }
+    else {
+        root.windows.fullscreen.addChild(root.windows.fullscreen.buttonLetsgo);
+    }
 
     root.addChild(root.windows);
     root.addChild(root.buttons);
