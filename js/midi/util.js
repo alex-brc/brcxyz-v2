@@ -53,6 +53,11 @@ if (!Array.prototype.last){
         return this[this.length - 1];
     };
 };
+if(!Array.prototype.removeFrom){
+    Array.prototype.removeFrom = function(p){
+        return this.splice(p, 1);
+    };
+};
 
 function round(number, step) {
     return Math.floor(number / step ) * step;

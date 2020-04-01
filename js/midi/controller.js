@@ -264,7 +264,7 @@ class Controller extends PIXI.Sprite {
             }
             // Remove it
             if(p != -1){
-                this._noteStack.splice(p, 1);
+                this._noteStack.removeFrom(p);
             }
         }
         // If the last active key is depressed, stop
@@ -355,7 +355,7 @@ class Keyboard extends PIXI.Container {
         this.buttons = {};
         var x = 0, y = 0;
         for(let i = 0; i < 25; i++){
-            let key = new Key(x, y, i);
+            let key = new Key(x, y, i, this);
 
             // Black keys above whites (raycast necessity)
             key.zIndex = zIndexs[i % 12];
@@ -377,21 +377,6 @@ class Keyboard extends PIXI.Container {
 
         // Sort children by zIndex to put black keys forwards
         this.sortChildren();
-
-        // Implement one interaction event for the entire keyboard
-        this.interactive = true;
-        this.interactiveChildren = true;
-        this.buttonMode = true;
-        this.dragging = false;
-        this
-            .on('mousedown', onStart)
-            .on('touchstart', onStart)
-            .on('mouseup', onEnd)
-            .on('mouseupoutside', onEnd)
-            .on('touchend', onEnd)
-            .on('touchendoutside', onEnd)
-            .on('touchmove', onMove)
-            .on('mousemove', onMove);
 
         // Keyboard input system (barebones version of keybind() in util)
         this.downHandler = event => {
@@ -453,47 +438,9 @@ class Keyboard extends PIXI.Container {
         this.shift.press = () => { if (!this.caps.isOn) controller.shiftStack(+1); }
         this.shift.release = () => { if (!this.caps.isOn) controller.shiftStack(-1); }
 
-        function onStart(event){
-            this.event = event;
-            this.dragging = true;
-            
-            let key = getKey(event.data.global, this);
-            this.event.currentKey = key;
-            this.press(this.event.currentKey.keyId, event.data.getLocalPosition(key).y);
-        }
-        function onEnd(event){
-            // If the drag has not already ended
-            if(this.dragging){
-                this.release(event.currentKey.keyId);
-
-                this.event = null;
-                this.dragging = false;
-            }
-        }
-        function onMove(event){
-            if (!this.dragging) 
-                return;
-            // Raycast for new key
-            let newKey = getKey(event.data.global, this);
-
-            // If we drag out of the keyboard, stop
-            if(newKey == null) {
-                this.release(event.currentKey.keyId);
-
-                this.event = null;
-                this.dragging = false;
-            }
-            // If we moved to a new key, 
-            // release the old one and press this one
-            else if(newKey.keyId != this.event.currentKey.keyId){
-                this.press(newKey.keyId, event.data.getLocalPosition(newKey).y);
-                this.release(event.currentKey.keyId);
-                this.event.currentKey = newKey;
-            }
-        }
-        function getKey(position, root){
-            return renderer.plugins.interaction.hitTest(position, root);
-        }
+        // Mouse/touch interaction system
+        this.interactiveChildren = true;
+        this.dragging = false;
     }
 
     release(keyId){
@@ -580,6 +527,54 @@ class Key extends Component {
         this.keyId = keyId;
 
         this.interactive = true;
+        this.on('mousedown', onStart)
+            .on('touchstart', onStart)
+            .on('mouseup', onEnd)
+            .on('mouseupoutside', onEnd)
+            .on('touchend', onEnd)
+            .on('touchendoutside', onEnd)
+            .on('touchmove', onMove)
+            .on('mousemove', onMove);
+
+        function onStart(event){
+            this.eventData = event.data;
+            this.eventData.dragging = true;
+            
+            let key = getKey(event.data.global, this.parent);
+            this.eventData.currentKey = key;
+            this.parent.press(key.keyId, this.eventData.getLocalPosition(key).y);
+        }
+        function onEnd(event){
+            // If the drag has not already ended
+            if(this.eventData != null && this.eventData.dragging){
+                this.parent.release(this.eventData.currentKey.keyId);
+
+                this.eventData = null;
+            }
+        }
+        function onMove(event){
+            if (!this.eventData || this.eventData == null) 
+                return;
+            // Raycast for new key
+            let newKey = getKey(this.eventData.global, this.parent);
+
+            // If we drag out of the keyboard, stop
+            if(newKey == null) {
+                this.parent.release(this.eventData.currentKey.keyId);
+
+                this.eventData.dragging = false;
+            }
+            // If we moved to a new key, 
+            // release the old one and press this one
+            else if(newKey.keyId != this.eventData.currentKey.keyId){
+                this.parent.press(newKey.keyId, this.eventData.getLocalPosition(newKey).y);
+                this.parent.release(this.eventData.currentKey.keyId);
+                this.eventData.currentKey = newKey;
+            }
+        }
+        function getKey(position, root){
+            return renderer.plugins.interaction.hitTest(position, root);
+        }
     }
 }
 class OctaveButton extends Component {
@@ -661,7 +656,6 @@ class OctaveButton extends Component {
             this.texture = this.textures[BUTTON_TYPE[t + shift]];
     }
 }
-
 class Slider extends Component {
     /**
      * @param {number} x Position x

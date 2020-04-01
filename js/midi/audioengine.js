@@ -16,6 +16,7 @@ class AudioEngine {
         // Create the audiocontext
         var AudioContext = window.AudioContext || window.webkitAudioContext;
         this.audioContext = new AudioContext();
+        console.log(this.audioContext.outputLatency);
         this.velocity = true;
         this.resetEnvelope = true;
 
