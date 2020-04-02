@@ -61,7 +61,7 @@ class Controller extends PIXI.Sprite {
                 ["k", "K"], ["o"], ["l"], ["p"], [";"],  
                 [], [], [], [], [], [], [], []];
             var keyboard = new Keyboard(keyBindings, controller);
-            keyboard.position.set(34, 54);
+            keyboard.position.set(35, 54);
             
             controller.keyboard = keyboard;
             return keyboard;
@@ -77,9 +77,9 @@ class Controller extends PIXI.Sprite {
             }
             // Make sine animation
             let sineAnimation = new PIXI.AnimatedSprite(frames);
-            sineAnimation.animationSpeed = 0.3;
+            sineAnimation.animationSpeed = 0.5;
             // Position it correctly
-            sineAnimation.x = 176;
+            sineAnimation.x = 192;
             sineAnimation.y = 22;
             sineAnimation.play();
 
@@ -108,8 +108,8 @@ class Controller extends PIXI.Sprite {
             const y = [0, 0, 0, 0, 0, 0, 13, 13, 13, 13, 13, 13];
             const tooltips = ["A>shape", "A>attack", "A>sustain", "A>decay", "A>release", "A>gain", 
                                 "B>shape", "B>attack", "B>sustain", "B>decay", "B>release", "B>gain"];
-            const initialValues = [0, 1, 7, 4, 3, 7, 
-                                    1, 4, 1, 5, 4, 2];
+            const initialValues = [3, 2, 7, 4, 3, 7, 
+                                    1, 1, 1, 5, 4, 3];
             const types = [4, 8, 8, 8, 8, 8, 
                             4, 8, 8, 8, 8, 8];
             let callbacks = [
@@ -143,19 +143,20 @@ class Controller extends PIXI.Sprite {
             return knobs;
         }
         function setupSliders(tooltipSet) {
-            const x = [110, 118, 126, 134, 142, 150, 158, 166];
-            const initialValues = [9, 1, 5, 9, 0, 4, 3, 5];
-            const tooltips = [ "A>LFO freq.", "A>LFO gain", "A>filter", "B>filter",
-                             "B>shift", "delay time", "delay feedback", "slide speed"];
-            const neutralValues = [0, 0, 7, 7, 5, 5, 5, 5];
+            const x = [110, 118, 126, 134, 142, 150, 158, 166, 174, 182];
+            const initialValues = [9, 1, 5, 9, 0, 9, 3, 7, 0, 5];
+            const tooltips = [ "LFO freq.", "LFO gain", "filter A", "filter B",
+                             "detune B", "reverb resonance", "reverb dampening", "reverb wet/dry", "", "slide speed"];
             let callbacks = [
                 function (v) {audioEngine.lfo.frequency = v},
                 function (v) {audioEngine.lfo.gain = v / 10},
                 function (v) {audioEngine.filterA.frequency = v},
                 function (v) {audioEngine.filterB.frequency = v},
                 function (v) {audioEngine.oscillatorB.shift = v},
-                function (v) {audioEngine.delay.time = v/20},
-                function (v) {audioEngine.delay.feedback = v/20},
+                function (v) {audioEngine.reverb.resonance = v},
+                function (v) {audioEngine.reverb.dampening = v},
+                function (v) {audioEngine.reverb.wet = v / 10},
+                function (v) {},
                 function (v) {audioEngine.slideSpeed = v / 50;},
             ];
             let sliders = new PIXI.Container();
@@ -165,7 +166,6 @@ class Controller extends PIXI.Sprite {
                 let slider = new Slider(
                     x[i],
                     initialValues[i],
-                    neutralValues[i],
                     tooltips[i], // name
                     tooltipSet.create(tooltips[i], 'right'),
                     callbacks[i]
@@ -192,7 +192,7 @@ class Controller extends PIXI.Sprite {
 
             var octaveUp = new OctaveButton(
                 'up', 
-                17, 95,
+                18, 95,
                 controller,
                 controller.tooltipSet.create("[x] octave+"));
             
@@ -220,7 +220,7 @@ class Controller extends PIXI.Sprite {
             pitchWheel.resetOnEnd = true;
                     
             var modWheel = new Wheel(
-                17, 55,
+                18, 55,
                 "modwheel",
                 controller.tooltipSet.create("modulation"),
                 function (value) {audioEngine.mod.pan(1-value)});
@@ -439,8 +439,64 @@ class Keyboard extends PIXI.Container {
         this.shift.release = () => { if (!this.caps.isOn) controller.shiftStack(-1); }
 
         // Mouse/touch interaction system
+        this.inputs = [];
+        this.interactive = true;
+        this.buttonMode = true;
         this.interactiveChildren = true;
         this.dragging = false;
+        this.on('mousedown', onStart)
+            .on('touchstart', onStart)
+            .on('mouseup', onEnd)
+            .on('mouseupoutside', onEnd)
+            .on('touchend', onEnd)
+            .on('touchendoutside', onEnd)
+            .on('touchmove', onMove)
+            .on('mousemove', onMove);
+
+        function onStart(event){
+            // Grab event data
+            var data = event.data;
+            data.dragging = true;
+            
+            // Press the key under this position
+            let key = getKey(data.global, this);
+            data.currentKey = key;
+            this.press(key.keyId, data.getLocalPosition(key).y);
+
+            // Remember this for future events
+            this.inputs[event.data.identifier] = data;
+        }
+        function onEnd(event){
+            // If the drag has not already ended
+            if(this.inputs[event.data.identifier] != null && this.inputs[event.data.identifier].dragging){
+                this.release(this.inputs[event.data.identifier].currentKey.keyId);
+
+                this.inputs[event.data.identifier] = null;
+            }
+        }
+        function onMove(event){
+            if (!this.inputs[event.data.identifier] || this.inputs[event.data.identifier] == null) 
+                return;
+            // Raycast for new key
+            let newKey = getKey(this.inputs[event.data.identifier].global, this);
+
+            // If we drag out of the keyboard, stop
+            if(newKey == null) {
+                this.release(this.inputs[event.data.identifier].currentKey.keyId);
+
+                this.inputs[event.data.identifier] = null;
+            }
+            // If we moved to a new key, 
+            // release the old one and press this one
+            else if(newKey.keyId != this.inputs[event.data.identifier].currentKey.keyId){
+                this.press(newKey.keyId, this.inputs[event.data.identifier].getLocalPosition(newKey).y);
+                this.release(this.inputs[event.data.identifier].currentKey.keyId);
+                this.inputs[event.data.identifier].currentKey = newKey;
+            }
+        }
+        function getKey(position, root){
+            return renderer.plugins.interaction.hitTest(position, root);
+        }
     }
 
     release(keyId){
@@ -527,54 +583,6 @@ class Key extends Component {
         this.keyId = keyId;
 
         this.interactive = true;
-        this.on('mousedown', onStart)
-            .on('touchstart', onStart)
-            .on('mouseup', onEnd)
-            .on('mouseupoutside', onEnd)
-            .on('touchend', onEnd)
-            .on('touchendoutside', onEnd)
-            .on('touchmove', onMove)
-            .on('mousemove', onMove);
-
-        function onStart(event){
-            this.eventData = event.data;
-            this.eventData.dragging = true;
-            
-            let key = getKey(event.data.global, this.parent);
-            this.eventData.currentKey = key;
-            this.parent.press(key.keyId, this.eventData.getLocalPosition(key).y);
-        }
-        function onEnd(event){
-            // If the drag has not already ended
-            if(this.eventData != null && this.eventData.dragging){
-                this.parent.release(this.eventData.currentKey.keyId);
-
-                this.eventData = null;
-            }
-        }
-        function onMove(event){
-            if (!this.eventData || this.eventData == null) 
-                return;
-            // Raycast for new key
-            let newKey = getKey(this.eventData.global, this.parent);
-
-            // If we drag out of the keyboard, stop
-            if(newKey == null) {
-                this.parent.release(this.eventData.currentKey.keyId);
-
-                this.eventData.dragging = false;
-            }
-            // If we moved to a new key, 
-            // release the old one and press this one
-            else if(newKey.keyId != this.eventData.currentKey.keyId){
-                this.parent.press(newKey.keyId, this.eventData.getLocalPosition(newKey).y);
-                this.parent.release(this.eventData.currentKey.keyId);
-                this.eventData.currentKey = newKey;
-            }
-        }
-        function getKey(position, root){
-            return renderer.plugins.interaction.hitTest(position, root);
-        }
     }
 }
 class OctaveButton extends Component {
@@ -665,7 +673,7 @@ class Slider extends Component {
      * @param {PIXI.Container} tooltip Tooltip object
      * @param {*} callbackFunc Function to execute when this.value changes
      */
-    constructor(x, initialValue, neutralValue, name, tooltip, callbackFunc){
+    constructor(x, initialValue, name, tooltip, callbackFunc){
         let y = SLIDER_RANGE[1] - initialValue * 2; // y in 21,41
         super(PIXI.Loader.shared.resources.controller.spritesheet.textures["slider.png"],
         x, y, 3, 3, name, 10, initialValue, tooltip, callbackFunc);

@@ -1,5 +1,6 @@
 // Globals
 const DEBUG = false;
+var scaleModifier = 0;
 var onMobile;
 var audioEngine;
 var controller;
@@ -31,9 +32,9 @@ function main(){
     onMobile = isMobile();
 
     loader
-    .add("tooltipFont", "../sprite/pixelmix.fnt")
-    .add("ui", "../sprite/ui.json")
-    .add("controller", "../sprite/controller.json")
+    .add("tooltipFont", "img/pixelmix.fnt")
+    .add("ui", "img/ui.json")
+    .add("controller", "img/controller.json")
     .load(setup);
 
     function setup() {
@@ -43,9 +44,22 @@ function main(){
         var overlay = createOverlay();
 
 
+        // Attach size modifier
+        var scaleUp = keybind("=");
+        scaleUp.press = (event) => { 
+            if(!event.getModifierState("Control"))
+                return;
+            scaleModifier++; 
+            sizeRenderer();}
+        var scaleUp = keybind("-");
+        scaleUp.press = (event) => { 
+            if(!event.getModifierState("Control"))
+                return;
+            scaleModifier--; 
+            sizeRenderer();}
+
         // Resize handler
         window.addEventListener('resize', sizeRenderer);
-
         // Arrange everything
         sizeRenderer();
 
@@ -53,6 +67,7 @@ function main(){
         stage.addChild(controller); 
         stage.addChild(overlay);
 
+        ticker.maxFPS = 30;
         ticker.add(() => { renderer.render(stage); });
         ticker.start();
 
@@ -86,6 +101,11 @@ function main(){
             }
             scale = Math.min(w,h);
             scale = Math.min(scale, 6);
+            scale += scaleModifier;
+
+            if(scale == 0)
+                alert("Where did you find a screen this small? Sorry, content won't fit!");
+
             // Rescale
             controller.scale.set(scale);
             overlay.scale.set(scale);

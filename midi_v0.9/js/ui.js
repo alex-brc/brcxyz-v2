@@ -234,12 +234,12 @@ function createOverlay(){
     if(onMobile){
         text = "hey there you! " + "\nbefore you go on ahead, you should " +
         "really go into fullscreen, it's just nicer don't you think? " + 
-        "also, if you're confused, tap the help icon above. \nhave fun! \n\ngo fullscreen?";
+        "also, if you're feeling lost, tap the \"?\" icon above. \nhave fun! \n\ngo fullscreen?";
     }
     else {
         text = "hi there! " + "\nbefore you go on ahead, you should know " +
         "you can also control this synth with a midi controller! " +
-        "i know, right? also, if you're feeling confused, tap the help " + 
+        "i know, right? also, if you're feeling lost, click the \"?\" " + 
         "icon above to show tooltips. \n\nhave fun! ";
     }
 

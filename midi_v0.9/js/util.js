@@ -11,7 +11,7 @@ function keybind(value) {
     key.downHandler = event => {
         if (event.key === key.value) {
             if (key.isUp && key.press) {
-                key.press();
+                key.press(event);
             }
             key.isDown = true;
             key.isUp = false;
@@ -22,7 +22,8 @@ function keybind(value) {
     //The `upHandler`
     key.upHandler = event => {
         if (event.key === key.value) {
-            if (key.isDown && key.release) key.release();
+            if (key.isDown && key.release) 
+                key.release(event);
             key.isDown = false;
             key.isUp = true;
             event.preventDefault();
