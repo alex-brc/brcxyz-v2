@@ -2,7 +2,6 @@ var noteRange = [48, 72];
 var currentOctave = 4;
 
 class Controller extends PIXI.Sprite {
-    _noteStack;
     constructor(anchorX, anchorY) {
         // Alias resources
         var spritesheet = PIXI.Loader.shared.resources.controller.spritesheet;
@@ -16,25 +15,6 @@ class Controller extends PIXI.Sprite {
         this._noteStack = [];
         this.tooltipSet = new TooltipSet();
         this.tooltipSet.visible = false;
-
-        // Set up MIDI here
-        this.midiAccess = null;
-        navigator.requestMIDIAccess()
-        .then(onMIDISuccess, onMIDIFailure);
-
-        function onMIDIFailure() {console.log("No midi")};
-        function onMIDISuccess(midiAccess) {
-            controller.midiAccess = midiAccess;
-            // Add listeners to all midi inputs
-            for (var input of midiAccess.inputs.values()){
-                input.onmidimessage = Controller.processMIDIMessage;
-            }
-
-            // If a new device is input, listen to it
-            midiAccess.onstatechange = (e) => {
-                e.port.onmidimessage = Controller.processMIDIMessage;
-            }
-        }
 
         // Setup all the components of the keyboard
         this.addChild(setupSine(this));
@@ -106,8 +86,8 @@ class Controller extends PIXI.Sprite {
             // - 12x, - 27y
             const x = [0, 15, 30, 45, 60, 75, 5, 20, 35, 50, 65, 80]
             const y = [0, 0, 0, 0, 0, 0, 13, 13, 13, 13, 13, 13];
-            const tooltips = ["A>shape", "A>attack", "A>sustain", "A>decay", "A>release", "A>gain", 
-                                "B>shape", "B>attack", "B>sustain", "B>decay", "B>release", "B>gain"];
+            const tooltips = ["shape", "attack", "sustain", "decay", "release", "gain", 
+                                "shape", "attack", "sustain", "decay", "release", "gain"];
             const initialValues = [3, 2, 7, 4, 3, 7, 
                                     1, 1, 1, 5, 4, 3];
             const types = [4, 8, 8, 8, 8, 8, 
@@ -144,20 +124,21 @@ class Controller extends PIXI.Sprite {
         }
         function setupSliders(tooltipSet) {
             const x = [110, 118, 126, 134, 142, 150, 158, 166, 174, 182];
-            const initialValues = [9, 1, 5, 9, 0, 9, 3, 7, 0, 5];
-            const tooltips = [ "LFO freq.", "LFO gain", "filter A", "filter B",
-                             "detune B", "reverb resonance", "reverb dampening", "reverb wet/dry", "", "slide speed"];
+            const initialValues = [0, 9, 2, 9, 1, 6, 1, 3, 8, 7];
+            const tooltips = [ "detune B", "lowpass", "highpass", "LFO freq.", "LFO gain", 
+                                "delay time", "delay feedback", 
+                                "reverb resonance", "reverb dampening", "reverb wet/dry"];
             let callbacks = [
+                function (v) {audioEngine.oscillatorB.shift = v},
+                function (v) {audioEngine.lowpass.frequency = v},
+                function (v) {audioEngine.highpass.frequency = v},
                 function (v) {audioEngine.lfo.frequency = v},
                 function (v) {audioEngine.lfo.gain = v / 10},
-                function (v) {audioEngine.filterA.frequency = v},
-                function (v) {audioEngine.filterB.frequency = v},
-                function (v) {audioEngine.oscillatorB.shift = v},
+                function (v) {audioEngine.delay.time = v / 20},
+                function (v) {audioEngine.delay.feedback = v / 10},
                 function (v) {audioEngine.reverb.resonance = v},
                 function (v) {audioEngine.reverb.dampening = v},
                 function (v) {audioEngine.reverb.wet = v / 10},
-                function (v) {},
-                function (v) {audioEngine.slideSpeed = v / 50;},
             ];
             let sliders = new PIXI.Container();
             sliders.name = "Sliders";
@@ -188,13 +169,13 @@ class Controller extends PIXI.Sprite {
                 'down', 
                 5, 95,
                 controller,
-                controller.tooltipSet.create("[z] octave-"));
+                controller.tooltipSet.create("octave-"));
 
             var octaveUp = new OctaveButton(
                 'up', 
                 18, 95,
                 controller,
-                controller.tooltipSet.create("[x] octave+"));
+                controller.tooltipSet.create("octave+"));
             
             // Cross link them
             octaveUp.other = octaveDown;
@@ -210,7 +191,7 @@ class Controller extends PIXI.Sprite {
             wheels.name = "Wheels";
                 
             var pitchWheel = new Wheel(
-                5, 55,
+                5, 55, 1,
                 "pitchwheel",
                 controller.tooltipSet.create("pitch"),
                 function (value) {
@@ -220,7 +201,7 @@ class Controller extends PIXI.Sprite {
             pitchWheel.resetOnEnd = true;
                     
             var modWheel = new Wheel(
-                18, 55,
+                18, 55, 2,
                 "modwheel",
                 controller.tooltipSet.create("modulation"),
                 function (value) {audioEngine.mod.pan(1-value)});
@@ -269,7 +250,7 @@ class Controller extends PIXI.Sprite {
         }
         // If the last active key is depressed, stop
         if(this._noteStack.length == 0){
-            audioEngine.stop();
+            audioEngine.release();
         }// Else play the last key that was pressed
         else{
             this.press(this._noteStack.last());
@@ -509,7 +490,7 @@ class Keyboard extends PIXI.Container {
 
     press(keyId, y){
         var key = this.keys[keyId];
-        y = y || key.height / 2;
+        y = y || key.height * 3 / 4;
         let pitch = key.keyId + noteRange[0];
         if(this.shift.isDown || this.caps.isOn)
             pitch += 12;
@@ -785,9 +766,9 @@ class Knob extends Component {
     }
 }
 class Wheel extends Component {
-    constructor(x, y, name, tooltip, callbackFunc){
+    constructor(x, y, initialValue, name, tooltip, callbackFunc){
         var texture = PIXI.Loader.shared.resources.controller.spritesheet.textures["touch-wheel.png"];
-        super(texture, x, y, 0, 0, name, 2, 1, tooltip, callbackFunc);
+        super(texture, x, y, 0, 0, name, 2, initialValue, tooltip, callbackFunc);
 
         // Define effective y range (to improve usability and accuracy)
         this.yRange = [2, 36];

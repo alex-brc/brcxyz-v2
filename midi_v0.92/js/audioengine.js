@@ -1,23 +1,24 @@
 /** Detune in fixed intervals:-8ve, -M7, -p5, -M3, -m3, 0, +m3, +M3, +p5, +M7, 8ve*/
 const SHIFT_CURVE = [-1200, -1100, -700, -400, -300, 0, +300, +400, +700, +1100, +1200];
-/** This is me trying to cram both a lowpass and a highpass onto a single slider */
-const CUTOFF_CURVE = [300, 700, 1800, 2000, 4000, 7500, 10000, 0, 300, 700, 1800];
+const LOWPASS_CURVE = [150, 400, 700, 1200, 3000, 3500, 4000, 5000, 6000, 7000, 10000];
+const HIGHPASS_CURVE = [50, 150, 250, 450, 650, 800, 1000, 1200, 1500, 2000, 3000];
+const DAMPENING_CURVE = [100, 300, 600, 1000, 2000, 4000, 6500, 8000, 10000, 14000, 19000];
 const RELEASE_CURVE = [0, 0.1, 0.2, 0.3, 0.6, 1, 1.5, 2.5];
 const ATTACK_CURVE = [0, 0.02, 0.05, 0.1, 0.3, 0.5, 0.8, 1.2];
 const FREQUENCY_CURVE = [0, 1/8, 1/2, 1, 2, 3, 5, 8, 12, 16, 20];
-const DEFAULT_VOLUME = 0.5;
+const COMB_FILTER_TUNINGS = [1557, 1617, 1491, 1422, 1277, 1356, 1188, 1116].map(dps => dps / 44100); // Sample rate = 44100
+const ALLPASS_FREQUENCES = [225, 556, 441, 341]; // All this? Magic.
+const DEFAULT_VOLUME = 0.8;
 
 class AudioEngine {
-    _gainM; 
-    _noteOn = false; 
-    _currentNote; 
-    
     constructor(){
         // Create the audiocontext
         var AudioContext = window.AudioContext || window.webkitAudioContext;
         this.audioContext = new AudioContext();
+        this._noteOn = false;
         this.velocity = true;
         this.resetEnvelope = true;
+        this.slideSpeed = 0.1;
 
         // Final node, used to control velocity
         this._gainM = this.audioContext.createGain();
@@ -25,32 +26,41 @@ class AudioEngine {
         // Generate Components
         this.oscillatorA = new Oscillator(this.audioContext);
         this.oscillatorB = new Oscillator(this.audioContext);
-        this.filterA = new Filter(this.audioContext);
-        this.filterB = new Filter(this.audioContext);
         this.envelopeA = new Envelope(this.audioContext);
         this.envelopeB = new Envelope(this.audioContext);
+        this.lowpass = new Filter(this.audioContext, 'lowpass');
+        this.highpass = new Filter(this.audioContext, 'highpass');
         this.lfo = new LFO(this.audioContext);
-        this.reverb = new Freeverb(this.audioContext);
         this.mod = new GainPan(this.audioContext);
-        
+        this.delay = new Delay(this.audioContext);
+        this.reverb = new Freeverb(this.audioContext);
+
         // Connect everything 
         // Path A
         this.oscillatorA.node.connect(this.mod.left);
-        this.mod.left.connect(this.lfo.node);
-        this.lfo.node.connect(this.filterA.node);
-        this.filterA.node.connect(this.envelopeA.node);
-        this.envelopeA.node.connect(this._gainM);
+        this.mod.left.connect(this.envelopeA.node);
+        this.envelopeA.node.connect(this.lowpass.node);
 
         // Path B
         this.oscillatorB.node.connect(this.mod.right);
-        this.mod.right.connect(this.filterB.node);
-        this.filterB.node.connect(this.envelopeB.node);
-        this.envelopeB.node.connect(this._gainM);
+        this.mod.right.connect(this.envelopeB.node);
+        this.envelopeB.node.connect(this.lowpass.node);
 
-        this._gainM.connect(this.reverb.input);
-        this.reverb.output.connect(this.audioContext.destination);
+        // Common
+        this.lowpass.node.connect(this.highpass.node);
+        this.highpass.node.connect(this.lfo.node);
+        this.lfo.node.connect(this.delay.input);
+        this.delay.output.connect(this.reverb.input);
+        this.reverb.output.connect(this._gainM);
+        this._gainM.connect(this.audioContext.destination);
+    }
 
-        // Start everything
+    // Activate the engine
+    start(){
+        // Wake up if suspended
+        if(this.audioContext.state === 'suspended')
+            this.audioContext.resume();
+            
         this._gainM.gain.value = 1;
         this.lfo.start(0);
         this.oscillatorA.start(0);
@@ -98,7 +108,7 @@ class AudioEngine {
         }
     }
 
-    stop() {
+    release() {
         if(this.audioContext.state === 'suspended')
             this.audioContext.resume();
         
@@ -110,13 +120,11 @@ class AudioEngine {
     }
 }
 
-
 class Oscillator {
-    _oscillator;
-    _shift = 0; // Meant for long term detuning
-    _detune = 0; // Meant for short term detuning (e.g. pitch wheels)
-
     constructor(audioContext){
+        this._shift = 0; // Long term pitch shift
+        this._detune = 0; // Pitch wheel
+
         this.audioContext = audioContext;
         this._oscillator = audioContext.createOscillator();
         this.node = audioContext.createGain();
@@ -176,17 +184,15 @@ class Oscillator {
 /** An implementation of Freeverb following Anton Miselaytes' tutorial at 
  * https://itnext.io/algorithmic-reverb-and-web-audio-api-e1ccec94621a 
  */
-const COMB_FILTER_TUNINGS = [1557, 1617, 1491, 1422, 1277, 1356, 1188, 1116].map(dps => dps / 44100); // Sample rate = 44100
-const ALLPASS_FREQUENCES = [225, 556, 441, 341]; // All this? Magic.
 class Freeverb {
     constructor(audioContext){
         this.audioContext = audioContext;
         this.input = audioContext.createGain();
         this.output = audioContext.createGain();
-        
-        this._wet = audioContext.createGain();
         this._dry = audioContext.createGain();
-        this._merger = new ChannelMergerNode(audioContext, {numberOfInputs: 2});
+        this._wet = audioContext.createGain();
+        
+        this._merger = audioContext.createChannelMerger(2);
         this._doubler = {};
         this._doubler.left = audioContext.createGain();
         this._doubler.right = audioContext.createGain();
@@ -206,9 +212,14 @@ class Freeverb {
             delay => new CombFilter(audioContext, delay));
         const combsLeft = this._combFilters.slice(0, 4);
         const combsRight = this._combFilters.slice(4);
-        this._allPassFilters = ALLPASS_FREQUENCES.map(
-            frequency => new BiquadFilterNode(audioContext, {type: 'allpass', frequency}));
-
+        this._allPassFilters = [];
+        for(var frequency of ALLPASS_FREQUENCES){
+            var allpass = audioContext.createBiquadFilter();
+            allpass.type = 'allpass';
+            allpass.frequency.value = frequency;
+            this._allPassFilters.push(allpass);
+        }
+        
         // Connect each set of comb filters to their respective channel
         combsLeft.forEach(combFilter => { // Channel 1
             // Route left channel into comb
@@ -234,7 +245,7 @@ class Freeverb {
     get wet() { return this._wet.gain.value; }
     set wet(value) {
         this._wet.gain.setTargetAtTime(value, this.audioContext.currentTime, 0.001);
-        this._dry.gain.setTargetAtTime(1-value/2, this.audioContext.currentTime, 0.001);
+        this._dry.gain.setTargetAtTime((1-value)/2, this.audioContext.currentTime, 0.001);
     }
 
     get resonance() { return this._combFilters[0].resonance; }
@@ -252,7 +263,6 @@ class Freeverb {
     }
 }
 
-const DAMPENING_CURVE = [100, 300, 600, 1000, 2000, 4000, 6500, 8000, 10000, 14000, 19000];
 class CombFilter {
     constructor(audioContext, delay){
         this.audioContext = audioContext;
@@ -288,9 +298,6 @@ class CombFilter {
 }
 
 class LFO extends Oscillator {
-    _gain; 
-    _constant; 
-
     constructor(audioContext){
         super(audioContext);
         // Oscillator and node were previously connected
@@ -301,12 +308,13 @@ class LFO extends Oscillator {
         
         this._oscillator.connect(this._gain);
         this._constant.connect(this._gain);
-        this._gain.connect(this.node.gain);
+        this._gain.connect(this.node.gain)
     }
 
     get frequency(){ return this._oscillator.frequency.value; }
-    set frequency(value){
-        value = FREQUENCY_CURVE[value];
+    set frequency(value){ 
+        // Value is in [0, 10]
+        value = value * value / 5; // Square in [0, 20];
         this._oscillator.frequency.setTargetAtTime(value, this.audioContext.currentTime, 0.001);
     }
 
@@ -321,30 +329,42 @@ class LFO extends Oscillator {
 }
 
 class Filter {
-    constructor(audioContext){
+    constructor(audioContext, type){
         this.audioContext = audioContext;
+        this.setValue = 0;
         this.node = audioContext.createBiquadFilter();
+        this.node.type = type;
     }
 
     get frequency() { return this.node.frequency.value }
     set frequency(value) {
-        // Set filtering algorithm
-        this.node.type = (value >= 7) ? 'highpass' : 'lowpass';
-        // Select frequency from curve
-        this.node.frequency.setTargetAtTime(CUTOFF_CURVE[value], this.audioContext.currentTime, 0.001);
+        if(this.node.type == 'lowpass')
+            value = LOWPASS_CURVE[value];
+        else if(this.node.type == 'highpass')
+            value = HIGHPASS_CURVE[value];
+
+        this.setValue = value;
+        this.node.frequency.setTargetAtTime(value, this.audioContext.currentTime, 0.001);
+    }
+
+    get q() { return this.node.Q.value; }
+    set q(value) {
+        // 1/2q = 0.1 -> 1 so 1/q = 0.2 -> 2 so q = 1/0.2 <- 1/2 so q = 5 <- 0.5
+        value = remap(value, [0, 10], [0.25, 5]);
+        this.node.Q.setTargetAtTime(value, this.audioContext.currentTime, 0.001);
     }
 }
 /** The play() and stop() methods interact with this class 
  * to control the output of the oscillators, instead of their respective
  * gain nodes. */
 class Envelope {
-    _sustain;
-    _open;
-    _attack; 
-    _release;
-    decay;
-    
     constructor(audioContext){
+        this._open = false;
+        this._sustain = 0;
+        this._attack = 0;
+        this._release = 0;
+        this.decay = 0;
+
         this.audioContext = audioContext;
         this.node = audioContext.createGain();
         this.node.gain.value = 0;
@@ -366,7 +386,7 @@ class Envelope {
         this.reset(0);
         // RELEASE to 0 gain
         let dt = delay + this._release;
-        this.node.gain.linearRampToValueAtTime(0.0001, this.audioContext.currentTime + dt); 
+        this.node.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + dt);
     }
     
     reset(delay) {
@@ -392,7 +412,6 @@ class Envelope {
     }
 }
 class Delay {
-    _feedback; _delay;
     constructor(audioContext){
         this.audioContext = audioContext;
 
@@ -401,7 +420,6 @@ class Delay {
         this._feedback = audioContext.createGain();
         this.output = audioContext.createGain();
 
-        // Loopdy looooooooop looooooop loooop loop lop lp l .
         this.input.connect(this._feedback);
         this._delay.connect(this._feedback);
         this._feedback.connect(this._delay);
@@ -421,6 +439,7 @@ class Delay {
     }
 
 }
+
 /** Not stereo, just two regular gains. Faking modulating oscillators */
 class GainPan {
     constructor(audioContext){

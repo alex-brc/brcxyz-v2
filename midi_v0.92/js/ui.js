@@ -212,7 +212,7 @@ function createOverlay(){
     var root = new PIXI.Container();
     root.buttons = new PIXI.Container();
     root.buttons.name = "Buttons";
-    var dummyTex = new PIXI.NineSlicePlane(PIXI.Loader.shared.resources.ui.textures["dummy-texture.png"], 0, 0, 0, 0);
+    var transparent = new PIXI.NineSlicePlane(PIXI.Loader.shared.resources.ui.textures["dummy-texture.png"], 0, 0, 0, 0);
 
     // Create tooltips for buttons
     root.tooltipSet = new TooltipSet();
@@ -221,8 +221,7 @@ function createOverlay(){
 
     // Tooltip toggle button
     root.buttons.tooltips = new Button("?", undefined, {x: 1, y: 0}, 
-        root.tooltipSet.create("tooltips", 'right', {x: 1.05, y: -1}),
-        dummyTex, dummyTex);
+        undefined, transparent, transparent);
     root.buttons.tooltips.face = new PIXI.Sprite(PIXI.Loader.shared.resources.ui.textures["question.png"]);
     root.buttons.tooltips.isToggle = true;
     root.buttons.tooltips.onOff = false
@@ -237,10 +236,14 @@ function createOverlay(){
         "also, if you're feeling lost, tap the \"?\" icon above. \nhave fun! \n\ngo fullscreen?";
     }
     else {
+        var t = "... but it seems your browser doesn't support it :(. ";
+        if(haveMidi)
+            t =  ", it connects automatically when you plug it in! "
+        
         text = "hi there! " + "\nbefore you go on ahead, you should know " +
-        "you can also control this synth with a midi controller! " +
-        "i know, right? also, if you're feeling lost, click the \"?\" " + 
-        "icon above to show tooltips. \n\nhave fun! ";
+        "you can also control this synth with a midi controller" + t +
+        "also, if you're feeling lost, click the \"?\" " + 
+        "icon above to show tooltips. \nhave fun! ";
     }
 
     root.windows = new PIXI.Container();
@@ -264,10 +267,18 @@ function createOverlay(){
     root.windows.fullscreen.buttonYeah = new Button("yeah!", {x: 60, y: 18}, {x: 0, y: 1});
     root.windows.fullscreen.buttonNah.position.set(root.windows.fullscreen.width / 2 - 3, root.windows.fullscreen.height - 6);
     root.windows.fullscreen.buttonYeah.position.set(root.windows.fullscreen.width / 2 + 3, root.windows.fullscreen.height - 6);
-    root.windows.fullscreen.buttonNah.onClick = () => { root.windows.fullscreen.visible = false; }
+    root.windows.fullscreen.buttonNah.onClick = () => {
+        // Start AudioEngine
+        audioEngine.start(); 
+        root.windows.fullscreen.visible = false;
+     }
     root.windows.fullscreen.buttonYeah.onClick = () => { 
+        // Start AudioEngine
+        audioEngine.start();
         // Go fullscreen
-        document.getElementById('pixicanvas').requestFullscreen();
+        var canvas = document.getElementById("pixicanvas");
+        req = canvas.requestFullScreen || canvas.webkitRequestFullScreen || canvas.mozRequestFullScreen;
+        req.call(canvas);
         root.windows.fullscreen.visible = false; }
     
     // Desktop
@@ -275,6 +286,7 @@ function createOverlay(){
     root.windows.fullscreen.buttonLetsgo.position.set(root.windows.fullscreen.width / 2, root.windows.fullscreen.height - 6);
     root.windows.fullscreen.buttonLetsgo.onClick = () => { 
         // Start AudioEngine
+        audioEngine.start();
         // Hide this
         root.windows.fullscreen.visible = false;}
 
