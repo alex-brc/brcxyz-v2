@@ -669,9 +669,9 @@ class Slider extends Component {
 
         // Bind interactions
         this.on('mousedown', onDragStart).on('touchstart', onDragStart)
-            .on('mouseup', onDragEnd).on('mouseupoutside', onDragEnd)
-            .on('touchend', onDragEnd).on('touchendoutside', onDragEnd)
-            .on('mousemove', onDragMove).on('touchmove', onDragMove);
+            .on('mouseup', onDragEnd).on('touchend', onDragEnd)
+            .on('mousemove', onDragMove).on('touchmove', onDragMove)
+            .on('mouseupoutside', onDragEnd).on('touchendoutside', onDragEnd);
         this.buttonMode = true;
         this.interactive = true;
         
@@ -731,14 +731,40 @@ class Knob extends Component {
         this.textures = textures;
         this.value = initialValue;
         // Bind interactions
-        this.on('click', onDown)
-            .on('tap', onDown);
+        this.on('click', onClick)
+            .on('tap', onClick)
+            .on('mousedown', onDragStart).on('touchstart', onDragStart)
+            .on('mouseup', onDragEnd).on('touchend', onDragEnd)
+            .on('mousemove', onDragMove).on('touchmove', onDragMove)
+            .on('mouseupoutside', onDragEnd).on('touchendoutside', onDragEnd);
+
         this.buttonMode = true;
         this.interactive = true;
 
-        function onDown(event) {
+        function onClick(event) {
             this.value++;
         }
+        function onDragStart(event) {
+            this.eventData = event.data;
+            this.eventData.startingValue = this.value;
+            this.dragging = true;
+        }
+        function onDragEnd(event) {
+            this.eventData = null;
+            this.dragging = false;
+        }
+        function onDragMove(event) {
+            if (this.dragging) {
+                var newPosition = this.eventData.getLocalPosition(this);
+                let delta = -(round(newPosition.y, 4)) / 4;
+                var newValue = this.eventData.startingValue + delta;
+                newValue = Math.max(0, newValue);
+                newValue = Math.min(newValue, 7);
+                console.log(newValue);
+                this.value = newValue;
+            }
+        }
+
     }
 
     /**
