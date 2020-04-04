@@ -86,8 +86,8 @@ class Controller extends PIXI.Sprite {
             // - 12x, - 27y
             const x = [0, 15, 30, 45, 60, 75, 5, 20, 35, 50, 65, 80]
             const y = [0, 0, 0, 0, 0, 0, 13, 13, 13, 13, 13, 13];
-            const tooltips = ["shape", "attack", "sustain", "decay", "release", "gain", 
-                                "shape", "attack", "sustain", "decay", "release", "gain"];
+            const tooltips = ["shape A", "attack A", "sustain A", "decay A", "release A", "gain A", 
+                                "shape B", "attack B", "sustain B", "decay B", "release B", "gain B"];
             const initialValues = [3, 2, 7, 4, 3, 7, 
                                     1, 1, 1, 5, 4, 3];
             const types = [4, 8, 8, 8, 8, 8, 
@@ -125,7 +125,7 @@ class Controller extends PIXI.Sprite {
         function setupSliders(tooltipSet) {
             const x = [110, 118, 126, 134, 142, 150, 158, 166, 174, 182];
             const initialValues = [0, 9, 2, 9, 1, 6, 1, 3, 8, 7];
-            const tooltips = [ "detune B", "lowpass", "highpass", "LFO freq.", "LFO gain", 
+            const tooltips = [ "detune B", "lowpass filter", "highpass filter", "LFO frequency", "LFO amplitude", 
                                 "delay time", "delay feedback", 
                                 "reverb resonance", "reverb dampening", "reverb wet/dry"];
             let callbacks = [
@@ -193,7 +193,7 @@ class Controller extends PIXI.Sprite {
             var pitchWheel = new Wheel(
                 5, 55, 1,
                 "pitchwheel",
-                controller.tooltipSet.create("pitch"),
+                controller.tooltipSet.create("pitch wheel"),
                 function (value) {
                     audioEngine.oscillatorA.detune = (1-value) * 200; // 200 cents max up and down
                     audioEngine.oscillatorB.detune = (1-value) * 200; 
@@ -201,9 +201,9 @@ class Controller extends PIXI.Sprite {
             pitchWheel.resetOnEnd = true;
                     
             var modWheel = new Wheel(
-                18, 55, 2,
+                18, 55, 1,
                 "modwheel",
-                controller.tooltipSet.create("modulation"),
+                controller.tooltipSet.create("modulation wheel"),
                 function (value) {audioEngine.mod.pan(1-value)});
 
             wheels.addChild(modWheel);
@@ -539,8 +539,11 @@ class Component extends PIXI.Sprite {
         this.value = initialValue;
         if(tooltip){
             this.tooltip = tooltip;
-            this.on('mouseover', TooltipSet.showTooltip)
-                .on('mouseout', TooltipSet.hideTooltip)
+            if(!onMobile)
+                this.on('mouseover', TooltipSet.showTooltipOnHover)
+                    .on('mouseout', TooltipSet.hideTooltip);
+            else
+                this.on('touchstart', TooltipSet.showTooltipOnTap);
         }
     }
 

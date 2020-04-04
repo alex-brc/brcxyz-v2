@@ -186,6 +186,7 @@ class TooltipSet extends PIXI.Container {
         tooltip.set = this;
         tooltip.addChild(bg);
         tooltip.addChild(text);
+        tooltip.primaryAnchor = anchor;
         tooltip.pivot.x = tooltip.width * anchor.x;
         tooltip.pivot.y = tooltip.height * anchor.y;
         tooltip.visible = false;
@@ -199,9 +200,25 @@ class TooltipSet extends PIXI.Container {
         return tooltip;
     }
 
-    static showTooltip(event) {
+    static showTooltipOnHover(event) {
         this.tooltip.visible = true;
         this.tooltip.position = this.position;
+    }
+    static showTooltipOnTap(event){
+        if(!this.tooltip.parent.visible)
+            return;
+        // Hide previously shown tooltip
+        if(this.tooltip.set.previous)
+            this.tooltip.set.previous.visible = false;
+        // Position this in top left corner
+        this.tooltip.pivot.x = 0;
+        this.tooltip.pivot.y = 0;
+        this.tooltip.position = this.tooltip.parent.toLocal({x: 0, y: 0});
+        // Show it
+        this.tooltip.visible = true;
+        this.tooltip.set.previous = this.tooltip;
+        // Hide it after a few seconds
+        setTimeout(() => {this.tooltip.visible = false}, 2000);
     }
     static hideTooltip(event) {
         this.tooltip.visible = false;
