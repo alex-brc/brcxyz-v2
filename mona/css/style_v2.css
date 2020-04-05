@@ -1,6 +1,7 @@
 body {
     background-color: #F9C1BF;
     margin: 0;
+    overflow: hidden;
 }
 
 img {
@@ -19,13 +20,22 @@ img {
     align-items: center;
     flex-direction: row;
     
-    background-image: url(../img/mona_man.webp);
     background-position: center;
     background-repeat: no-repeat;
     background-size: contain;
 }
 
+.webp #centerer {
+    background-image: url(../img/mona_man.webp);
+}
 
+.no-webp #centerer { 
+    background-image: url(../img/mona_man.gif);
+}
+
+.no-js #centerer { 
+    background-image: url(../img/mona_man.gif);
+}
 
 @media only screen and (orientation: portrait) {
     #centerer {
