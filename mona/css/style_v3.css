@@ -8,12 +8,14 @@ img {
     top: 0;
     left: 25vw;
     height: 100vh;
+    height: calc(var(--vh, 1vh) * 100);
 }
 
 #centerer {
     position: absolute;
     width: 100vw;
     height: 100vh;
+    height: calc(var(--vh, 1vh) * 100);
 
     display: flex;
     justify-content: center;
@@ -44,6 +46,7 @@ img {
 
     .text {
         margin: 22vh;
+        margin: calc(var(--vh, 1vh) * 22);
     }
 }
 
