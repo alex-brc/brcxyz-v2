@@ -4,13 +4,11 @@ var currentOctave = 4;
 class Controller extends PIXI.Sprite {
     constructor(anchorX, anchorY) {
         // Alias resources
-        var spritesheet = PIXI.Loader.shared.resources.controller.spritesheet;
-        var buttonsheet = PIXI.Loader.shared.resources.controller.spritesheet;
+        var spritesheet = PIXI.Loader.shared.resources.sprites.spritesheet;
 
         // Make this
         super(spritesheet.textures["base.png"]);
         this.spritesheet = spritesheet;
-        this.buttonsheet = buttonsheet;
         
         this._noteStack = [];
         this.tooltipSet = new TooltipSet();
@@ -40,7 +38,7 @@ class Controller extends PIXI.Sprite {
                 ["f", "F"], ["t", "T"], ["g", "G"], ["y", "Y"], ["h", "H"], ["u", "U"], ["j", "J"], 
                 ["k", "K"], ["o"], ["l"], ["p"], [";"],  
                 [], [], [], [], [], [], [], []];
-            var keyboard = new Keyboard(keyBindings, controller);
+            var keyboard = new brcKeyboard(keyBindings, controller);
             keyboard.position.set(35, 54);
             
             controller.keyboard = keyboard;
@@ -53,7 +51,7 @@ class Controller extends PIXI.Sprite {
                 str = i;
                 if(i < 10)
                     str = "0" + str;
-                frames.push(controller.buttonsheet.textures[str + ".png"]);
+                frames.push(controller.spritesheet.textures[str + ".png"]);
             }
             // Make sine animation
             let sineAnimation = new PIXI.AnimatedSprite(frames);
@@ -70,8 +68,8 @@ class Controller extends PIXI.Sprite {
         function setupKnobs(tooltipSet) {
             // First, prepare the textures for them
             var textureSet = [];
-            var sTex = buttonsheet.textures["straight-knob.png"];
-            var dTex = buttonsheet.textures["diagonal-knob.png"];
+            var sTex = spritesheet.textures["straight-knob.png"];
+            var dTex = spritesheet.textures["diagonal-knob.png"];
             textureSet.push(sTex);
             textureSet.push(dTex);
             for(var rotate = 6; rotate > 0; rotate -= 2){
@@ -86,29 +84,30 @@ class Controller extends PIXI.Sprite {
             // - 12x, - 27y
             const x = [0, 15, 30, 45, 60, 75, 5, 20, 35, 50, 65, 80]
             const y = [0, 0, 0, 0, 0, 0, 13, 13, 13, 13, 13, 13];
-            const tooltips = ["shape A", "attack A", "sustain A", "decay A", "release A", "gain A", 
-                                "shape B", "attack B", "sustain B", "decay B", "release B", "gain B"];
-            const initialValues = [3, 2, 7, 4, 3, 7, 
-                                    1, 1, 1, 5, 4, 3];
-            const types = [4, 8, 8, 8, 8, 8, 
-                            4, 8, 8, 8, 8, 8];
+            const tooltips = ["attack A", "sustain A", "decay A", "release A", "gain A", "gain B",
+                                "shape A", "shape B", "attack B", "sustain B", "decay B", "release B"];
+            const initialValues = [2, 7, 4, 3, 7, 3,
+                                    1, 3, 1, 1, 5, 4];
+            const types = [8, 8, 8, 8, 8, 8,
+                            4, 4, 8, 8, 8, 8];
             let callbacks = [
-                function (v) {audioEngine.oscillatorA.shape = v},
                 function (v) {audioEngine.envelopeA.attack = v},
                 function (v) {audioEngine.envelopeA.sustain = remap(v, [0,7], [0, 0.5])},
                 function (v) {audioEngine.envelopeA.decay = remap(v, [0,7], [0, 1])},
                 function (v) {audioEngine.envelopeA.release = v},
                 function (v) {audioEngine.oscillatorA.gain = remap(v, [0,7], [0, 1])},  
+                function (v) {audioEngine.oscillatorB.gain = remap(v, [0,7], [0, 1])},
+
                 function (v) {audioEngine.oscillatorB.shape = v},
+                function (v) {audioEngine.oscillatorA.shape = v},
                 function (v) {audioEngine.envelopeB.attack = v},
                 function (v) {audioEngine.envelopeB.sustain = remap(v, [0,7], [0, 0.5])},
                 function (v) {audioEngine.envelopeB.decay = remap(v, [0,7], [0, 1])},
-                function (v) {audioEngine.envelopeB.release = v},
-                function (v) {audioEngine.oscillatorB.gain = remap(v, [0,7], [0, 1])}];
+                function (v) {audioEngine.envelopeB.release = v}];
             let knobs = new PIXI.Container();
             knobs.name = "Knobs";
             for (let i = 0; i < 12; i++) {
-                let knob = new Knob(
+                let knob = new brcKnob(
                     textureSet,
                     x[i] + 12, y[i] + 27,
                     tooltips[i],
@@ -144,7 +143,7 @@ class Controller extends PIXI.Sprite {
             sliders.name = "Sliders";
             for (let i = 0; i < x.length; i++) {
                 // Make slider
-                let slider = new Slider(
+                let slider = new brcSlider(
                     x[i],
                     initialValues[i],
                     tooltips[i], // name
@@ -165,13 +164,13 @@ class Controller extends PIXI.Sprite {
             let octaveButtons = new PIXI.Container();
             octaveButtons.name = "Octave Buttons";
 
-            var octaveDown = new OctaveButton(
+            var octaveDown = new brcOctaveButton(
                 'down', 
                 5, 95,
                 controller,
                 controller.tooltipSet.create("octave-"));
 
-            var octaveUp = new OctaveButton(
+            var octaveUp = new brcOctaveButton(
                 'up', 
                 18, 95,
                 controller,
@@ -190,7 +189,7 @@ class Controller extends PIXI.Sprite {
             let wheels = new PIXI.Container("wheels");
             wheels.name = "Wheels";
                 
-            var pitchWheel = new Wheel(
+            var pitchWheel = new brcWheel(
                 5, 55, 1,
                 "pitchwheel",
                 controller.tooltipSet.create("pitch wheel"),
@@ -200,7 +199,7 @@ class Controller extends PIXI.Sprite {
                 });
             pitchWheel.resetOnEnd = true;
                     
-            var modWheel = new Wheel(
+            var modWheel = new brcWheel(
                 18, 55, 1,
                 "modwheel",
                 controller.tooltipSet.create("modulation wheel"),
@@ -320,7 +319,7 @@ class Controller extends PIXI.Sprite {
     }
 }
 
-class Keyboard extends PIXI.Container {
+class brcKeyboard extends PIXI.Container {
     /**
      * 
      * @param {array} keyBindings Array of array of strings. i.e. [["a","b"], ["c"], ["f", "g"], ...]
@@ -336,7 +335,7 @@ class Keyboard extends PIXI.Container {
         this.buttons = {};
         var x = 0, y = 0;
         for(let i = 0; i < 25; i++){
-            let key = new Key(x, y, i, this);
+            let key = new brcKey(x, y, i, this);
 
             // Black keys above whites (raycast necessity)
             key.zIndex = zIndexs[i % 12];
@@ -511,7 +510,7 @@ class Keyboard extends PIXI.Container {
  * Basic component class for the synth controls. Does not
  * define any interactivity and should be extended
  */
-class Component extends PIXI.Sprite {
+class brcComponent extends PIXI.Sprite {
     /**
      * @param {PIXI.Texture} texture Texture to generate sprite from
      * @param {number} x Position x
@@ -557,10 +556,10 @@ class Component extends PIXI.Sprite {
         return this._value;
     }
 }
-class Key extends Component {
+class brcKey extends brcComponent {
     constructor(x, y, keyId, tooltip){
         var name = "key" + keyId;
-        var tex = PIXI.Loader.shared.resources.controller.spritesheet.
+        var tex = PIXI.Loader.shared.resources.sprites.spritesheet.
             textures[KEY_TYPES[keyId] + ".png"];
         super(tex, x, y, 0, 0, name, 0, 0, undefined, () => {});
 
@@ -569,9 +568,9 @@ class Key extends Component {
         this.interactive = true;
     }
 }
-class OctaveButton extends Component {
+class brcOctaveButton extends brcComponent {
     constructor(type, x, y, controller, tooltip){
-        var textures = PIXI.Loader.shared.resources.controller.spritesheet.textures;
+        var textures = PIXI.Loader.shared.resources.sprites.spritesheet.textures;
         var texture = textures["button-" + type + ".png"];
         super(texture, x, y, 0, 0, "octave"+type, 0, 0, tooltip, () => {})
 
@@ -648,7 +647,7 @@ class OctaveButton extends Component {
             this.texture = this.textures[BUTTON_TYPE[t + shift]];
     }
 }
-class Slider extends Component {
+class brcSlider extends brcComponent {
     /**
      * @param {number} x Position x
      * @param {number} y Position y
@@ -659,10 +658,10 @@ class Slider extends Component {
      */
     constructor(x, initialValue, name, tooltip, callbackFunc){
         let y = SLIDER_RANGE[1] - initialValue * 2; // y in 21,41
-        super(PIXI.Loader.shared.resources.controller.spritesheet.textures["slider.png"],
+        super(PIXI.Loader.shared.resources.sprites.spritesheet.textures["slider.png"],
         x, y, 3, 3, name, 10, initialValue, tooltip, callbackFunc);
         /* 
-        this.marker = new PIXI.Sprite(PIXI.Loader.shared.resources.controller.spritesheet.textures["red-mark.png"]);
+        this.marker = new PIXI.Sprite(PIXI.Loader.shared.resources.sprites.spritesheet.textures["red-mark.png"]);
         this.marker.y = -neutralValue*2-12;
         this.marker.x = x;
         */
@@ -713,7 +712,7 @@ class Slider extends Component {
     }
 
 }
-class Knob extends Component {
+class brcKnob extends brcComponent {
     constructor(textures, x, y, name, tooltip, initialValue, type, callbackFunc){
         if(type != 4 && type != 8)
             return undefined;
@@ -756,11 +755,12 @@ class Knob extends Component {
         function onDragMove(event) {
             if (this.dragging) {
                 var newPosition = this.eventData.getLocalPosition(this);
-                let delta = -(round(newPosition.y, 4)) / 4;
+                let delta = -(round(newPosition.y, 8)) / 8;
+                if(delta == 0)
+                    this.value++;
                 var newValue = this.eventData.startingValue + delta;
                 newValue = Math.max(0, newValue);
                 newValue = Math.min(newValue, 7);
-                console.log(newValue);
                 this.value = newValue;
             }
         }
@@ -773,7 +773,7 @@ class Knob extends Component {
     set value(value){
         value = value % (this.maxValue + 1);
         this._value = value;
-        this.texture = Knob.matchTexture(value, this._type, this.textures);
+        this.texture = brcKnob.matchTexture(value, this._type, this.textures);
         this.callbackFunc(this._value);
     }
 
@@ -794,9 +794,9 @@ class Knob extends Component {
         return textures[value];
     }
 }
-class Wheel extends Component {
+class brcWheel extends brcComponent {
     constructor(x, y, initialValue, name, tooltip, callbackFunc){
-        var texture = PIXI.Loader.shared.resources.controller.spritesheet.textures["touch-wheel.png"];
+        var texture = PIXI.Loader.shared.resources.sprites.spritesheet.textures["touch-wheel.png"];
         super(texture, x, y, 0, 0, name, 2, initialValue, tooltip, callbackFunc);
 
         // Define effective y range (to improve usability and accuracy)

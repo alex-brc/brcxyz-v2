@@ -2,13 +2,13 @@
   "meta": {
     "version": "0.6.5"
   },
-  "savePath": "D:\\Code\\Web\\brc.xyz\\sprite",
+  "savePath": "D:\\Code\\Web\\brc.xyz\\portfolio\\pixel-synth\\img",
   "images": [],
   "folders": [
-    "D:/Code/Web/brc.xyz/sprite/raw/ui"
+    "D:/Code/Web/brc.xyz/portfolio/pixel-synth/img/raw"
   ],
   "packOptions": {
-    "textureName": "ui",
+    "textureName": "spritesheet",
     "textureFormat": "png",
     "removeFileExtension": false,
     "prependFolderName": false,
@@ -16,22 +16,22 @@
     "tinify": true,
     "tinifyKey": "Btp1hpnJswNc7Vp8Qpw2swQprlFGqvcv",
     "scale": 1,
-    "disableSmoothing": false,
+    "disableSmoothing": true,
     "filter": "none",
     "exporter": "pixi.js",
     "fileName": "pack-result",
-    "savePath": "D:\\Code\\Web\\brc.xyz\\sprite",
+    "savePath": "D:\\Code\\Web\\brc.xyz\\portfolio\\pixel-synth\\img",
     "width": 2048,
     "height": 2048,
     "fixedSize": false,
     "powerOfTwo": false,
     "padding": 0,
     "extrude": 1,
-    "allowRotation": true,
-    "allowTrim": true,
+    "allowRotation": false,
+    "allowTrim": false,
     "trimMode": "trim",
     "alphaThreshold": "0",
-    "detectIdentical": true,
+    "detectIdentical": false,
     "packer": "OptimalPacker",
     "packerMethod": "Automatic"
   }

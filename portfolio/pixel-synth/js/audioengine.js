@@ -5,7 +5,6 @@ const HIGHPASS_CURVE = [50, 150, 250, 450, 650, 800, 1000, 1200, 1500, 2000, 300
 const DAMPENING_CURVE = [100, 300, 600, 1000, 2000, 4000, 6500, 8000, 10000, 14000, 19000];
 const RELEASE_CURVE = [0, 0.1, 0.2, 0.3, 0.6, 1, 1.5, 2.5];
 const ATTACK_CURVE = [0, 0.02, 0.05, 0.1, 0.3, 0.5, 0.8, 1.2];
-const FREQUENCY_CURVE = [0, 1/8, 1/2, 1, 2, 3, 5, 8, 12, 16, 20];
 const COMB_FILTER_TUNINGS = [1557, 1617, 1491, 1422, 1277, 1356, 1188, 1116].map(dps => dps / 44100); // Sample rate = 44100
 const ALLPASS_FREQUENCES = [225, 556, 441, 341]; // All this? Magic.
 const DEFAULT_VOLUME = 0.8;
@@ -14,6 +13,7 @@ class AudioEngine {
     constructor(){
         // Create the audiocontext
         var AudioContext = window.AudioContext || window.webkitAudioContext;
+        this.started = false;
         this.audioContext = new AudioContext();
         this._noteOn = false;
         this.velocity = true;
@@ -53,15 +53,25 @@ class AudioEngine {
         this.delay.output.connect(this.reverb.input);
         this.reverb.output.connect(this._gainM);
         this._gainM.connect(this.audioContext.destination);
+
+        if(iOS)
+            this.start();
     }
 
     // Activate the engine
     start(){
+        if(this.started){
+            console.log("AUDIOENGINE STARTED TWICE!");
+            return;
+        }
+
+        this.started = true;
         // Wake up if suspended
         if(this.audioContext.state === 'suspended')
             this.audioContext.resume();
             
         this._gainM.gain.value = 1;
+        
         this.lfo.start(0);
         this.oscillatorA.start(0);
         this.oscillatorB.start(0);
@@ -134,6 +144,7 @@ class Oscillator {
 
     set shape(value){
         let type = '';
+    
         switch(value){
             case 0: type = 'sine';
                 break;

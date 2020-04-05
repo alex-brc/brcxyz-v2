@@ -1,7 +1,7 @@
 
-class Window extends PIXI.NineSlicePlane{
+class brcWindow extends PIXI.NineSlicePlane{
     constructor(size){
-        super(PIXI.Loader.shared.resources.ui.spritesheet.textures["window.png"],
+        super(PIXI.Loader.shared.resources.sprites.spritesheet.textures["window.png"],
         7, 7, 7, 7);
 
         size = size || {x: 17, y: 22};
@@ -12,8 +12,8 @@ class Window extends PIXI.NineSlicePlane{
         this.pivot.y = this.height * 0.5;
 
         // Put an X button in the corner
-        var dummyTex = new PIXI.NineSlicePlane(PIXI.Loader.shared.resources.ui.textures["dummy-texture.png"], 0, 0, 0, 0);
-        this.xButton = new Button("x", undefined, {x: 1, y: 0}, undefined, dummyTex, dummyTex);
+        var dummyTex = new PIXI.NineSlicePlane(PIXI.Loader.shared.resources.sprites.textures["dummy-texture.png"], 0, 0, 0, 0);
+        this.xButton = new brcButton("x", undefined, {x: 1, y: 0}, undefined, dummyTex, dummyTex);
         this.xButton.position.set(size.x - 2, 0);
         this.xButton.onClick = () => { this.visible = false; }
         this.addChild(this.xButton);
@@ -30,7 +30,7 @@ class Window extends PIXI.NineSlicePlane{
     }
 }
 
-class Button extends PIXI.Container {
+class brcButton extends PIXI.Container {
     constructor(text, size, anchor, tooltip, upTexture, downTexture){
         super();
         anchor = anchor || {x: 0, y: 0};
@@ -46,7 +46,7 @@ class Button extends PIXI.Container {
         
         // Create button background
         var nsp = upTexture || new PIXI.NineSlicePlane(
-            PIXI.Loader.shared.resources.ui.spritesheet.textures["button.png"],
+            PIXI.Loader.shared.resources.sprites.spritesheet.textures["button.png"],
             3, 3, 3, 3);
         // And set it up
         size = size || {x: textBmp.width + 7, y: textBmp.height + 7};
@@ -58,7 +58,7 @@ class Button extends PIXI.Container {
 
         // Create mousedown background
         var clicked = downTexture || new PIXI.NineSlicePlane(
-            PIXI.Loader.shared.resources.ui.spritesheet.textures["button-clicked.png"],
+            PIXI.Loader.shared.resources.sprites.spritesheet.textures["button-clicked.png"],
             3, 3, 3, 3);
         clicked.width = size.x;
         clicked.height = size.y;
@@ -173,7 +173,7 @@ class TooltipSet extends PIXI.Container {
         
         // Create background object
         let bg = new PIXI.NineSlicePlane(
-            PIXI.Loader.shared.resources.ui.spritesheet.textures["tooltip.png"],
+            PIXI.Loader.shared.resources.sprites.spritesheet.textures["tooltip.png"],
             4, 4, 4, 4);
         bg.height = 13;
         bg.width = text.width + 8;
@@ -229,7 +229,7 @@ function createOverlay(){
     var root = new PIXI.Container();
     root.buttons = new PIXI.Container();
     root.buttons.name = "Buttons";
-    var transparent = new PIXI.NineSlicePlane(PIXI.Loader.shared.resources.ui.textures["dummy-texture.png"], 0, 0, 0, 0);
+    var transparent = new PIXI.NineSlicePlane(PIXI.Loader.shared.resources.sprites.textures["dummy-texture.png"], 0, 0, 0, 0);
 
     // Create tooltips for buttons
     root.tooltipSet = new TooltipSet();
@@ -237,22 +237,29 @@ function createOverlay(){
     root.tooltipSet.visible = true; 
 
     // Tooltip toggle button
-    root.buttons.tooltips = new Button("?", undefined, {x: 1, y: 0}, 
+    root.buttons.tooltips = new brcButton("?", undefined, {x: 1, y: 0}, 
         undefined, transparent, transparent);
-    root.buttons.tooltips.face = new PIXI.Sprite(PIXI.Loader.shared.resources.ui.textures["question.png"]);
+    root.buttons.tooltips.face = new PIXI.Sprite(PIXI.Loader.shared.resources.sprites.textures["question.png"]);
     root.buttons.tooltips.isToggle = true;
     root.buttons.tooltips.onOff = false
     root.buttons.tooltips.onToggle = (onOff) => { controller.tooltipSet.visible = onOff; };
     root.buttons.addChild(root.buttons.tooltips);
     
     // Fullscreen request
-    var text = ""
+    var text = "";
     if(onMobile){
-        text = "hey there you! " + "\nbefore you go on ahead, you should " +
+        text = "hey there you!";
+        if(iOS)
+            text += "\n";
+        text += "\nbefore you go on ahead, you should " +
         "really go into fullscreen, it's just nicer don't you think? " + 
-        "also, if you're feeling lost, tap the \"?\" icon above. \nhave fun! \n\ngo fullscreen?";
+        "also, if you're feeling lost, tap the \"?\" icon above.";
+        if(!iOS) 
+            text += "\nhave fun!\n\ngo fullscreen?";
+        else 
+            text += "\n\nhave fun!";
     }
-    else {
+    else {  
         var t = "... but it seems your browser doesn't support it :(. ";
         if(haveMidi)
             t =  ", it connects automatically when you plug it in! "
@@ -264,7 +271,7 @@ function createOverlay(){
     }
 
     root.windows = new PIXI.Container();
-    root.windows.fullscreen = new Window({x: controller.texture.width, y: controller.texture.height + 10});
+    root.windows.fullscreen = new brcWindow({x: controller.texture.width, y: controller.texture.height + 10});
     root.windows.fullscreen.text = new PIXI.BitmapText(
         text, {
         align: 'center',
@@ -278,10 +285,11 @@ function createOverlay(){
     root.windows.fullscreen.name = "Fullscreen request";
     root.windows.fullscreen.visible = true;
     root.windows.fullscreen.xButton.visible = false;
-    root.windows.addChild(root.windows.fullscreen);
+    if(!iOS)
+        root.windows.addChild(root.windows.fullscreen);
     // Mobile 
-    root.windows.fullscreen.buttonNah = new Button("nah...", {x: 60, y: 18}, {x: 1, y: 1});
-    root.windows.fullscreen.buttonYeah = new Button("yeah!", {x: 60, y: 18}, {x: 0, y: 1});
+    root.windows.fullscreen.buttonNah = new brcButton("nah...", {x: 60, y: 18}, {x: 1, y: 1});
+    root.windows.fullscreen.buttonYeah = new brcButton("yeah!", {x: 60, y: 18}, {x: 0, y: 1});
     root.windows.fullscreen.buttonNah.position.set(root.windows.fullscreen.width / 2 - 3, root.windows.fullscreen.height - 6);
     root.windows.fullscreen.buttonYeah.position.set(root.windows.fullscreen.width / 2 + 3, root.windows.fullscreen.height - 6);
     root.windows.fullscreen.buttonNah.onClick = () => {
@@ -294,12 +302,14 @@ function createOverlay(){
         audioEngine.start();
         // Go fullscreen
         var canvas = document.getElementById("pixicanvas");
-        req = canvas.requestFullScreen || canvas.webkitRequestFullScreen || canvas.mozRequestFullScreen;
-        req.call(canvas);
+        if(!iOS){
+            var req = canvas.requestFullScreen || canvas.webkitRequestFullScreen || canvas.mozRequestFullScreen;
+            req.call(canvas);
+        }
         root.windows.fullscreen.visible = false; }
     
     // Desktop
-    root.windows.fullscreen.buttonLetsgo = new Button("let's go!", {x: 100, y: 18}, {x: 0.5, y: 1});
+    root.windows.fullscreen.buttonLetsgo = new brcButton("let's go!", {x: 100, y: 18}, {x: 0.5, y: 1});
     root.windows.fullscreen.buttonLetsgo.position.set(root.windows.fullscreen.width / 2, root.windows.fullscreen.height - 6);
     root.windows.fullscreen.buttonLetsgo.onClick = () => { 
         // Start AudioEngine
@@ -307,7 +317,7 @@ function createOverlay(){
         // Hide this
         root.windows.fullscreen.visible = false;}
 
-    if(onMobile){
+    if(onMobile && !iOS){
         root.windows.fullscreen.addChild(root.windows.fullscreen.buttonNah);
         root.windows.fullscreen.addChild(root.windows.fullscreen.buttonYeah);
     }

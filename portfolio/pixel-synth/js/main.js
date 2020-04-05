@@ -2,14 +2,11 @@
 const DEBUG = false;
 var haveMidi = false;
 var scaleModifier = 0;
-var onMobile;
+var onMobile, iOS;
 var audioEngine;
 var controller;
 var renderer;
 var stage;
-
-// Start program
-main();
 
 function main(){
     // Meta settings
@@ -47,11 +44,15 @@ function main(){
     }
 
     onMobile = isMobile();
+    iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    // Double test to be sure
+    var t = !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform);
+    if(t != iOS) // Tests give different results
+        console.log("Confusion ensues! Two tests for iOS give two different results");
 
     loader
     .add("tooltipFont", "img/pixelmix.fnt")
-    .add("ui", "img/ui.json")
-    .add("controller", "img/controller.json")
+    .add("sprites", "img/spritesheet.json")
     .load(setup);
 
     function setup() {
@@ -76,6 +77,7 @@ function main(){
 
         // Resize handler
         window.addEventListener('resize', sizeRenderer);
+
         // Arrange everything
         sizeRenderer();
 
@@ -116,7 +118,6 @@ function main(){
                 h = Math.floor((size.width - 5) / controller.texture.height);
             }
             scale = Math.min(w,h);
-            scale = Math.min(scale, 6);
             scale += scaleModifier;
 
             if(scale == 0)
@@ -126,18 +127,6 @@ function main(){
             controller.scale.set(scale);
             overlay.scale.set(scale);
 
-            if (DEBUG) {
-                console.log("-------------------------------");
-                console.log("aspect: ", aspect);
-                console.log("window.innner: ", window.innerWidth, window.innerHeight);
-                console.log("pixicanvas: ", pixicanvas.width, pixicanvas.height);
-                console.log("pixicanvas.client: ", pixicanvas.clientWidth, pixicanvas.clientHeight);
-                console.log("renderer: ", renderer.screen.width, renderer.screen.height);
-                console.log("controller: ", controller.texture.width, controller.texture.height);
-                console.log("dpr, w,h,scale: ", devicePixelRatio, w, h, scale);
-                console.log("-------------------------------");
-            }
-            
             // Reposition
             controller.position.set(renderer.screen.width / 2, renderer.screen.height / 2);
             overlay.position.set(renderer.screen.width / 2, renderer.screen.height / 2);

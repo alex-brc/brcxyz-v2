@@ -1,11 +1,11 @@
 <!doctype html>
 <html>
     <head>
-        <title>Pixel Synth</title>
+        <title>Pocket Synth</title>
         <meta charset="utf-8">
         <meta name="theme-color" content="#B14156">
         <meta name="viewport" content="width=device-width, minimal-ui">
-        <meta name="description" content="A fully functioning monophonic synthesizer. Features two oscillators with independent ADSR envelopes, delay and reverb (Freeverb). Original artwork by sekai.club, built by brc.xyz.">
+        <meta name="description" content="Placeholder meta description.">
         <link rel="icon" href="favicon.png">
 
         <script> 
@@ -13,12 +13,17 @@
             document.documentElement.style.setProperty('--vh', `${vh}px`);
         </script>
         <link rel="stylesheet" type="text/css" href="css/style.css"/>
+        <script src='https://cwilso.github.io/WebMIDIAPIShim/build/WebMIDIAPI.min.js'></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.2.1/pixi.min.js"></script>
         <script src="js/constant-source-node.min.js"></script>
-        <script src="js/pixel-synth_v1.1.min.js"></script>
+        <script src="js/util.js"></script>
+        <script src="js/ui.js"></script>
+        <script src="js/controller.js"></script>
+        <script src="js/audioengine.js"></script>
     </head>
     <body>
         <canvas id="pixicanvas"></canvas>
+        <script src="js/main.js"></script>
         <script> main(); </script>
     </body>
     
