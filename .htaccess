@@ -4,5 +4,5 @@ RewriteEngine on
 RewriteCond %{HTTPS} off
 RewriteCond %{HTTP_HOST} ^brc.xyz$
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}/index.html [L,R=301]
+RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 # DO NOT REMOVE THIS LINE AND THE LINES ABOVE SSL_REDIRECT:brc.xyz
