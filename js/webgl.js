@@ -94,7 +94,7 @@ function title_webgl(){
   // Define perspective matrix
   mat4.perspective(
       globalMatrices.projectionMatrix,
-      45 * Math.PI / 180,
+      130 * Math.PI / 180,
       gl.canvas.clientWidth / gl.canvas.clientHeight, // aspect
       0.1,
       350.0);

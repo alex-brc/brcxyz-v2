@@ -50,6 +50,16 @@ function main(){
     if(t != iOS) // Tests give different results
         console.log("Confusion ensues! Two tests for iOS give two different results");
 
+    // Get reference to the sekai button for rescaling
+    var sekaiButton = 
+    { 'ref': document.getElementById("sekai"),
+      'rescale': function(scale) {
+        this.ref.style.width = 16 * scale;
+        this.ref.style.height = 8 * scale;
+        alert("did something");
+      }
+    }
+        
     loader
     .add("tooltipFont", "img/pixelmix.fnt")
     .add("sprites", "img/spritesheet.json")
@@ -126,6 +136,7 @@ function main(){
             // Rescale
             controller.scale.set(scale);
             overlay.scale.set(scale);
+            sekaiButton.rescale(scale);
 
             // Reposition
             controller.position.set(renderer.screen.width / 2, renderer.screen.height / 2);
@@ -140,8 +151,6 @@ function main(){
                 overlay.angle = 0;
                 overlay.buttons.position.set(renderer.screen.width / (2*scale), -renderer.screen.height / (2*scale) + 2);
             }
-
-            
         }
     }
 }
