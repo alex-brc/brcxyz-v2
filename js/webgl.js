@@ -5,7 +5,7 @@ const INITIAL_POSITION_Z = [-30, 30]; // Sideways
 const INITIAL_POSITION_Y = [25, 50]; // Up
 const INITIAL_POSITION_X = [-30, 0]; // Forward
 
-const FALL_SPEED = [-3, -1];
+const FALL_SPEED = [-4, -1];
 const CULL_POSITION_Y = -25;
 const OBJECT_POOL_SIZE = 40;
 // Camera

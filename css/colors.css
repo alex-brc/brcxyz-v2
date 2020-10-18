@@ -1,44 +1,42 @@
 :root {
-    --russian-green: #6a8d73;
-    --green-shadow: #2b3b2e;
-
-    --satin-gold: #de9e36;
-    --gold-shadow: #563b0e;
-    --gold-light: #e3b23c;
-
-    --color-gray: #423e37;
-    --color-dark: #23201b;
-    --color-light: #edebd7;
-
+    --green: #6a8d73ff;
+    --yellow: #e3b23c;
+    --blue: #197BBDff;
     --accent: #fd5e53;
+    --transparent: #ffffff00;
+
+    --dark: #23201b;
+    --gray: #0a0a09;
+    --light: #edebd7;
+    --white: #F9F8F1;
+
   }
 
   /* Wrappers */
-
-.russian-green {
-    color: var(--russian-green);
+.green {
+    color: var(--green);
 }
 
-.green-shadow {
-    color: var(--green-shadow);
+.accent {
+    color: var(--accent);
 }
 
-.satin-gold {
-    color: var(--satin-gold);
+.yellow {
+    color: var(--yellow);
 }
 
-.gold-shadow {
-    color: var(--gold-shadow);
+.dark {
+    color: var(--dark);
 }
 
-.gold-light {
-    color: var(--gold-light);
+.blue {
+    color: var(--blue);
 }
 
-.color-dark {
-    color: var(--color-dark);
+.light {
+    color: var(--light);
 }
 
-.color-light {
-    color: var(--color-light);
+.white {
+    color: var(--white);
 }

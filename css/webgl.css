@@ -1,0 +1,12 @@
+#webgl {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100vw;
+  height: 130vh;
+  overflow: hidden;
+  display: block;
+  z-index: 4;
+  background-color: var(--light);
+}
+  

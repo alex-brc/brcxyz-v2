@@ -7,79 +7,102 @@
     <meta name="theme-color" content="#fd5e53">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Placeholder meta description.">
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/fullPage.js/3.0.8/fullpage.min.css" />
     <link rel="stylesheet" type="text/css" href="css/style.css"/>
     
     <link rel="icon" href="favicon.png">
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullPage.js/3.0.8/fullpage.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.7/ScrollMagic.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.7/plugins/debug.addIndicators.min.js"></script>
+
     <script src="js/util.js"></script>
   </head>
 
   <body>
-    <div id="fullpage">
-      <div class="section action" id="title-page"> 
+    <div class="site-wrapper">
+      <div id="webgl-panel"> 
         <canvas id="webgl"></canvas>
         <script src="js/webgl.js"></script>
-        <div class="centerer">
-          <h1 class="title gold-light pop-green"> brc </h1>
-          <h1 class="title russian-green pop-gold"> .xyz </h1>
+        <div class="centerer" id="title-div">
+          <h1 class="title yellow pop-green" id="title-A"> brc </h1>
+          <h1 class="title green pop-yellow" id="title-B"> .xyz </h1>
         </div>
       </div>
-      <div class="fp-auto-height section">
-        <div id="footer">
-          <div class="footer-seg"> 
-            Alexandru Bracau <br>
-            emailemail@brc.xyz <br>
-            +40 (0) 755 010 203 <br>
-            brc.xyz 
+
+      <div id="hi-panel" class="columnist panel">  
+        <div class="tilted left background blue" style="z-index: 10"></div>
+
+        <div class="rowist" style="align-self: stretch;">
+          <div class="box" style="font-size:xx-large; align-self: flex-start;">
+            hi!
           </div>
-          <div class="footer-seg">
-            <img src="img/github.svg" style="margin: 14px">
-            <img src="img/linkedin.svg" style="margin: 14px">
-            <img src="img/linkedin.svg" style="margin: 14px ">
-              
-          </div>
-          <div class="footer-seg"> 
-            ------------------- <br>
-            ------------------- <br>
-            ------------------- <br>
-            ------------------- <br>
+          <div class="box" style="font-size: 22px;">
+            <span>i'm alex,</span> 
+            <br> i am a <br> 
+          <span>junior developer</span>
+            
           </div>
         </div>
+          
       </div>
+      
+      <div class="columnist panel">
+        <div class="tilted right background yellow" style="z-index: 10;"></div>
+
+        <div class="box blue" style="font-size: x-large; align-self: center;">
+          <span>
+            i 
+            <b>love</b> 
+            creating things</span>
+        </div>
+
+        <div class="box transparent" style="font-size: x-large; text-align: center;">
+          my main interest is<br>
+          <span style="color: var(--accent); font-weight: bold;">
+            computer graphics.<br>
+          </span>
+          i also enjoy working with<br>
+          <span style="color: var(--blue); font-weight: bold;">
+            music & sounds <br>
+          </span>
+          and <br>
+          <span style="color: var(--green); font-weight: bold;">
+          virtual reality<br>
+          </span>
+        </div>
+        
+      </div>
+
+      <div class="columnist panel">
+        <div class="tilted left background blue" style="z-index: 10;"></div>
+        
+        <div id="skills-box" class="rowist">
+          <div class="skill major">java</div>
+          <div class="skill major">c#</div>
+          <div class="skill major">git</div>
+          <div class="skill major">matlab</div>
+          <div class="skill major">unity</div>
+          <div class="skill medium">c/c++</div>
+          <div class="skill medium">web</div>
+          <div class="skill medium">opengl</div>
+          <div class="skill minor">sql</div>
+          <div class="skill minor">cuda</div>
+          <div class="skill minor">ocaml</div>
+        </div>
+      </div>
+
+      <div id="links" class="columnist">
+        <div class="tilted right background blue" style="z-index: 10;"></div>
+
+        <div class="box link accent"> stuff i made > </div>
+        <div class="box link green"> my cool friends > </div>
+        <div class="box link yellow"> contact > </div>
+        <div style="height: 50vh"></div>
+        
+      </div>
+
     </div>
 
-    <script>
-      // Easings from: 
-      //   jQuery Easing v1.3 - http://gsgd.co.uk/sandbox/jquery/easing/
-      //   Copyright 2008 George McGinley Smith All rights reserved
-      $.easing.jswing = $.easing.swing;
-      $.extend($.easing, {
-          def: 'easeOutQuad',
-          easeOutQuad: function (x, t, b, c, d) {
-              return -c *(t/=d)*(t-2) + b;
-          },});
-
-      new fullpage('#fullpage', {
-        licenseKey: 'CEAEB2F9-D07E42AF-A8725A3C-A5162A1F', // hide this somehow 
-        scrollingSpeed: 1000,
-        easing: 'easeOutQuad',
-        // Disabled parallaxing background cause it's a bit too intense
-        /* onLeave: function(origin, destination, direction){
-          if(direction == 'down')
-            // parallax down
-            $("#webgl").css("position", "absolute").animate({
-              top: '-=15vh'
-            }, 1000, 'easeOutQuad');
-          else if(direction == 'up')
-            // parallax up
-            $("#webgl").css("position", "absolute").animate({
-              top:  '+=15vh'
-            }, 1000, 'easeOutQuad'); }*/
-      });
-    </script>
   </body> 
 </html>

@@ -35,39 +35,15 @@
 }
 
 @font-face {
-    font-family: 'brcxyz-Light';
-    src: url('../font/brcxyz-LightItali.eot');
-    src: url('../font/brcxyz-LightItali.eot?#iefix') format('embedded-opentype'),
-        url('../font/brcxyz-LightItali.woff2') format('woff2'),
-        url('../font/brcxyz-LightItali.woff') format('woff'),
-        url('../font/brcxyz-LightItali.ttf') format('truetype'),
-        url('../font/brcxyz-LightItali.svg#brcxyz-LightItali') format('svg');
-    font-weight: 300;
-    font-style: italic;
-}
-
-@font-face {
     font-family: 'brcxyz-Bold';
     src: url('../font/brcxyz-Bold.eot');
     src: url('../font/brcxyz-Bold.eot?#iefix') format('embedded-opentype'),
-        url('../font/brcxyz-Bold.woff2') format('woff2'),
-        url('../font/brcxyz-Bold.woff') format('woff'),
-        url('../font/brcxyz-Bold.ttf') format('truetype'),
-        url('../font/brcxyz-Bold.svg#brcxyz-Bold') format('svg');
+         url('../font/brcxyz-Bold.woff2') format('woff2'),
+         url('../font/brcxyz-Bold.woff') format('woff'),
+         url('../font/brcxyz-Bold.ttf') format('truetype'),
+         url('../font/brcxyz-Bold.svg#brcxyz-Bold') format('svg');
     font-weight: bold;
     font-style: normal;
-}
-
-@font-face {
-    font-family: 'brcxyz-Regular';
-    src: url('../font/brcxyz-Italic.eot');
-    src: url('../font/brcxyz-Italic.eot?#iefix') format('embedded-opentype'),
-        url('../font/brcxyz-Italic.woff2') format('woff2'),
-        url('../font/brcxyz-Italic.woff') format('woff'),
-        url('../font/brcxyz-Italic.ttf') format('truetype'),
-        url('../font/brcxyz-Italic.svg#brcxyz-Italic') format('svg');
-    font-weight: normal;
-    font-style: italic;
 }
 
 
