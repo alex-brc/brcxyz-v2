@@ -1,27 +1,22 @@
-@import "colors.css";
 @import "animation.css";
 @import "font.css";
 @import "webgl.css";
-x
 
-html, body, site-wrapper {
+
+html, body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
 }
 
-.panel {
-  position: relative;
-  height: 50vh;
-}
-
-.centerer {
+section {
+  z-index: 10;
   width: 100vw;
   height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
+}
+
+.spacer {
+  height: 100vh;
 }
 
 .title {
@@ -38,46 +33,34 @@ html, body, site-wrapper {
   flex-direction: column;
   justify-content: center;
   align-content: space-around;
-  width: 100%;
-  padding-top: 5vh;
-  padding-bottom: 5vh;
+  height: fit-content;
+  width: 100vw;
 }
 
 .rowist {
+  width: 100vw;
   display: flex;
   flex-direction: row;
 }
 
-.tilted {
-  position: absolute;
-  left: -25vw;
-  width: 200vw;
-  height: 50vh;
+.panel {
+  z-index: 11;
+  width: 100vw;
   transform-origin: center top;
-  background-color: rgba(255, 251, 0, 0.199);
+  background-color: rgba(255, 251, 0, 0.2);
 }
-.tilted.blue {
+.panel.blue {
   background-color: var(--blue);
 }
-.tilted.yellow {
+.panel.yellow {
   background-color: var(--yellow);
 }
-.tilted.green {
+.panel.green {
   background-color: var(--green);
 }
-.tilted.light {
+.panel.light {
   background-color: var(--light);
 }
-.tilted.right {
-  transform: rotate(15deg) scaleY(3) translateX(0);
-}
-.tilted.left {
-  transform: rotate(-15deg) scaleY(3) translateX(0);
-}
-.tilted.revealer {
-  margin-top: -1px;
-}
-
 
 .subtitle {
   font-family: 'brcxyz-Bold';
@@ -118,13 +101,13 @@ html, body, site-wrapper {
 .box {
   font-family: 'brcxyz-Regular';
   font-size: large;
-  background-color: none;
   color: var(--white);
   z-index: 11;
   margin-left: 3vmin;
   margin-right: 5vmin;
   margin-top: 3vh;
   padding: 8px;
+  background-color: none;
   display: block;
 }
 .box.link {
@@ -132,29 +115,42 @@ html, body, site-wrapper {
   text-align: right;
 }
 
-#main {
-  height:auto;
-  width: 100%;
+#webgl {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: block;
+  z-index: 4;
+  background-color: var(--light);
+}
+
+#slide-ins {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+}
+
+#title-panel {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100vw;
+  height: 100vh;
+  z-index: 5;
   display: flex;
+  justify-content: center;
+  align-items: center;
   flex-direction: column;
-  justify-content: space-around;
-}
-
-#first-panel {
-  background-color: var(--green);
-  height: 20vh;
-  z-index: 10;
-}
-
-#links { 
-
 }
 
 @media only screen and (orientation: landscape) {
   .title {
     font-size: 20vh;
   }
-  .centerer {
+  #title-panel {
     flex-direction: row;
   }
 }

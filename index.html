@@ -13,96 +13,105 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.7/ScrollMagic.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.7/plugins/debug.addIndicators.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.1/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.1/ScrollTrigger.min.js"></script>
 
     <script src="js/util.js"></script>
   </head>
 
   <body>
-    <div class="site-wrapper">
-      <div id="webgl-panel"> 
-        <canvas id="webgl"></canvas>
-        <script src="js/webgl.js"></script>
-        <div class="centerer" id="title-div">
-          <h1 class="title yellow pop-green" id="title-A"> brc </h1>
-          <h1 class="title green pop-yellow" id="title-B"> .xyz </h1>
-        </div>
-      </div>
+    <canvas id="webgl"></canvas>
+    <script src="js/webgl.js"></script>
 
-      <div id="hi-panel" class="columnist panel">  
-        <div class="tilted left background blue" style="z-index: 10"></div>
-
-        <div class="rowist" style="align-self: stretch;">
-          <div class="box" style="font-size:xx-large; align-self: flex-start;">
-            hi!
-          </div>
-          <div class="box" style="font-size: 22px;">
-            <span>i'm alex,</span> 
-            <br> i am a <br> 
-          <span>junior developer</span>
-            
-          </div>
-        </div>
-          
-      </div>
-      
-      <div class="columnist panel">
-        <div class="tilted right background yellow" style="z-index: 10;"></div>
-
-        <div class="box blue" style="font-size: x-large; align-self: center;">
-          <span>
-            i 
-            <b>love</b> 
-            creating things</span>
-        </div>
-
-        <div class="box transparent" style="font-size: x-large; text-align: center;">
-          my main interest is<br>
-          <span style="color: var(--accent); font-weight: bold;">
-            computer graphics.<br>
-          </span>
-          i also enjoy working with<br>
-          <span style="color: var(--blue); font-weight: bold;">
-            music & sounds <br>
-          </span>
-          and <br>
-          <span style="color: var(--green); font-weight: bold;">
-          virtual reality<br>
-          </span>
-        </div>
-        
-      </div>
-
-      <div class="columnist panel">
-        <div class="tilted left background blue" style="z-index: 10;"></div>
-        
-        <div id="skills-box" class="rowist">
-          <div class="skill major">java</div>
-          <div class="skill major">c#</div>
-          <div class="skill major">git</div>
-          <div class="skill major">matlab</div>
-          <div class="skill major">unity</div>
-          <div class="skill medium">c/c++</div>
-          <div class="skill medium">web</div>
-          <div class="skill medium">opengl</div>
-          <div class="skill minor">sql</div>
-          <div class="skill minor">cuda</div>
-          <div class="skill minor">ocaml</div>
-        </div>
-      </div>
-
-      <div id="links" class="columnist">
-        <div class="tilted right background blue" style="z-index: 10;"></div>
-
-        <div class="box link accent"> stuff i made > </div>
-        <div class="box link green"> my cool friends > </div>
-        <div class="box link yellow"> contact > </div>
-        <div style="height: 50vh"></div>
-        
-      </div>
-
+    <div id="title-panel" class="centerer"> 
+      <h1 class="title yellow pop-green" id="title-A"> brc </h1>
+      <h1 class="title green pop-yellow" id="title-B"> .xyz </h1>
     </div>
 
+    <section id="slide-ins">  
+      <div class="left">
+        <div id="hi-panel" class="panel green">
+          <div class="rowist">
+            <div id="hi-box" class="box subtitle vertical">
+              hi!
+            </div>
+            <div id="who-box"  class="box">
+              <span>i'm alex,</span> 
+              <br> i am a <br> 
+            <span>junior developer</span>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="right">
+        <div id="interests-panel" class="panel yellow">
+          <div class="columnist">
+            <div class="box blue" style="font-size: x-large; align-self: center;">
+              <span>
+                i <b>love</b> creating things</span>
+            </div>
+
+            <div class="box transparent" style="font-size: x-large; text-align: center;">
+              i'm mainly interested in<br>
+              <span style="color: var(--accent); font-weight: bold;">
+                computer graphics.<br>
+              </span>
+              i also enjoy working with<br>
+              <span style="color: var(--blue); font-weight: bold;">
+                music & sounds <br>
+              </span>
+              and <br>
+              <span style="color: var(--green); font-weight: bold;">
+              virtual reality<br>
+              </span>
+            </div>
+          </div> 
+        </div>  
+      </div>
+      
+      <div class="left">
+        <div id="skills-panel" class="panel blue">
+          <div class="columnist">
+            <div id="skills-box" class="rowist">
+              <div class="skill major">java</div>
+              <div class="skill major">c#</div>
+              <div class="skill major">git</div>
+              <div class="skill major">matlab</div>
+              <div class="skill major">unity</div>
+              <div class="skill medium">c/c++</div>
+              <div class="skill medium">web</div>
+              <div class="skill medium">opengl</div>
+              <div class="skill minor">sql</div>
+              <div class="skill minor">cuda</div>
+              <div class="skill minor">ocaml</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="right">
+        <div id="links-panel" class="panel green">
+          <div class="columnist">
+            <div class="box link accent"> stuff i made > </div>
+            <div class="box link green"> my cool friends > </div>
+            <div class="box link yellow"> contact > </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="spacer"></div>
+
+    <div id="trigger1" class="spacer"></div>
+    <div class="spacer"></div>
+    <div id="trigger2" class="spacer"></div>
+    <div class="spacer"></div>
+    <div id="trigger3" class="spacer"></div>
+    <div class="spacer"></div>
+    <div id="trigger4" class="spacer"></div>
+
+    <script src="js/main.js"></script>
   </body> 
 </html>
