@@ -1,4 +1,4 @@
-@import "animation.css";
+@import "colors.css";
 @import "font.css";
 @import "webgl.css";
 
@@ -6,17 +6,24 @@
 html, body {
   margin: 0;
   padding: 0;
-  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+html::-webkit-scrollbar {
+  display: none;
 }
 
 section {
-  z-index: 10;
   width: 100vw;
   height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .spacer {
-  height: 100vh;
+  height: 50vh;
 }
 
 .title {
@@ -25,28 +32,11 @@ section {
   font-size: 20vmin;
   margin-top: -5vw;
   margin-bottom: -5vw;
-  z-index: 10;
-}
-
-.columnist {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-content: space-around;
-  height: fit-content;
-  width: 100vw;
-}
-
-.rowist {
-  width: 100vw;
-  display: flex;
-  flex-direction: row;
 }
 
 .panel {
-  z-index: 11;
   width: 100vw;
-  transform-origin: center top;
+  transform-origin: center bottom;
   background-color: rgba(255, 251, 0, 0.2);
 }
 .panel.blue {
@@ -58,93 +48,175 @@ section {
 .panel.green {
   background-color: var(--green);
 }
-.panel.light {
-  background-color: var(--light);
+.panel.accent {
+  background-color: var(--accent);
+}
+.panel.transparent {
+  background-color: #00000000;
 }
 
-.subtitle {
-  font-family: 'brcxyz-Bold';
-  font-size: 20vmin;
-  margin-left: 3vw;
-  margin-right: 3vw;}
-.subtitle.vertical {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-}
 
 .skill {
   font-family: 'brcxyz-Bold';
   margin-left: 3vw;
   margin-right: 3vw;
-}
-.skill.major {
-  font-size: 13vmin;
+  font-size: 13vw;
   color: var(--yellow);
-}
-.skill.medium {
-  font-size: 10vmin;
-  color: var(--accent);
-}
-.skill.minor {
-  font-size: 7vmin;
-  color: var(--light);
-}
-#skills-box {
-  z-index: 11;
-  flex-wrap: wrap;
-  background-color: transparent;
-  align-items: center;
-  align-content: space-around;
-  justify-content: center;
 }
 
 .box {
-  font-family: 'brcxyz-Regular';
-  font-size: large;
+  font-family: 'brcxyz-Regular';  
+  font-size: 10vw;
   color: var(--white);
-  z-index: 11;
-  margin-left: 3vmin;
-  margin-right: 5vmin;
-  margin-top: 3vh;
+  margin: 3vw;
   padding: 8px;
-  background-color: none;
   display: block;
 }
-.box.link {
-  font-size: xx-large;
-  text-align: right;
+
+.box.vertical {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
 }
+.box.accent {
+  color: var(--accent);
+}
+.box.blue {
+  color: var(--blue);
+}
+.box.yellow {
+  color: var(--yellow);
+}
+.box.green {
+  color: var(--green);
+}
+
+.subtitle {
+  font-family: 'brcxyz-Bold';
+  font-size: 20vw;
+  margin: 3vw;
+  margin-bottom: 0vw;
+}
+
+/* Cover */
 
 #webgl {
   position: fixed;
+  z-index: -1;
   top: 0px;
   left: 0px;
   width: 100vw;
   height: 100vh;
   overflow: hidden;
   display: block;
-  z-index: 4;
   background-color: var(--light);
 }
 
-#slide-ins {
-  position: fixed;
-  top: 0px;
-  left: 0px;
-}
-
 #title-panel {
-  position: fixed;
   top: 0px;
   left: 0px;
   width: 100vw;
-  height: 100vh;
-  z-index: 5;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
 }
+
+/* First section */
+
+#hi-box {
+  align-self: center;
+  margin: 0;
+  padding: 0;
+}
+
+#im-box {  
+  text-align: center;
+}
+
+#who-box {
+  text-align: center;
+}
+
+#who-wrapper {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: row;
+  text-align: center;
+  align-items: baseline;
+  align-self: center;
+}
+
+#hi-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Second section */
+
+#likes-panel {
+  display: flex;
+  flex-wrap: wrap;  
+  justify-content: center;
+  align-content: space-around;
+  flex-direction: row;
+}
+
+#what-box {
+  margin-top: 0;
+  width: 100vw;
+  text-align: center;
+}
+
+.box.likes {
+  text-align: center;
+  font-size: 10vw;
+  display: flex;
+  flex-direction: column;
+}
+.box.masked {
+  color: #00000000;
+}
+
+/* Third section */
+#how-box {
+  margin-top: 0;
+  width: 100vw;
+  text-align: center;
+}
+
+#skills-box {
+  padding-top: 3vh;
+  padding-bottom: 3vh;
+  flex-wrap: wrap;
+  display: flex;
+  flex-direction: row;
+  background-color: transparent;
+  align-items: center;
+  align-content: space-around;
+  justify-content: center;
+}
+
+/* Links section */
+.box.link {
+  text-align: right;
+  margin: 7vw;
+}
+
+#stuff-link {
+  background-color: var(--blue);
+  box-shadow: -1px 1px var(--accent), -2px 2px var(--accent), -3px 3px var(--accent), -4px 4px var(--accent), -5px 5px var(--accent), -6px 6px var(--accent), -7px 7px var(--accent), -8px 8px var(--accent);
+}
+
+#friends-link {
+  background-color: var(--yellow);
+  box-shadow: -1px 1px var(--green), -2px 2px var(--green), -3px 3px var(--green), -4px 4px var(--green), -5px 5px var(--green), -6px 6px var(--green), -7px 7px var(--green), -8px 8px var(--green);
+}
+
+#contact-link {
+  background-color: var(--green);
+  box-shadow: -1px 1px var(--yellow), -2px 2px var(--yellow), -3px 3px var(--yellow), -4px 4px var(--yellow), -5px 5px var(--yellow), -6px 6px var(--yellow), -7px 7px var(--yellow), -8px 8px var(--yellow);
+}
+
 
 @media only screen and (orientation: landscape) {
   .title {
