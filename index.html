@@ -6,16 +6,19 @@
 
     <meta name="theme-color" content="#fd5e53">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Placeholder meta description.">
+    <meta name="description" content="brcxyz's home page, not much to see here but it's nice, i guess">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullPage.js/3.0.9/fullpage.min.css" integrity="sha512-8M8By+q+SldLyFJbybaHoAPD6g07xyOcscIOQEypDzBS+sTde5d6mlK2ANIZPnSyxZUqJfCNuaIvjBUi8/RS0w==" crossorigin="anonymous" />
     <link rel="stylesheet" type="text/css" href="css/style.css"/>
     
     <link rel="icon" href="favicon.png">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.1/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.1/ScrollTrigger.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.1/TextPlugin.min.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullPage.js/3.0.9/fullpage.min.js" integrity="sha512-Gx/C4x1qubng2MWpJIxTPuWch9O88dhFFfpIl3WlqH0jPHtCiNdYsmJBFX0q5gIzFHmwkPzzYTlZC/Q7zgbwCw==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.6.0/gsap.min.js" integrity="sha512-1dalHDkG9EtcOmCnoCjiwQ/HEB5SDNqw8d4G2MKoNwjiwMNeBAkudsBCmSlMnXdsH8Bm0mOd3tl/6nL5y0bMaQ==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.6.0/ScrollTrigger.min.js" integrity="sha512-QcYm1q7RbnXmwY7HJ0H7938IS0MalTPYqGUF0fIwQgEjMBt2tqjDBt+R5I+ppdwEohjMdHnFU0H+RxmrGQ8qcg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.6.0/TextPlugin.min.js" integrity="sha512-9rrv0HjdJFBwV+8fl8RTTKpoRwmthf1APcDtGm+KDrxXLSKKFcnPh32LpFEsnVudxrih8N7K9X+vAaCFgAtJ5Q==" crossorigin="anonymous"></script>
+  
     <script src="js/util.js"></script>
   </head>
 
@@ -23,73 +26,75 @@
     <canvas id="webgl"></canvas>
     <script src="js/webgl.js"></script>
 
-    <section>
-      <div id="title-panel" class="sliding panel transparent"> 
-        <h1 id="title-A" class="title yellow"> brc </h1>
-        <h1 id="title-B" class="title green"> .xyz </h1>
-      </div>
-    </section>
-    
-    <section>
-      <div id="hi-panel" class="sliding panel yellow">
-        <div id="im-box" class="box"> i'm alex </div>
-        <div id="hi-box" class="subtitle box">
-          hi!
-        </div>
-        <div id="who-box"  class="box">
-          <br>
+    <div id="fullpage">
+      <div class="section" id="title-section">
+        <div id="title-panel" class="panel transparent"> 
+          <h1 id="title-A" class="title yellow"> brc </h1>
+          <h1 id="title-B" class="title green"> .xyz </h1>
         </div>
       </div>
-    </section>
+      
+      <div class="section" id="hi-section">
+        <div id="hi-panel" class="panel transparent">
+          <div id="im-box" class="box green">i'm alex</div>
+          <div id="hi-title" class="subtitle box yellow">
+            hi!
+          </div>
+          <div id="who-box"  class="box">
+            <br>
+          </div>
+        </div>
+      </div>
 
-    <section>
-      <div id="likes-panel" class="sliding panel accent">
-        <div id="graphics-like" class="box likes blue">
-          <div class="like">computer</div>
-          <div class="like">graphics</div>
-        </div>
-        <div id="games-like" class="box likes green">
-          <div class="like">video</div>
-          <div class="like">games</div>
-        </div>
-        <div id="what-box" class="subtitle box">
-          what?
-        </div>
-        <div id="music-like" class="box likes yellow">
-          <div class="like">music &</div>
-          <div class="like">sounds</div>
-        </div>
-        <div id="vr-like" class="box likes blue">
-          <div class="like">virtual</div>
-          <div class="like">reality</div>
+      <div class="section" id="likes-section">
+        <div id="likes-panel" class="panel transparent">
+          <div id="graphics-like" class="box likes yellow">
+            <div class="like">computer</div>
+            <div class="like">graphics</div>
+          </div>
+          <div id="games-like" class="box likes yellow">
+            <div class="like">video</div>
+            <div class="like">games</div>
+          </div>
+          <div id="what-title" class="subtitle box green">
+            what?
+          </div>
+          <div id="music-like" class="box likes yellow">
+            <div class="like">music &</div>
+            <div class="like">sounds</div>
+          </div>
+          <div id="vr-like" class="box likes yellow">
+            <div class="like">virtual</div>
+            <div class="like">reality</div>
+          </div>
         </div>
       </div>
-    </section>
 
-    <section>
-      <div id="skills-panel" class="sliding panel blue">
-        <div id="skills-box" class="rowist">
-          <div class="skill major">java</div> 
-          <div class="skill">opengl</div>
-          <div class="skill">c#</div>
-          <div id="how-box" class="subtitle box"> how? </div>
-          <div class="skill">unity</div>
-          <div class="skill">matlab</div>
+      <div class="section" id="skills-section">
+        <div id="skills-panel" class="panel transparent">
+          <div id="skills-box">
+            <div class="skill major">java</div> 
+            <div class="skill">opengl</div>
+            <div class="skill">c#</div>
+            <div id="how-title" class="subtitle box yellow"> how? </div>
+            <div class="skill">unity</div>
+            <div class="skill">matlab</div>
+          </div>
         </div>
       </div>
-    </section>
- 
-    <div class="spacer"></div>
- 
-    <section>
-      <div id="links-panel" class="panel transparent">
-        <div id="stuff-link" class="box link"> stuff i made > </div>
-        <div id="friends-link" class="box link"> my cool friends > </div>
-        <div id="contact-link" class="box link"> contact me > </div>
+  
+      <div class="section" id="links-section"> 
+        <div id="links-panel" class="panel transparent">
+          <div id="check-box" class="box green">check out
+            <a href="portfolio/index.html">my stuff</a></div>
+          <div id="cool-title" class="subtitle box accent"> cool? </div>
+          
+          <div id="contact-box" class="box green">get in
+            <a >touch</a></div>
+        </div>
       </div>
-    </section>
 
-    <script src="js/layers.js"></script>
+    </div>
     <script src="js/animation.js"></script>
   </body> 
 </html>

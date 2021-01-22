@@ -1,0 +1,101 @@
+.box::-webkit-scrollbar {
+    width: 2px;
+}
+  
+.box::-webkit-scrollbar-track {
+    display: none;
+}
+
+.box::-webkit-scrollbar-thumb {
+    background: var(--white);
+    box-shadow: 1px 0px var(--white) ;
+}
+
+a {
+  color: var(--white);
+}
+
+
+.box {
+    font-family: 'brcxyz-Regular';  
+    position: relative;
+    margin: 5vmin;
+    width: 80vw;
+    display: block;
+    overflow-x: hidden;
+    font-size: x-large;
+    text-align: left;
+    border-color: var(--white);
+    border-style: solid;
+    border-width: 0;
+    padding-top: 2vh;
+    transform-origin: bottom center;
+}
+
+.subtitle {
+    font-size: 20vw;
+    align-self:flex-start;
+    transform-origin: top center;
+    overflow: hidden !important;
+    padding: 8px;
+    margin-left: 10vw;
+    margin-bottom: 0;
+}
+.background {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    
+    background-repeat: no-repeat;
+    background-position-x: 50%;
+    background-size: 400%;
+    background-blend-mode: soft-light;
+    overflow: hidden;
+    justify-content: flex-start;
+}
+.background.blue {
+    background-color: var(--blue);
+}
+.background.green {
+    background-color: #38B86E;
+}
+.background.accent {
+    background-color: var(--accent);
+}
+.background.synth {
+    background-color: #B14156;
+}
+
+#synth-section {
+    background-image: url("../img/pixel-synth.png");
+}
+
+#battleship-section {
+    background-image: url("../img/battleship.png");
+}
+
+#outfielder-section {
+    background-image: url("../img/outfielder.png");
+}
+
+.landscape-title {
+    display: none;
+}
+
+@media only screen and (orientation: landscape) {
+    .subtitle {
+        font-size: 8vw;
+    }
+
+    .portrait-title {
+        display: none;
+    }
+    .landscape-title {
+        display: block;
+    }
+    .background {
+        background-size: 120%;
+    }
+}

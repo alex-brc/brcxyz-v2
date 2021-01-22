@@ -6,7 +6,10 @@
 html, body {
   margin: 0;
   padding: 0;
-  scroll-behavior: smooth;
+}
+
+a {
+  color: var(--accent);
 }
 
 html::-webkit-scrollbar {
@@ -22,9 +25,6 @@ section {
   justify-content: center;
 }
 
-.spacer {
-  height: 50vh;
-}
 
 .title {
   text-align: center;
@@ -36,8 +36,6 @@ section {
 
 .panel {
   width: 100vw;
-  transform-origin: center bottom;
-  background-color: rgba(255, 251, 0, 0.2);
 }
 .panel.blue {
   background-color: var(--blue);
@@ -56,27 +54,17 @@ section {
 }
 
 
-.skill {
-  font-family: 'brcxyz-Bold';
-  margin-left: 3vw;
-  margin-right: 3vw;
-  font-size: 13vw;
-  color: var(--yellow);
-}
-
 .box {
-  font-family: 'brcxyz-Regular';  
+  font-family: 'brcxyz-Bold';  
+  text-align: center;
   font-size: 10vw;
   color: var(--white);
+
   margin: 3vw;
   padding: 8px;
   display: block;
 }
 
-.box.vertical {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-}
 .box.accent {
   color: var(--accent);
 }
@@ -93,8 +81,9 @@ section {
 .subtitle {
   font-family: 'brcxyz-Bold';
   font-size: 20vw;
+  width: 94vw;
   margin: 3vw;
-  margin-bottom: 0vw;
+  padding: 0;
 }
 
 /* Cover */
@@ -115,6 +104,7 @@ section {
   top: 0px;
   left: 0px;
   width: 100vw;
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -122,29 +112,6 @@ section {
 }
 
 /* First section */
-
-#hi-box {
-  align-self: center;
-  margin: 0;
-  padding: 0;
-}
-
-#im-box {  
-  text-align: center;
-}
-
-#who-box {
-  text-align: center;
-}
-
-#who-wrapper {
-  display: flex;
-  flex-grow: 1;
-  flex-direction: row;
-  text-align: center;
-  align-items: baseline;
-  align-self: center;
-}
 
 #hi-panel {
   display: flex;
@@ -161,15 +128,9 @@ section {
   flex-direction: row;
 }
 
-#what-box {
-  margin-top: 0;
-  width: 100vw;
-  text-align: center;
-}
-
 .box.likes {
-  text-align: center;
   font-size: 10vw;
+  font-family: 'brcxyz-Bold';
   display: flex;
   flex-direction: column;
 }
@@ -178,11 +139,6 @@ section {
 }
 
 /* Third section */
-#how-box {
-  margin-top: 0;
-  width: 100vw;
-  text-align: center;
-}
 
 #skills-box {
   padding-top: 3vh;
@@ -196,33 +152,42 @@ section {
   justify-content: center;
 }
 
+.skill {
+  font-family: 'brcxyz-Bold';
+  margin-left: 3vw;
+  margin-right: 3vw;
+  font-size: 13vw;
+  color: var(--accent);
+}
+
+
 /* Links section */
-.box.link {
-  text-align: right;
-  margin: 7vw;
-}
-
-#stuff-link {
-  background-color: var(--blue);
-  box-shadow: -1px 1px var(--accent), -2px 2px var(--accent), -3px 3px var(--accent), -4px 4px var(--accent), -5px 5px var(--accent), -6px 6px var(--accent), -7px 7px var(--accent), -8px 8px var(--accent);
-}
-
-#friends-link {
-  background-color: var(--yellow);
-  box-shadow: -1px 1px var(--green), -2px 2px var(--green), -3px 3px var(--green), -4px 4px var(--green), -5px 5px var(--green), -6px 6px var(--green), -7px 7px var(--green), -8px 8px var(--green);
-}
-
-#contact-link {
-  background-color: var(--green);
-  box-shadow: -1px 1px var(--yellow), -2px 2px var(--yellow), -3px 3px var(--yellow), -4px 4px var(--yellow), -5px 5px var(--yellow), -6px 6px var(--yellow), -7px 7px var(--yellow), -8px 8px var(--yellow);
+.box.a {
+  color: var(--green) ;
 }
 
 
 @media only screen and (orientation: landscape) {
-  .title {
-    font-size: 20vh;
+  .box, .box.likes{
+    font-size: 8vh;
   }
+
+  .box.likes {
+    flex-direction: row;
+  }
+  .like {
+    padding-right: 2vh;
+  }
+  .skill { font-size: 12vh; }
+  
+  .subtitle {
+    margin: 3vh;
+    font-size: 18vh;
+  }
+
   #title-panel {
     flex-direction: row;
   }
+
+  
 }
