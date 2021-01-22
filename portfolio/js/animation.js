@@ -157,6 +157,9 @@ battleshipBackground.fromTo("#battleship-section", 30,
     
 new fullpage('#fullpage', {
     licenseKey: 'CEAEB2F9-D07E42AF-A8725A3C-A5162A1F',
+    normalScrollElements: "#synth-box, #outfielder-box, #battleship-box",
+	navigation: true,
+	navigationPosition: 'right',
 
     afterLoad: function(origin, destination, direction){
         // Play animation

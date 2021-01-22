@@ -15,6 +15,9 @@ a {
   color: var(--white);
 }
 
+#fp-nav ul li a span, .fp-slidesNav ul li a span {
+    background: var(--white);
+}
 
 .box {
     font-family: 'brcxyz-Regular';  

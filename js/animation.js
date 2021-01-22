@@ -110,6 +110,8 @@ typeText(linksTimeline, "#contact-box", 0.6);
 
 new fullpage('#fullpage', {
     licenseKey: 'CEAEB2F9-D07E42AF-A8725A3C-A5162A1F',
+	navigation: true,
+	navigationPosition: 'right',
 
     afterLoad: function(origin, destination, direction){
 

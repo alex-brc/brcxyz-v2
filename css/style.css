@@ -86,6 +86,10 @@ section {
   padding: 0;
 }
 
+#fp-nav ul li a span, .fp-slidesNav ul li a span {
+  background: var(--accent);
+}
+
 /* Cover */
 
 #webgl {
