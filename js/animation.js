@@ -122,7 +122,8 @@ new fullpage('#fullpage', {
         }
 
         if(destination.index != 0)
-            timelines[destination.index - 1].play();
+            for(i = destination.index; i > 0; i--)
+                timelines[i - 1].play();
     },
             
   });

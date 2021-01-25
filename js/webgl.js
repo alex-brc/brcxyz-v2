@@ -132,6 +132,8 @@ function title_webgl(){
       // Update viewport
       gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
+      console.log("changed! w:" + gl.canvas.width + "  h:" + gl.canvas.height);
+
       // Update perspective matrix for when the window is resized
       mat4.perspective(
           globalMatrices.projectionMatrix,
