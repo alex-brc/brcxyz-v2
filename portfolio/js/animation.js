@@ -100,7 +100,7 @@ var synthTl = buildAnimations("synth", otherBlue,
     "but also natively support the MIDI protocol!" +
     "i took that as an opportunity to step outside my comfort zone and make a minimalistic synthesizer that lives and breathes inside the browser. <br> <br>" +
 
-    "my main goals were stability and sound quality, and for the most part, it turned out great. as an added bonus, i even managed to stick a reverb onto it!" + 
+    "my main goals were stability and sound quality, and for the most part, it turned out great. as an added bonus, i even managed to stick a reverb onto it! " + 
     "we played it in a jam session that summer, using an iPhone hooked up to " +
     "a MIDI controller, and we had a real blast. <br> <br>" +
 
@@ -157,7 +157,7 @@ var outfielderTl = buildAnimations("outfielder", accent,
     
     "scientific rigour aside, the software itself is intentionally simplistic, but offers a rich (though admittedly dull) interface for monitoring ongoing trials " +
     "as well as potentially limitless configurability by supporting custom code to be introduced at runtime (in straight C#). " +
-    "this was the first time i encountered the concept of reflection in C# and my mind was promptly blown." +
+    "this was the first time i encountered the concept of reflection in C# and my mind was promptly blown. <br> <br>" +
 
     "it's been a very exciting project for me, having to apply computer science in a very different field, " +
     "particularly since i had a chance to work with experts in computer science as well as sports sciences. " +
@@ -205,6 +205,5 @@ new fullpage('#fullpage', {
         timelines[destination.index].play();
     },
 
-    afterResize 
             
   });
