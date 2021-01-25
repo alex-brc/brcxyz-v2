@@ -48,7 +48,7 @@ h6 {
 }
 
 .subtitle {
-    font-size: 20vw;
+    font-size: 16vw;
     align-self:flex-start;
     transform-origin: top center;
     overflow: hidden !important;

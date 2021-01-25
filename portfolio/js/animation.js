@@ -84,10 +84,12 @@ function buildAnimations(name, popColor, content) {
 // WELCOME
 let blue = `#197bbd`;
 var welcomeTl = buildAnimations("welcome", blue, 
-"this is where i keep a summary of some of my completed projects. <br <br>" +
-"scroll down for some short descriptions and stories about each one. " + 
-"you can find links/downloads for them in the descriptions, but you can also click the titles on each page. <br> <br>" +
-"if you want to know more about any of these or just wanna chat, don't hesitate to drop me a message anywhere!");
+    "<h6> check out my stuff, titles are links! </h6> <br>" +
+
+    "this is where i keep a summary of some of my completed projects. scroll down for some short descriptions and stories about each one. <br <br>" +
+    " " + 
+    "you can access the project files or live builds by clicking the titles, or via the links at the bottom of the text boxes.  <br> <br>" +
+    "if you want to know more about any of these check out the git repos, or if you wanna chat, don't hesitate to drop me a message anywhere!");
 
 
 // SYNTH
@@ -95,13 +97,13 @@ let otherBlue = '#35a3ec';
 var synthTl = buildAnimations("synth", otherBlue, 
     "<h6> wait... browsers can do MIDI? </h6> <br>" +
 
-    "<i> tl;dr: made synthesizer in browser. it's cool, try it </i> <br> <br>" +
+    "<i> tl;dr: made synthesizer in browser. it's cool, try it. </i> <br> <br>" +
 
     "a while back i started getting into music production, synthesizers and the like. " +
     "i don't know how exactly, but at some point i stumbled upon this really cool synthesizer pixel art. i thought: \"would be cool if that thing actually played\". " +
-    "so i looked into it for a bit. imagine, then, my excitement when i found out that modern browsers don't <i>just</i> come with digital oscillators and filters, " +
-    "but also natively support the MIDI protocol!" +
-    "i took that as an opportunity to step outside my comfort zone and make a minimalistic synthesizer that lives and breathes inside the browser. <br> <br>" +
+    "so i looked into it for a bit. <br> <br>" + "imagine, then, my excitement when i found out that modern browsers don't <i>just</i> come with digital oscillators and filters, " +
+    "but also natively support the MIDI protocol! " +
+    "i took that as an opportunity to step outside my comfort zone and build a minimalistic synthesizer that lives and breathes inside the browser. <br> <br>" +
 
     "my main goals were stability and sound quality, and for the most part, it turned out great. as an added bonus, i even managed to stick a reverb onto it! " + 
     "we played it in a jam session that summer, using an iPhone hooked up to " +
@@ -118,7 +120,7 @@ var synthTl = buildAnimations("synth", otherBlue,
     "in the end, i was very happy with the result. turns out playing an instrument you made yourself is really satisfying, i'm really glad i took this on. " +
     "i'd really encourage you to check it out " + 
     "<a href=\"https://brc.xyz/portfolio/pixel-synth/\">here</a>, or by clicking the title. " +
-    "it's pretty fun to play with! if you're interested in the full list of features and some technical details, check it out on " + 
+    "it's pretty fun to play with! if you're interested in the technical details, check it out on " + 
     "<a href=\"https://github.com/alex-brc/brc.xyz/tree/master/portfolio/pixel-synth\">github</a>.");
 
 // Moving background
@@ -146,14 +148,14 @@ var outfielderTl = buildAnimations("outfielder", accent,
     "slides</a> for an overview if you're interested in reading on (there's videos in it). <br> <br>" +
 
     "the aim of the project was to construct a virtual reality environment which can be used " +
-    "to study this problem. in broad terms, strap a headset onto a participant, run some trials, collect data and " +
-    "also perform some predictions based on proposed mathematical models and if everything goes right, " +
+    "to study this problem. in broad terms, strap a headset onto a participant, run some trials, collect data " +
+    "perform some predictions based on proposed mathematical models and if everything goes right, " +
     "show that there's a preference for one model or the other. <br> <br>" +
 
     "funnily enough, for a computer science project, it wasn't very technically demanding. " +
     "the real challenge was getting familiar enough with topics completely outside of my domain " +
     "in order to deliver a product that is scientifically appropriate for the task at hand; in other words, " +
-    "we wanted this virtual environment to model the real world scenario closely enough so that the data we collected " +
+    "we wanted this virtual environment to model the real world task closely enough so that the data we collected " +
     "is determinably relevant. turns out science is hard and in the end, it kind of worked, but it had its shortcomings*. <br> <br> " +
     
     "scientific rigour aside, the software itself is intentionally simplistic, but offers a rich (though admittedly dull) interface for monitoring ongoing trials " +
@@ -165,7 +167,7 @@ var outfielderTl = buildAnimations("outfielder", accent,
     "working on such a large project has also taught me some valuable lessons about the necessity of planning " +
     "and having a clear set of goals in mind when pushing for a deadline. <br> <br> " +
     "*note: if this piqued your interest, you can download the full report, for your own private viewing, " + 
-    "<a href=\"doc/The-Outfielder-Problem-A-Virtual-Reality-Testing-Environment-REPORT.pdf\">here</a>, or by clicking the title.");
+    "<a href=\"doc/The-Outfielder-Problem-A-Virtual-Reality-Testing-Environment-REPORT.pdf\">here</a>.");
 
 // Background
 var outfielderBackground = gsap.timeline({
@@ -180,7 +182,36 @@ outfielderBackground.fromTo("#outfielder-section", 30,
 
 
 // BATTLESHIP
-var battleshipTl = buildAnimations("battleship", accent, "");
+var battleshipTl = buildAnimations("battleship", accent, 
+    "<h6> i think we need more explosions </h6> <br>" +
+
+    "<i> tl;dr: team of five made game. it didn't work but we played it anyway </i> <br> <br> " + 
+
+    "my first ever team project was this tiny game made in plain old java. " + 
+    "no libraries, no funny business. we wrote it from the ground up. <br> <br>" + 
+    
+    "i was responsible for the controls, audio, interface, menus and most of the gameplay design aspects of it (excluding the original concept). " +
+    "of course, i'm not very happy with my work from then nowadays, but i still think i was chasing the right ideas, with a focus on feedback and immersion.  " +
+
+    "on the bright side, we all learned so much by having to research every aspect of " + 
+    "how a game actually runs, from the graphics engine, mess of audio streams, <i> networking (oh god networking)</i>, " + 
+    "procedural generation, down to the complex systems that linked everything up. <br> <br>" + 
+
+    "on the other, less bright side, well, it didn't really work. it actually did work fine for the most part, <i> except </i> for the networking bit. " + 
+    "unfortunately, networking just happened to sit at the core of the entire game, since even \"single player\" ran a server locally. " + 
+    "this means that the game is more or less unplayable, although on some lucky systems it does run fine for up to two players. <br> <br>" + 
+
+    "this was kind of a bummer because the game would actually be quite fun if it ran better. we know, because we used to play an older build without networking " + 
+    "in order to test new gameplay features. but networking was a main requirement for the system and we now have to live with it being the way it is. <br> <br> " +
+
+    "i did start on revamping the networking system a couple times, but i was discouraged by the unsavoury amounts of spaghetti code and gave up. " + 
+    "now, i've come to terms with the fact that we improve over time, and it's not really worth trying to fix old, uninteresting projects. " + 
+    "i'd much rather invest my time in new, exciting ideas. <br> <br>" + 
+    
+    "if want to check it out, you can download a build by clicking the title or from " +
+    "<a href=\"bin/BattleshipAntarctica.jar\">here</a>." 
+
+    );
 
 // Backgrounds
 var battleshipBackground = gsap.timeline({
