@@ -14,7 +14,6 @@
 a {
   color: var(--white);
 }
-
 .clean {
     text-decoration: none;
 }
@@ -35,7 +34,7 @@ h6 {
 .box {
     font-family: 'brcxyz-Regular';  
     position: relative;
-    margin: 5vmin;
+    margin: 5vmin 10vw 5vmin;
     width: 80vw;
     display: block;
     font-size: x-large;
@@ -54,47 +53,45 @@ h6 {
     transform-origin: top center;
     overflow: hidden !important;
     padding: 8px;
-    margin-left: 10vw;
-    margin-bottom: 0;
+    margin: 0 8vw 0;
 }
-.background {
+
+.wrapper {
     width: 100vw;
-    height: 100vh;
-    min-height: -webkit-fill-available;
+    height: calc(var(--vh, 1vh) * 100);
     display: flex;
     flex-direction: column;
     align-items: center;
     
+    overflow: hidden;
+    justify-content: flex-start;
+}
+
+#welcome-section, #synth-section, #battleship-section, #outfielder-section
+{
     background-repeat: no-repeat;
     background-position-x: 50%;
     background-size: 400%;
     background-blend-mode: soft-light;
-    overflow: hidden;
-    justify-content: flex-start;
 }
-.background.blue {
-    background-color: var(--blue);
-}
-.background.green {
-    background-color: #38B86E;
-}
-.background.accent {
+
+#welcome-section {
     background-color: var(--accent);
-}
-.background.synth {
-    background-color: #B14156;
 }
 
 #synth-section {
     background-image: url("../img/pixel-synth.png");
+    background-color: #B14156;
 }
 
 #battleship-section {
     background-image: url("../img/battleship.png");
+    background-color: var(--blue);
 }
 
 #outfielder-section {
     background-image: url("../img/outfielder.png");
+    background-color: #38B86E;
 }
 
 .landscape-title {
@@ -112,7 +109,7 @@ h6 {
     .landscape-title {
         display: block;
     }
-    .background {
+    #welcome-section, #synth-section, #battleship-section, #outfielder-section {
         background-size: 120%;
     }
 }

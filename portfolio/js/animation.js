@@ -38,6 +38,7 @@ function buildAnimations(name, popColor, content) {
     var titleNode = document.getElementById(title.substring(1));
     var initialTitleOffset = {x: titleNode.offsetLeft, y: titleNode.offsetTop};
     gsap.set(section, {"justify-content": "center"});
+    console.log("source: " + initialTitleOffset.x + " " + initialTitleOffset.y);
 
     // Now to move title up
     // First, set final flex
@@ -88,6 +89,7 @@ var welcomeTl = buildAnimations("welcome", blue,
 "you can find links/downloads for them in the descriptions, but you can also click the titles on each page. <br> <br>" +
 "if you want to know more about any of these or just wanna chat, don't hesitate to drop me a message anywhere!");
 
+
 // SYNTH
 let otherBlue = '#35a3ec';
 var synthTl = buildAnimations("synth", otherBlue, 
@@ -129,8 +131,6 @@ synthBackground.fromTo("#synth-section", 30,
     {backgroundPosition: "10% center"},
     {backgroundPosition: "50% center", ease: Power0.easeNone}
 );
-
-
 
 // OUTFIELER
 let accent = `#fd5e53`;

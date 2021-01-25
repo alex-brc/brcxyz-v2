@@ -7,6 +7,17 @@
     <meta name="viewport" content="width=device-width, minimal-ui">
     <meta name="description" content="some stuff some guy made, it's not even that good. seriously, don't bother, unless you really wanna, in which case come right this way.">
     <link rel="icon" href="../favicon.png">
+
+    <script>
+      let vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+      
+      window.addEventListener('resize', () => {
+        vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+        console.log("100vh is " + 100 * vh);
+      });
+    </script>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fullPage.js/3.0.9/fullpage.min.js" integrity="sha512-Gx/C4x1qubng2MWpJIxTPuWch9O88dhFFfpIl3WlqH0jPHtCiNdYsmJBFX0q5gIzFHmwkPzzYTlZC/Q7zgbwCw==" crossorigin="anonymous"></script>
@@ -21,7 +32,7 @@
   <body>
     <div id="fullpage">
       <div class="section">
-        <div id="welcome-section" class="background accent">
+        <div id="welcome-section" class="wrapper">
           <div id="welcome-title" class="subtitle box">
             welcome!
           </div>
@@ -31,9 +42,9 @@
       </div>
 
       <div class="section">
-        <div id="synth-section" class="background synth fp-scrollable">
+        <div id="synth-section" class="wrapper">
             <div id="synth-title" class="subtitle box">
-              <a href="pixel-synth/" target="_blank" class="clean">
+              <a href="pixel-synth/" class="clean">
                 <span class="portrait-title">pixel <br> synth</span>
                 <span class="landscape-title">pixel synth</span>
               </a>
@@ -44,9 +55,9 @@
       </div>
 
       <div class="section">
-        <div id="outfielder-section" target="_blank" class="background green">
+        <div id="outfielder-section" class="wrapper">
           <div id="outfielder-title" class="subtitle box">
-            <a href="https://docs.google.com/presentation/d/e/2PACX-1vRr_pa0IS0OTeS_Za6GELklBXJSkZnN1QCpEc2cmNM4M_IyyldM3t_a8Dry0PzY3eHsCnxmMP5klTLb/pub?start=false&loop=false&delayms=3000" class="clean">
+            <a href="docs/The-Outfielder-Problem-A-Virtual-Reality-Testing-Environment-SLIDES.pdf" class="clean">
               <span class="portrait-title">the <br> outfielder <br> problem</span>
               <span class="landscape-title">the outfielder problem</span>
             </a>
@@ -57,9 +68,9 @@
       </div>
 
       <div class="section">
-        <div id="battleship-section" target="_blank" class="background blue">
+        <div id="battleship-section" class="wrapper">
           <div id="battleship-title" class="subtitle box">
-            <a href="bin/BattleshipAntarctica.jar" class="clean">
+            <a href="pixel-synth/" class="clean">
               <span class="portrait-title">battleship <br> antarctica</span>
               <span class="landscape-title">battleship antarctica</span>
             </a>
