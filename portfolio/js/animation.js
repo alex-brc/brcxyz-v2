@@ -61,6 +61,7 @@ function buildAnimations(name, popColor, content) {
             let node = document.getElementById(box.substring(1));
             let height = node.getBoundingClientRect().height;
             node.style.maxHeight = height+"px";
+            node.style.height = height+"px";
         }
     });
     // Expand width
@@ -191,8 +192,6 @@ battleshipBackground.fromTo("#battleship-section", 30,
     {backgroundPosition: "10% center"},
     {backgroundPosition: "50% center", ease: Power0.easeNone}
 );
-
-
     
 new fullpage('#fullpage', {
     licenseKey: 'CEAEB2F9-D07E42AF-A8725A3C-A5162A1F',

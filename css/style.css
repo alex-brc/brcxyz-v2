@@ -6,6 +6,11 @@ a {
   color: var(--accent);
 }
 
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
 html::-webkit-scrollbar {
   display: none;
 }
@@ -36,7 +41,6 @@ html::-webkit-scrollbar {
 .panel.transparent {
   background-color: #00000000;
 }
-
 
 .box {
   font-family: 'brcxyz-Bold';  
