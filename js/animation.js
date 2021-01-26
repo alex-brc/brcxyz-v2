@@ -59,6 +59,7 @@ popShadow(hiTimeline, "#hi-title", green);
 
 hiTimeline.from("#im-box", {
     duration: 1,
+    repeat: 1,
     text: {
         value: "",
         padSpace: true 
@@ -66,9 +67,7 @@ hiTimeline.from("#im-box", {
 });
 
 // Animate text
-const values = ["a developer", "a nerd", "a maker", "a gamer", "a gradute", "a funny guy", 
-"not annoying", "not <i>that</i> funny", "running out of stuff", "a volunteer", "sure you're bored", 
-"urging you to go on", "starting to lose it", "out of things to say"];
+const values = ["a developer", "a nerd", "a gamer", "a fast learner", "a hobbyist"];
 
 values.forEach (item => {
     hiTimeline.to("#who-box", {
