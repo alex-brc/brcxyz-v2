@@ -11,6 +11,9 @@ html, body {
     margin: 0;
     overflow-x: hidden;
     background-color: black;
+    
+    font-family: 'KoHo', sans-serif;
+    font-style: normal;
 }
 
 h1 {
@@ -34,9 +37,6 @@ h2 {
     background-image: url("../img/balon.png");
     background-position: center;
     background-size: cover;
-
-    font-family: 'KoHo', sans-serif;
-    font-style: normal;
 }
 
 .title.div {
@@ -47,6 +47,35 @@ h2 {
     text-align: left;
 }
 
+.award.page {
+    height: auto;
+    width: 100vw;
+    display: flex;
+
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+.award.image {
+    width: 20vw;
+    height: 16vw;
+
+    margin: 2vh 2vw 2vh 2vw; 
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.showreel.section {
+    background-image: url("../img/showreel.png");
+    background-position: center;
+    background-size: cover;
+}
+
+.showreel.link {
+    text-align: center;
+}
 
 @media only screen and (orientation: landscape) {
 

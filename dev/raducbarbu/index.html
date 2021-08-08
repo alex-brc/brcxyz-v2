@@ -18,24 +18,36 @@
     </head>
     <body>
         <div id="fullpage">
-            <div class="fp-auto-height section"> 
-                <div class="title section">
-                    <div class="title div">
-                        <div><h1>Radu C. Barbu</h1></div>
-                        <div><h2>regizor criticat de critici</h2></div>
-                    </div>
+            <div class="title section"> 
+                <div class="title div">
+                    <h1>Radu C. Barbu</h1>
+                    <h2>regizor criticat de critici</h2>
                 </div>
             </div>
             
-            <div class="fp-auto-height section"> 
+            <div class="fp-auto-height section">
+                <div class="award page">
+                    <div class="award image" style="background-image: url(img/example_award.png)"></div>
+                    <div class="award image" style="background-image: url(img/example_award.png)"></div>
+                    <div class="award image" style="background-image: url(img/example_award.png)"></div>
+                    <div class="award image" style="background-image: url(img/example_award.png)"></div>
+                    <div class="award image" style="background-image: url(img/example_award.png)"></div>
+                    <div class="award image" style="background-image: url(img/example_award.png)"></div>
+                    <div class="award image" style="background-image: url(img/example_award.png)"></div>
+                </div>
             </div>
-            
+
+            <div class="showreel section"> 
+                <div class="showreel page">
+                    <h2 class="showreel link">watch more <i>here</i></h2>
+                </div>
+            </div>
         </div>
 
         <script>new fullpage('#fullpage', {
             licenseKey: 'CEAEB2F9-D07E42AF-A8725A3C-A5162A1F',
             autoScrolling: false,
-            fitToSection: true,
+            fitToSection: false,
             fitToSectionDelay: 500,
             lazyLoading: false
             });
